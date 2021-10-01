@@ -1,9 +1,9 @@
 export default class Func{
-    constructor(step, ...poly){//make new equation (called a function)
+    constructor(steps, ...poly){//make new equation (called a function)
         //
         this.terms = [];//defaults
-        this.step = step;
-        this.Xoffest = 0;
+        this.steps = steps;
+        this.Xoffset = 0;
         this.Yoffset = 0;
         //
         this.color = "blue";
@@ -13,6 +13,7 @@ export default class Func{
             this.terms.push(new Term(coef, n));
             n--;
         });
+        console.log(this.terms);
     }
     //
     calc(input){//calculate the value of the equation given an input
@@ -20,7 +21,34 @@ export default class Func{
         this.terms.forEach(term => {//find the sum of each term at the input
             sum += term.calc(input);
         });
-        return sum;
+        return sum + this.Yoffset;
+    }
+    //
+    calcRoots(){
+        switch(this.terms.length){
+            case 1:
+                return [];//because value is constant, there are either no roots or infinite roots
+            case 2:
+                return [-this.terms[1].coef / this.terms[0].coef];//simple algebra for linear function
+            case 3:
+                var roots = [];
+                let a = this.terms[0].coef;//get quadratic coefficients
+                let b = this.terms[1].coef;
+                let c = this.terms[2].coef;
+                let disc = Math.pow(b, 2) - (4 * a * c);//calculate discriminant
+                for(var n = 0; n < 2; n++){
+                    if(a == 0 || disc < 0){//break out if dividing by 0 or sqrting a negative number
+                        continue;
+                    }
+                    //
+                    console.log(`${disc} from (${a}, ${b}, ${c})`);
+                    roots.push((-b + (Math.pow(-1, n)) * Math.sqrt(disc)) / 2 * a);
+                }
+                return roots;
+            default:
+                console.log("I can't do that yet!");
+                return [];
+        }
     }
     //
     calcDelta(rStart, rEnd){//calculate the differnce between two values
@@ -35,14 +63,14 @@ export default class Func{
     //
     setOff(Xoffset, Yoffset, idx){
         if(arguments.length > 2){
-            this.terms[idx].Xoffest = Xoffset;
-            this.terms[idx].Yoffset = Yoffset;
+            this.terms[idx].Xoffset = Xoffset;
+            this.Yoffset = Yoffset;
         }else{
             this.terms.forEach(term => {
-                term.Xoffest = Xoffset;
-                term.Yoffest = Yoffset;
-                console.log(term.Yoffest);
+                term.Xoffset = Xoffset;
             });
+            this.Xoffset = Xoffset;
+            this.Yoffset = Yoffset;
         }
     }
     //
@@ -55,14 +83,14 @@ export default class Func{
         var lastV = this.calc(start);
         var nextX;
         var nextV;
-        let loop = (end - start) / this.step;
+        let loop = (end - start) / this.steps;
         //
-        console.log(end + " but " + loop + " from " + start);
+        //console.log(end + " but " + loop + " from " + start);
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 5; 
         //
-        for(var n = 0; n < loop; n++){
-            nextX = lastX + this.step;
+        for(var n = 0; n < this.steps; n++){
+            nextX = lastX + loop;
             nextV = this.calc(nextX);
             //
             //console.log(nextX);
@@ -96,15 +124,14 @@ export default class Func{
 
 
 class Term{//single coefficient and power of input (i.e. 4*x^3)
-    constructor(coef, power, Xoffset = 0, Yoffset = 0){
+    constructor(coef, power, Xoffset = 0){
         this.coef = coef;
         this.power = power;
-        this.Xoffest = Xoffset;
-        this.Yoffset = Yoffset;
+        this.Xoffset = Xoffset;
     }
     //
     calc(input){//calculate value at input
-        return this.coef * Math.pow((input - this.Xoffest), this.power) + this.Yoffset;
+        return this.coef * Math.pow((input - this.Xoffset), this.power);
     }
 }
 

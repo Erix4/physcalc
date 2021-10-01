@@ -20,10 +20,25 @@ After creation, the following things can happen:
     - the object can be solved or resolved at any time with the Calc prop
     - the values of an object at a given time can be calculated at any time with the Calc prop (this will also change the current time)
     - a new component can be applied to any value with the Apply prop
+
+Object capabilities:
+    - creation stages from input
+    - unsolved status (dynamic, static)
+    - resolve by values
+    - resolve by equations
+    - resolve by force
+    - resolve by calc
+    - calc at point
+    - apply values, then resolve by value
+    - contain motion profile (all function descriptors)
+    - contain and calc visiblity domain on resize
 */
 
+import Func from "./func";
+
 export default class Object{
-    constructor(field){
+    constructor(command){
+        this.command = command;
         //
     }
 }

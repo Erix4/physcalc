@@ -24,7 +24,7 @@ export default class Field{
         this.superRes = 4;//frequency of bolded lines
         this.res = 1;//frequency of any lines (internal unit values)
         //
-        this.cx = cx;//center position in units
+        this.cx = cx;//center position in units, describes the grid position the field of view is positioned around
         this.cy = cy;
         this.scale = scale;//y scale defines as y units across height (ex. 20)
         this.strX = 1;//x stretch multiplies by y scale
@@ -33,10 +33,16 @@ export default class Field{
         canvas.width = this.scrW;
         canvas.height = this.scrH;
         //
+        this.gridMin = this.getGridRes() / 2;//minimum distance between grid lines (pixels)
+        this.gridMax = this.getGridRes() * 2;//minimum distance between grid lines (pixels)
+        //
         this.grid = new Grid(this);
         //
-        this.functions = [new Func(1, 1, 0), new Func(.05, 1, 2, 0, 0)];
+        this.functions = [new Func(10, 1, 2), new Func(1000, 1, 2, 0, 0), new Func(1000, 1, 0, -5)];
         this.functions[1].setColor("red");
+        this.functions[2].setColor("green");
+        console.log(this.functions[0].calcRoots());
+        console.log(this.functions[2].calcRoots());
         //
         this.drawField();
     }
@@ -59,7 +65,7 @@ export default class Field{
     }
     //
     resize(){
-        let pScrW = this.scrW;
+        /*let pScrW = this.scrW;
         let pScrH = this.scrH;
         let pTotW = this.totalW;
         let pTotH = this.totalH;
@@ -78,10 +84,10 @@ export default class Field{
         let nx = (nxSc / this.strX / 2) + (nxSc / this.strX) * (this.totalW - nScrW) / nScrW;//new x offset
         //
         let py = (pScale / 2) - this.conY(pTotH - pScrH);//previous y offset
-        let ny = (this.scale / 2) + (this.scale) * (this.totalH - nScrH) / nScrH;//new y offset
+        let ny = (this.scale / 2) + (this.scale) * (this.totalH - nScrH) / nScrH;//new y offset*/
         //
-        this.cx -= (nx - px);//repos center for screen resize with change in unit offset
-        this.cy += (ny - py);
+        //this.cx -= (nx - px);//repos center for screen resize with change in unit offset
+        //this.cy += (ny - py);
         //
         this.calcSize();
         this.command.canvas.width = this.scrW;
@@ -93,12 +99,21 @@ export default class Field{
     repos(px, py){//reposition field
         this.cx += this.conX(px);
         this.cy += this.conY(py);
+        //
         this.resize();
-        this.drawField();
+        //this.drawField();
     }
     //
     zoom(c, px, py){
         this.scale *= c;
+        //
+        if(this.getGridRes() < this.gridMin){
+            this.res *= 4;
+            this.superRes *= 4;
+        }else if(this.getGridRes() > this.gridMax){
+            this.res /= 4;
+            this.superRes /= 4;
+        }
         //
         let mx = this.scaleX.invert(px);
         let my = this.scaleY.invert(py);
@@ -108,6 +123,9 @@ export default class Field{
         //
         this.calcSize();
         this.drawField();
+    }
+    getGridRes(){
+        return this.scrH / (this.scale / this.res);
     }
     //
     drawField(){
@@ -140,8 +158,9 @@ class Grid{
         let yBot = this.field.scaleY.domain()[0];//get y top and bottom
         let yTop = this.field.scaleY.domain()[1];
         //
+        ctx.lineCap = "round";
         ctx.strokeStyle = "gray";
-        var curX = Math.ceil(xLeft / res);//get first x line position
+        var curX = Math.ceil(xLeft / res) * res;//get first x line position
         for(var n = 0; n < ((xRight - xLeft) / res); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
             ctx.lineWidth = this.colorLine(ctx, curX) * .5;
             ctx.beginPath();
@@ -151,7 +170,7 @@ class Grid{
             curX += res;//increment by grid line resolution
         }
         //
-        var curY = Math.ceil(yBot / this.field.res);//get first y line position
+        var curY = Math.ceil(yBot / res) * res;//get first y line position
         for (var n = 0; n < (this.field.scale / res); n++){
             //this.colorLine(ctx, curY);
             ctx.lineWidth = this.colorLine(ctx, curY) * .5;
