@@ -35,10 +35,32 @@ Object capabilities:
 */
 
 import Func from "./func";
+import { ObjInput } from "./input";
 
 export default class Object{
-    constructor(command){
+    constructor(command, px, py){
         this.command = command;
+        this.field = command.field;
         //
+        this.px = px;
+        this.py = py;
+        //
+        this.svg = command.svg;
+        //
+        this.self = this.svg.append("circle").style("fill", "dark-gray").style("stroke", "white").style("stroke-width", 4)
+        .style("r", 20)
+        .style("visibility", "hidden");
+        //
+        this.self.attr("cx", px).attr("cy", py).style("visibility", "visible");
+        //
+        new ObjInput(this);
+    }
+    //
+    draw(){
+        //
+    }
+    //
+    test(){
+        this.self.style("fill", "green");
     }
 }

@@ -1,5 +1,6 @@
 import Field from "./field";
 import Input from "./input";
+import Object from "./object";
 
 export default class Command{
     constructor(canvas, svg){
@@ -11,11 +12,16 @@ export default class Command{
         //
         this.field = new Field(this, this.ctx, this.svg, 0, 0, 20);
         //
-        this.input = new Input(this);
+        new Input(this);
+        //
+        this.objects = [];
     }
     //
     resize(){
-        //
         this.field.resize();
+    }
+    //
+    newObject(px, py){
+        this.objects.push(new Object(this, px, py));
     }
 }

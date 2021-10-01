@@ -21,7 +21,7 @@ export default class Field{
         this.totalW = parseInt(this.body.style("width"));
         this.totalH = parseInt(this.body.style("height")) - parseInt(this.timeline.style("height"));
         //
-        this.superRes = 4;//frequency of bolded lines
+        this.superRes = 5;//frequency of bolded lines
         this.res = 1;//frequency of any lines (internal unit values)
         //
         this.cx = cx;//center position in units, describes the grid position the field of view is positioned around
@@ -51,11 +51,11 @@ export default class Field{
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
         //
-        let bt = (this.scale / -2) - this.cy;//get screen top and bottom in units
+        let bt = (this.scale / -2) + this.cy;//get screen top and bottom in units
         let tp = bt + this.scale;
         //
         let xSc = this.scale * this.scrW / (this.scrH * this.strX);//get number of x units using scale and x stretch
-        let lf = (xSc / -2) - this.cx;//get screen left and right in units
+        let lf = (xSc / -2) + this.cx;//get screen left and right in units
         let rt = lf + xSc;
         //
         this.scaleY = d3.scaleLinear().domain([bt, tp]).range([this.scrH, 0]);//declare scale functions for converting units to pixels
@@ -97,14 +97,15 @@ export default class Field{
     }
     //
     repos(px, py){//reposition field
-        this.cx += this.conX(px);
-        this.cy += this.conY(py);
+        this.cx -= this.conX(px);
+        this.cy -= this.conY(py);
         //
         this.resize();
         //this.drawField();
     }
     //
     zoom(c, px, py){
+        let pScale = this.scale
         this.scale *= c;
         //
         if(this.getGridRes() < this.gridMin){
@@ -117,9 +118,14 @@ export default class Field{
         //
         let mx = this.scaleX.invert(px);
         let my = this.scaleY.invert(py);
+        console.log(`M: (${mx}, ${my})`);
+        console.log(`D: ${mx - this.cx}`);
+        console.log(`C: ${c}, nS: ${this.scale}`);
+        console.log(`offset from mouse: ${((mx - this.cx) * c)}`);
+        console.log(`New cx: ${mx - ((mx - this.cx) * c)}`)
         //
-        this.cx = mx - ((mx - this.cx) / c);//this is slightly wrong and I don't know why
-        this.cy = my - ((my - this.cy) / c);
+        this.cx = mx - ((mx - this.cx) * c);//this is slightly wrong and I don't know why
+        this.cy = my - ((my - this.cy) * c);
         //
         this.calcSize();
         this.drawField();

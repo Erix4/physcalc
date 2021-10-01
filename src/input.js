@@ -1,6 +1,7 @@
 export default class Input{
     constructor(command){
-        var fieldMove = false;
+        var fieldMove = false;//track when field is being moved (after mouse click)
+        var adding = false;//track when add button is pressed
         //
         var mX = 0;
         var mY = 0;
@@ -14,6 +15,22 @@ export default class Input{
         //
         document.addEventListener("wheel", event => {
             command.field.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+        })
+        //
+        document.addEventListener("keydown", event => {
+            switch(event.key){
+                case "a":
+                    if(!adding){
+                        command.newObject(mX, mY);
+                        adding = true;
+                    }
+            }
+        });
+        document.addEventListener("keyup", event => {
+            switch(event.key){
+                case "a":
+                    adding = false;
+            }
         })
         //
         command.svg.on("mousedown", function(){
@@ -33,6 +50,14 @@ export default class Input{
         //
         command.svg.on("mouseup", function(){
             fieldMove = false;
+        });
+    }
+}
+
+export class ObjInput{
+    constructor(obj){
+        obj.self.on("click", function(){
+            obj.test();
         });
     }
 }
