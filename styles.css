@@ -1,0 +1,60 @@
+@font-face {
+    font-family: 'heavitas';/*not licensed for professional use ($15 fee)*/
+    src: url('/fonts/Heavitas.ttf');
+}
+
+body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    position: absolute;
+}
+
+div{
+    background-color: gray;
+    outline: 3px solid black;
+}
+
+#header{
+    height: 5%;
+}
+
+h1{
+    margin: 0;
+    font-family: 'Heavitas';
+}
+
+/*#region Interface*/
+#interface{
+    height: 85%;
+}
+
+#leftcolumn{
+    height: 100%;
+    width: 20%;
+    margin: 0;
+}
+
+#svg{
+    z-index: 2;
+    background: none;
+}
+
+#canvas{
+    z-index: 1;
+    background-color: black;
+}
+
+.field{
+    left: 20%;
+    top: 5%;
+    width: 80%;
+    height: 85%;
+    float: left;
+    position: absolute;
+}
+/*#endregion*/
+
+#timeline{
+    height: 10%;
+}
