@@ -10,11 +10,11 @@ export default class Input{
         let canoy = parseInt(d3.select("#header").style("height"));
         //
         window.addEventListener("resize", event => {
-            command.field.resize();
+            command.resize();
         });
         //
         document.addEventListener("wheel", event => {
-            command.field.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+            command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
         })
         //
         document.addEventListener("keydown", event => {
@@ -42,7 +42,7 @@ export default class Input{
             let mouse = d3.mouse(this);
             //
             if(fieldMove){
-                command.field.repos(mouse[0] - mX, mouse[1] - mY);
+                command.repos(mouse[0] - mX, mouse[1] - mY);
             }
             mX = mouse[0];
             mY = mouse[1];

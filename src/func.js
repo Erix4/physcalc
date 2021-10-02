@@ -78,7 +78,7 @@ export default class Func{
         this.color = color;
     }
     //
-    draw(field, ctx, start, end){//draw the function over a certain space
+    draw(command, start, end){//draw the function over a certain space
         var lastX = start;
         var lastV = this.calc(start);
         var nextX;
@@ -86,6 +86,7 @@ export default class Func{
         let loop = (end - start) / this.steps;
         //
         //console.log(end + " but " + loop + " from " + start);
+        let ctx = command.ctx;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = 5; 
         //
@@ -95,13 +96,13 @@ export default class Func{
             //
             //console.log(nextX);
             //
-            if(inBounds(field.scaleY(lastV), 0, field.scrH) || inBounds(field.scaleY(nextV), 0, field.scrH)){
+            if(inBounds(command.scaleY(lastV), 0, command.scrH) || inBounds(command.scaleY(nextV), 0, command.scrH)){
                 //
                 //console.log(`Start at (${field.scale(lastX)}, ${field.scrH - field.scale(lastV)})`);
                 //
                 ctx.beginPath();
-                ctx.moveTo(field.scaleX(lastX), field.scaleY(lastV));
-                ctx.lineTo(field.scaleX(nextX), field.scaleY(nextV));
+                ctx.moveTo(command.scaleX(lastX), command.scaleY(lastV));
+                ctx.lineTo(command.scaleX(nextX), command.scaleY(nextV));
                 ctx.stroke();
                 //
             }

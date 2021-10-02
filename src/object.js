@@ -42,8 +42,11 @@ export default class Object{
         this.command = command;
         this.field = command.field;
         //
-        this.px = px;
-        this.py = py;
+        this.px = this.command.scaleX.invert(px);
+        this.py = this.command.scaleY.invert(py);
+        this.pfunc = new Func(1000, (1/2 * command.gravity), 10, 0);
+        this.pfunc.setOff(this.px, this.py);
+        this.pfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         //
         this.svg = command.svg;
         //
@@ -51,9 +54,14 @@ export default class Object{
         .style("r", 20)
         .style("visibility", "hidden");
         //
-        this.self.attr("cx", px).attr("cy", py).style("visibility", "visible");
+        this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //
         new ObjInput(this);
+    }
+    //
+    update(){
+        this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
+        this.pfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
     }
     //
     draw(){
