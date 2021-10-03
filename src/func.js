@@ -267,7 +267,12 @@ export class Func{
         this.terms.push(new Term (coef, power));
     }
     //
-    setOff(Xoffset, Yoffset, idx){//TODO: make this function change the constant value (last term) by subtracting the sum of the coeffs * the x offset and adding the y offset
+    setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by subtracting the sum of the coeffs * the x offset and adding the y offset
+        var sum = 0;
+        for(var n = 0; n < this.terms.length - 1; n++){
+            //
+        }
+        //
         if(arguments.length > 2){
             this.terms[idx].Xoffset = Xoffset;
             this.Yoffset = Yoffset;
