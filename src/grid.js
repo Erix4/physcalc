@@ -6,7 +6,7 @@ It is not the field's job to keep track of inputs or resizing events
 While pixel values are y increasing top-down, everything else is top-up
 */
 
-import Func from "./func";
+import {Func} from "./func";
 
 export default class Grid{
     constructor(command, ctx, svg, cx, cy, scale){
@@ -33,12 +33,6 @@ export default class Grid{
         //
         this.gridMin = this.getGridRes() / 2;//minimum distance between grid lines (pixels)
         this.gridMax = this.getGridRes() * 2;//minimum distance between grid lines (pixels)
-        //
-        this.functions = [new Func(10, 1, 2), new Func(1000, 1, 2, 0, 0), new Func(1000, 1, 0, -5)];
-        this.functions[1].setColor("red");
-        this.functions[2].setColor("green");
-        console.log(this.functions[0].calcRoots());
-        console.log(this.functions[2].calcRoots());
         //
         this.draw(ctx);
     }
