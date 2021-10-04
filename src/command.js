@@ -25,7 +25,7 @@ export default class Command{
         //
         this.input = new Input(this);
         //
-        this.func = new Func(100, [1, 4, 3]).setOff(2, 5);
+        this.func = (new Func(100, [1, 4, 3])).setOff(2, 5);
         //
         this.a = 1;
         console.log(this.a);

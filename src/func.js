@@ -210,7 +210,7 @@ export class Func{
             this.terms.push(new Term(coef, n));
             n--;
         });
-        console.log(this.terms[1].coef);
+        console.log(this.terms);
     }
     //
     calc(input){//calculate the value of the equation given an input
@@ -268,30 +268,39 @@ export class Func{
     }
     //
     setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by magic
-        console.log(`Settingglug to offset (${Xoffset}, ${Yoffset})`);
+        console.log(`Setting to offset (${Xoffset}, ${Yoffset})`);
         var sum = 0;
         var pascal = [1,1];//pascal's triangle!
         for(var n = this.terms.length - 2; n >= 0; n--){//for each term starting with second to last (lowest coefficient is constant, x offset won't affect it and it screws up my pascal)
             let l = this.terms[n].power;
             //
             console.log(this.terms);
-            let tempTerm = [...this.terms];//make a copy of the terms
+            let coefs = [];
+            this.terms.forEach(term => {
+                coefs.push(term.coef);
+            })
             //this.terms[n].coef = 0;
-            console.log(tempTerm);
+            console.log(coefs);
             console.log(`Starting with term ${l}, expanding to ${pascal}`);
             for(var a = 0; a <= l; a++){//for every term of power less than or equal to current 
-                console.log(`Changing term ${l - a} to ${this.terms[n].coef * pascal[a] * Math.pow(-Xoffset, a)} from ${tempTerm[n].coef}*${pascal[a]}*${Math.pow(-Xoffset, a)}`);
-                this.terms[n + a].coef += (tempTerm[n].coef * pascal[a] * Math.pow(-Xoffset, a));
+                console.log(`Changing term ${l - a} to ${coefs[n] * pascal[a] * Math.pow(-Xoffset, a)} from ${coefs[n]}*${pascal[a]}*${Math.pow(-Xoffset, a)}`);
+                this.terms[n + a].coef += (coefs[n] * pascal[a] * Math.pow(-Xoffset, a));
+                console.log(this.terms[n + a]);
+                console.log(this.terms);
             }
+            console.log(this.terms);
             //
             let tempPasc = [1,1];
             for(var a = 0; a < l; a++){//generate next layer in pascal's triangle
-                tempPasc.splice[a + 1, 0, pascal[a] + pascal[a + 1]];//adjust term based on polynomial generated from application of x offset
+                console.log(pascal[a] + ", " + pascal[a + 1] + " => " + (pascal[a] + pascal[a + 1]));
+                tempPasc.splice(a + 1, 0, pascal[a] + pascal[a + 1]);//adjust term based on polynomial generated from application of x offset
+                //tempPasc[a] = pascal[a] + pascal[a + 1];
+                console.log(tempPasc);
             }
-            pascal = tempPasc;
+            pascal = tempPasc.splice();
         }
         //
-        this.terms[this.terms.length - 1] += Yoffset; 
+        this.terms[this.terms.length - 1].coef += Yoffset; 
     }
     //
     setColor(color){
