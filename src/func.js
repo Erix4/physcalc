@@ -94,22 +94,42 @@ export default class Profile{
         for(var n = 0; n < depth; n++){//integrate functions of higher power
             let para = this.paras[n];
             let newX = [];
-            for(var a = 0; a < current.xFunc.terms.length; a++){//for every term except the last (the constant, which is preserved)
+            for(var a = 0; a < current.xFunc.terms.length; a++){//for every term in currently integrated function
                 let power = current.xFunc.terms.length - a;//get power of function being propagated to
                 newX.push(para.xFunc.terms[a].coef / power);
             }
             newX.push(para[para.xFunc.terms.length - 1]);//push preserved constant
             //
             let newY = [];
-            for(var a = 0; a < current.yFunc.terms.length; a++){//for every term except the last (the constant, which is preserved)
+            for(var a = 0; a < current.yFunc.terms.length; a++){//for every term in current integrated function
                 let power = current.yFunc.terms.length - a;//get power of function being propagated to
                 newY.push(para.yFunc.terms[a].coef / power);
             }
             newY.push(para[para.yFunc.terms.length - 1]);//push preserved constant
             //
-            this.setPower(this.paras.length - a - 1, newX, newY);
+            this.setPower(this.paras.length - n - 1, newX, newY);
             //
             current = this.paras[n];//get new function to be integrated
+        }
+        //
+        current = this.paras[depth];
+        for(var n = depth + 1; n < this.paras.length; n++){
+            let para = this.paras[n];
+            let newX = [];
+            for(var a = 0; a < current.xFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
+                let power = current.xFunc.terms.length - a - 2;//get power of function being propagated to
+                newX.push(para.xFunc.terms[a].coef * power);
+            }
+            //
+            let newY = [];
+            for(var a = 0; a < current.yFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
+                let power = current.yFunc.terms.length - a - 2;//get power of function being propagated to
+                newY.push(para.yFunc.terms[a].coef * power);
+            }
+            //
+            this.setPower(this.paras.length - n - 1, newX, newY);
+            //
+            current = this.paras[n];
         }
     }
 }
