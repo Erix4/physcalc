@@ -269,30 +269,22 @@ export class Func{
     //
     setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by magic
         var sum = 0;
-        var pascal = [1,1];
-        for(var n = this.terms.length - 2; n >= 0; n--){//start with power 1
-            pascal.forEach(p => {
-                //sum += 
-            });
-            sum += this.terms[n].ceof;//too simple
+        var pascal = [1,1];//pascal's triangle!
+        for(var n = this.terms.length - 2; n >= 0; n--){//for each term starting with second to last (lowest coefficient is constant, x offset won't affect it and it screws up my pascal)
+            let l = this.terms[n].power;
+            this.terms[n].coef = 0;
+            for(var a = 0; a <= l; a++){//for every term of power less than or equal to current 
+                this.terms[n + a].coef += (this.terms[n].coef * pascal[a] * Math.pow(-Xoffset, a));
+            }
             //
             let tempPasc = [1,1];
             for(var a = 0; a < this.terms[n].power; a++){//generate next layer in pascal's triangle
-                tempPasc.splice[a + 1, 0, pascal[a] + pascal[a + 1]];
+                tempPasc.splice[a + 1, 0, pascal[a] + pascal[a + 1]];//adjust term based on polynomial generated from application of x offset
             }
             pascal = tempPasc;
         }
         //
-        if(arguments.length > 2){
-            this.terms[idx].Xoffset = Xoffset;
-            this.Yoffset = Yoffset;
-        }else{
-            this.terms.forEach(term => {
-                term.Xoffset = Xoffset;
-            });
-            this.Xoffset = Xoffset;
-            this.Yoffset = Yoffset;
-        }
+        this.terms[this.terms.length - 1] += Yoffset; 
     }
     //
     setColor(color){
