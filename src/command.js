@@ -3,6 +3,7 @@ import Input from "./input";
 import Object from "./object";
 import Para from "./func";
 import Props from "./props";
+import {Func} from "./func";
 
 export default class Command{
     constructor(canvas, svg){
@@ -23,6 +24,13 @@ export default class Command{
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.input = new Input(this);
+        //
+        this.func = new Func(100, [1, 4, 3]).setOff(2, 5);
+        //
+        this.a = 1;
+        console.log(this.a);
+        this.a +=1;
+        console.log(this.a);
         //
         this.objects = [];
     }

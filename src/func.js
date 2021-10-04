@@ -210,7 +210,7 @@ export class Func{
             this.terms.push(new Term(coef, n));
             n--;
         });
-        console.log(this.terms);
+        console.log(this.terms[1].coef);
     }
     //
     calc(input){//calculate the value of the equation given an input
@@ -268,17 +268,24 @@ export class Func{
     }
     //
     setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by magic
+        console.log(`Settingglug to offset (${Xoffset}, ${Yoffset})`);
         var sum = 0;
         var pascal = [1,1];//pascal's triangle!
         for(var n = this.terms.length - 2; n >= 0; n--){//for each term starting with second to last (lowest coefficient is constant, x offset won't affect it and it screws up my pascal)
             let l = this.terms[n].power;
-            this.terms[n].coef = 0;
+            //
+            console.log(this.terms);
+            let tempTerm = [...this.terms];//make a copy of the terms
+            //this.terms[n].coef = 0;
+            console.log(tempTerm);
+            console.log(`Starting with term ${l}, expanding to ${pascal}`);
             for(var a = 0; a <= l; a++){//for every term of power less than or equal to current 
-                this.terms[n + a].coef += (this.terms[n].coef * pascal[a] * Math.pow(-Xoffset, a));
+                console.log(`Changing term ${l - a} to ${this.terms[n].coef * pascal[a] * Math.pow(-Xoffset, a)} from ${tempTerm[n].coef}*${pascal[a]}*${Math.pow(-Xoffset, a)}`);
+                this.terms[n + a].coef += (tempTerm[n].coef * pascal[a] * Math.pow(-Xoffset, a));
             }
             //
             let tempPasc = [1,1];
-            for(var a = 0; a < this.terms[n].power; a++){//generate next layer in pascal's triangle
+            for(var a = 0; a < l; a++){//generate next layer in pascal's triangle
                 tempPasc.splice[a + 1, 0, pascal[a] + pascal[a + 1]];//adjust term based on polynomial generated from application of x offset
             }
             pascal = tempPasc;
