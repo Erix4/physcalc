@@ -267,10 +267,20 @@ export class Func{
         this.terms.push(new Term (coef, power));
     }
     //
-    setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by subtracting the sum of the coeffs * the x offset and adding the y offset
+    setOff(Xoffset, Yoffset){//TODO: make this function change the constant value (last term) by magic
         var sum = 0;
-        for(var n = 0; n < this.terms.length - 1; n++){
+        var pascal = [1,1];
+        for(var n = this.terms.length - 2; n >= 0; n--){//start with power 1
+            pascal.forEach(p => {
+                //sum += 
+            });
+            sum += this.terms[n].ceof;//too simple
             //
+            let tempPasc = [1,1];
+            for(var a = 0; a < this.terms[n].power; a++){//generate next layer in pascal's triangle
+                tempPasc.splice[a + 1, 0, pascal[a] + pascal[a + 1]];
+            }
+            pascal = tempPasc;
         }
         //
         if(arguments.length > 2){
