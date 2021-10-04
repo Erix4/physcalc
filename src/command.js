@@ -1,8 +1,9 @@
 import Grid from "./grid";
 import Input from "./input";
 import Object from "./object";
-import Para from "./func";
+import Profile from "./func";
 import Props from "./props";
+import {Para} from "./func";
 import {Func} from "./func";
 
 export default class Command{
@@ -20,12 +21,14 @@ export default class Command{
         this.grid.calcSize();//get scales and things
         //
         this.gravity = -9.81;
+        this.time = 1;
         //
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.input = new Input(this);
         //
-        this.func = (new Func(100, [1, 4, 3])).setOff(2, 5);
+        //this.func = (new Func(100, [4,2,3,1])).setOff(-1,2);
+        //this.para = (new Para(this.time, 1000, [1, 4], [2, 1, 3], 0, 0));
         //
         this.a = 1;
         console.log(this.a);
