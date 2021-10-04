@@ -27,7 +27,7 @@ export default class Command{
         //
         this.input = new Input(this);
         //
-        this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
+        //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
         this.prof = new Profile(this, 2, [1, 4], [2,1,3]);
         this.prof.setValues(0, 0, 0);
         //
