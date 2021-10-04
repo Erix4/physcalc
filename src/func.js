@@ -2,23 +2,32 @@ export default class Profile{
     constructor(command, depth, xCoefs, yCoefs){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
         //
-        this.paras = [new Para(1, xCoefs, yCoefs)];
+        this.paras = [new Para(command.time, 1, xCoefs, yCoefs)];
         this.comps = [[this.paras[0]]];
         for(var n = 0; n < depth; n++){//generate derivatives
             xCoefs = [];
-            let xTerms = this.paras[n].xFunc.terms//get terms of x function of last parametric function
-            for(var a = 0; a < xTerms.length - 1; a++){//find coefficients for derivative function
+            let xTerms = this.paras[n].xFunc.terms;//get terms of x function of last parametric function
+            for(var a = 0; a < xTerms.length - 1; a++){//find coefficients for derivative function (but not for last)
                 xCoefs.push(xTerms[a].coef * xTerms[a].power);
             }
             yCoefs = [];
-            let yTerms = this.paras[n].yFunc.terms
+            let yTerms = this.paras[n].yFunc.terms;
             for(var a = 0; a < yTerms.length - 1; a++){
-                xCoefs.push(yTerms[a].coef * yTerms[a].power);
+                yCoefs.push(yTerms[a].coef * yTerms[a].power);
             }
             //
-            this.paras.push(new Para(1, xCoefs, yCoefs));
-            this.comps.push([para]);//add current net function as top component
+            if(xCoefs.length == 0){
+                xCoefs.push(0);
+            }
+            if(yCoefs.length == 0){
+                yCoefs.push(0);
+            }
+            this.paras.push(new Para(0, 1, xCoefs, yCoefs));
+            this.comps.push([this.paras[0]]);//add current net function as top component
         }
+        //
+        console.log("Made parametric functions in profile:");
+        console.log(this.paras);
     }
     //
     draw(command, power, steps){
@@ -30,17 +39,22 @@ export default class Profile{
     }
     //
     setValues(power, x, y){
+        let idx = this.paras.length - power - 1;
         //
+        console.log(`Changing offset at power ${power}`);
+        this.paras[idx].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
+        this.propagate(power);//propagate new para to other powers
     }
     //
     setPower(power, xCoefs, yCoefs){//set the net functions for a given power and changes top component so sum matches
+        console.log("Setting power");
         if(power >= this.paras.length - 1){
-            this.paras.splice(0, 0, new Para(this.command, 1, xCoefs, yCoefs));
+            this.paras.splice(0, 0, new Para(this.command.time, 1, xCoefs, yCoefs));
             this.comps.push([this.paras[0]]);
         }else{
             let idx = this.paras.length - power - 1;
             var sum;
-            for(var n = xCoefs.length - 1; n >= 0; n++){//for every x coefficient of the x net
+            for(var n = xCoefs.length - 1; n >= 0; n--){//for every x coefficient of the x net
                 sum = 0;
                 for(var a = 1; a < this.comps[idx].length; a++){//for each component except the first at the current derivative power
                     let comp = this.comps[idx][a];
@@ -49,8 +63,9 @@ export default class Profile{
                     }
                 }
                 this.comps[idx][0].setTermX(n, xCoefs[n] - sum);//set the current x coefficient of default component to value necessary to reach net goal
+                console.log(this.comps[idx][0]);
             }
-            for(var n = yCoefs.length - 1; n >= 0; n++){//for every y coefficient of the y net
+            for(var n = yCoefs.length - 1; n >= 0; n--){//for every y coefficient of the y net
                 sum = 0;
                 for(var a = 1; a < this.comps[idx].length; a++){//for each component except the first at the current derivative power
                     let comp = this.comps[idx][a];
@@ -61,11 +76,12 @@ export default class Profile{
                 this.comps[idx][0].setTermY(n, yCoefs[n] - sum);//set the current y coefficient of default component to value necessary to reach net goal
             }
         }
+        console.log("Finished setting power");
     }
     //
     addComp(power, xCoefs, yCoefs, xOff = 0, yOff = 0){//power is descending (2, 1, 0) & length is 3
         let idx = this.paras.length - power - 1;//get list index of the power (derivative depth is derivative-list-length - power - 1)
-        this.comps[idx].push(new Para(this.command, 1, xCoefs, yCoefs, xOff, yOff));//push a new component to the desired power
+        this.comps[idx].push(new Para(this.command.time, 1, xCoefs, yCoefs, xOff, yOff));//push a new component to the desired power
         //
         var sum;
         for(var n = xCoefs.length - 1; n >= 0; n++){//for every x coefficient of the new component
@@ -89,29 +105,33 @@ export default class Profile{
     }
     //
     propagate(power){//para powers (4,3,2,1,0)
+        console.log("Propagating");
         let depth = this.paras.length - power - 1;//also is index of changed para in net list
         let current = this.paras[depth];
-        for(var n = 0; n < depth; n++){//integrate functions of higher power
+        for(var n = depth - 1; n >= 0; n--){//integrate functions of higher power
             let para = this.paras[n];
             let newX = [];
-            for(var a = 0; a < current.xFunc.terms.length; a++){//for every term in currently integrated function
+            for(var a = 0; a < current.xFunc.terms.length - 1; a++){//for every term in currently integrated function
                 let power = current.xFunc.terms.length - a;//get power of function being propagated to
-                newX.push(para.xFunc.terms[a].coef / power);
+                newX.push(current.xFunc.terms[a].coef / power);
             }
-            newX.push(para[para.xFunc.terms.length - 1]);//push preserved constant
+            newX.push(para.xFunc.terms[para.xFunc.terms.length - 1].coef);//push preserved constant
             //
             let newY = [];
-            for(var a = 0; a < current.yFunc.terms.length; a++){//for every term in current integrated function
+            for(var a = 0; a < current.yFunc.terms.length - 1; a++){//for every term in current integrated function
                 let power = current.yFunc.terms.length - a;//get power of function being propagated to
-                newY.push(para.yFunc.terms[a].coef / power);
+                newY.push(current.yFunc.terms[a].coef * power);
             }
-            newY.push(para[para.yFunc.terms.length - 1]);//push preserved constant
+            newY.push(para.yFunc.terms[para.yFunc.terms.length - 1].coef);//push preserved constant
             //
+            console.log(newX);
+            console.log(newY);
             this.setPower(this.paras.length - n - 1, newX, newY);
             //
             current = this.paras[n];//get new function to be integrated
         }
         //
+        console.log("starting derivatives");
         current = this.paras[depth];
         for(var n = depth + 1; n < this.paras.length; n++){
             let para = this.paras[n];
@@ -127,10 +147,13 @@ export default class Profile{
                 newY.push(para.yFunc.terms[a].coef * power);
             }
             //
+            console.log(newX);
+            console.log(newY);
             this.setPower(this.paras.length - n - 1, newX, newY);
             //
             current = this.paras[n];
         }
+        console.log("Finished derivatives");
     }
 }
 
@@ -144,8 +167,6 @@ export class Para{
         this.yFunc = (new Func(this.steps, yCoefs));
         this.xFunc.setOff(time, xOff);
         this.yFunc.setOff(time, yOff);
-        console.log(this.xFunc);
-        console.log(this.yFunc);
     }
     //
     calc(t){
@@ -245,8 +266,6 @@ export class Para{
 
 export class Func{
     constructor(steps, poly){//make new equation (called a function)
-        console.log(arguments);
-        //
         this.terms = [];//defaults
         this.steps = steps;
         //
@@ -257,7 +276,6 @@ export class Func{
             this.terms.push(new Term(coef, n));
             n--;
         });
-        console.log(this.terms);
     }
     //
     calc(input){//calculate the value of the equation given an input
