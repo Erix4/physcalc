@@ -53,13 +53,13 @@ export default class Object{
         this.ax = 0;
         this.ay = this.gravity;
         //
-        this.profile = new Profile(2, [this.vx, 0], [this.ay / 2, this.vy, 0])
-        this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
+        this.profile = new Profile(2, [this.ax / 2, this.vx, 0], [this.ay / 2, this.vy, 0])
+        /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
         this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
         this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);
         this.vFuncComps = [new Para(1000, [this.vx], [this.ay, this.vy])];
         this.aFunc = new Para(10, [0], [this.ay]);
-        this.aFuncComps = [new Para(10, [0], [0]), new Para(10, [this.ax], [this.ay])];
+        this.aFuncComps = [new Para(10, [0], [0]), new Para(10, [this.ax], [this.ay])];*/
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
         this.vNet = new Arrow(command, this, this.vFunc, this.vx * this.arrStr, this.vy * this.arrStr);

@@ -24,19 +24,20 @@ export default class Profile{
                 yCoefs.push(0);
             }
             this.paras.push(new Para(0, 1, xCoefs, yCoefs));
-            this.comps.push([this.paras[0]]);//add current net function as top component
+            this.comps.push([this.paras[n+1]]);//add current net function as top component
         }
         //
         console.log("Made parametric functions in profile:");
         console.log(this.paras);
+        console.log(this.comps);
     }
     //
-    draw(command, power, steps){
-        let para = this.paras[this.paras.length - power - 1];//get para by power
-        let dom = para.calcDomain(command);
+    draw(power, steps){
+        let para = this.paras[power];//get para by power
+        let dom = para.calcDomain(this.command);
         //
         para.steps = steps;
-        para.draw(command, dom[0], dom[1]);//draw the para wherever it's on screen
+        para.draw(this.command, dom[0], dom[1]);//draw the para wherever it's on screen
     }
     //
     setValues(power, x, y){
@@ -48,8 +49,7 @@ export default class Profile{
         console.log(this.paras);
     }
     //
-    setPower(power, xCoefs, yCoefs){//set the net functions for a given power and changes top component so sum matches
-        console.log("Setting power");
+    setPower(power, xCoefs, yCoefs, xOff, yOff){//set the net functions for a given power and changes top component so sum matches
         if(power >= this.paras.length - 1){
             this.paras.splice(0, 0, new Para(this.command.time, 1, xCoefs, yCoefs));
             this.comps.push([this.paras[0]]);
@@ -64,8 +64,9 @@ export default class Profile{
                         sum += comp.xFunc.terms[n].coef;//sum up the current power x coefficients from the components
                     }
                 }
+                //this.comps[1][0].setTerm(n, xCoefs[n] - sum);
                 this.comps[power][0].setTermX(n, xCoefs[n] - sum);//set the current x coefficient of default component to value necessary to reach net goal
-                console.log(this.comps[power][0]);
+                this.paras[power].setTermX(n, xCoefs[n]);
             }
             for(var n = yCoefs.length - 1; n >= 0; n--){//for every y coefficient of the y net
                 sum = 0;
@@ -76,9 +77,12 @@ export default class Profile{
                     }
                 }
                 this.comps[power][0].setTermY(n, yCoefs[n] - sum);//set the current y coefficient of default component to value necessary to reach net goal
+                this.paras[power].setTermY(n, yCoefs[n]);
             }
         }
-        console.log("Finished setting power");
+        if(arguments.length > 3){
+            this.paras[power].setOff(this.command.time, xOff, yOff)
+        }
     }
     //
     addComp(power, xCoefs, yCoefs, xOff = 0, yOff = 0){//power is descending (2, 1, 0) & length is 3
@@ -110,55 +114,52 @@ export default class Profile{
         console.log("Propagating");
         //let depth = this.paras.length - power - 1;//also is index of changed para in net list
         let current = this.paras[power];
-        console.log(current);
         for(var n = power - 1; n >= 0; n--){//integrate functions of higher power
             let para = this.paras[n];
-            console.log(para);
-            let newX = [];
-            for(var a = 0; a < current.xFunc.terms.length - 1; a++){//for every term in currently integrated function
-                let power = current.xFunc.terms.length - a;//get power of function being propagated to
-                newX.push(current.xFunc.terms[a].coef / power);
+            let timeOff = para.calc(this.command.time);//get offset at current time
+            let newX = [para.xFunc.terms[para.xFunc.terms.length - 1].coef];
+            for(var a = current.xFunc.terms.length - 1; a >= 0; a--){//for every term in currently integrated function
+                let p = current.xFunc.terms.length - a;//get power of function being propagated to
+                newX.push(current.xFunc.terms[a].coef / p);
             }
-            newX.push(para.xFunc.terms[para.xFunc.terms.length - 1].coef);//push preserved constant
             //
-            let newY = [];
-            for(var a = 0; a < current.yFunc.terms.length - 1; a++){//for every term in current integrated function
-                let power = current.yFunc.terms.length - a;//get power of function being propagated to
-                newY.push(current.yFunc.terms[a].coef * power);
+            let newY = [para.yFunc.terms[para.yFunc.terms.length - 1].coef];
+            for(var a = current.yFunc.terms.length - 1; a >= 0; a--){//for every term in current integrated function
+                let p = current.yFunc.terms.length - a;//get power of function being propagated to
+                newY.push(current.yFunc.terms[a].coef / p);
             }
-            newY.push(para.yFunc.terms[para.yFunc.terms.length - 1].coef);//push preserved constant
-            //
-            console.log(newX);
-            console.log(newY);
-            this.setPower(n, newX, newY);
+            this.setPower(n, newX, newY, timeOff[0], timeOff[1]);//change function
             //
             current = this.paras[n];//get new function to be integrated
         }
         //
-        console.log("starting derivatives");
         current = this.paras[power];
-        for(var n = power + 1; n < this.paras.length; n++){//derive to lower powers
-            console.log(`${this.paras[power].xFunc.terms[0].ceof} at power ${power}`);
-            let para = this.paras[n];
+        for(var n = power + 1; n < this.paras.length - 1; n++){//derive to lower powers
             let newX = [];
+            console.log(current);
             for(var a = 0; a < current.xFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
-                let power = current.xFunc.terms.length - a - 2;//get power of function being propagated to
-                newX.push(para.xFunc.terms[a].coef * power);
+                let p = current.xFunc.terms.length - a - 1;//get power of function being propagated to
+                newX.push(current.xFunc.terms[a].coef * p);
             }
             //
             let newY = [];
             for(var a = 0; a < current.yFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
-                let power = current.yFunc.terms.length - a - 2;//get power of function being propagated to
-                newY.push(para.yFunc.terms[a].coef * power);
+                let p = current.yFunc.terms.length - a - 1;//get power of function being propagated to
+                newY.push(current.yFunc.terms[a].coef * p);
             }
             //
-            console.log(newX);
+            if(newX.length == 0){
+                newX.push(0);
+            }
+            if(newY.length == 0){
+                newY.push(0);
+            }
+            //
             console.log(newY);
             this.setPower(n, newX, newY);
             //
             current = this.paras[n];
         }
-        console.log("Finished derivatives");
     }
 }
 
@@ -175,7 +176,7 @@ export class Para{
     }
     //
     calc(t){
-        return [this.xFunc.calc(t) + this.xOff, this.yFunc.calc(t) + this.yOff];
+        return [this.xFunc.calc(t), this.yFunc.calc(t)];
     }
     //
     calcDomain(command){
@@ -183,6 +184,7 @@ export class Para{
         this.yFunc.calcDomain(command.scaleY.domain()[0], command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push(val);//put them all in a list
         });
+        console.log(vals);
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
         return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
@@ -224,9 +226,12 @@ export class Para{
     //
     setTermX(power, valx){//assume descending power order (2,1,0), so power 2 correspondes to term length 3
         let xLength = this.xFunc.terms.length;
-        if(xLength > power){
+        if(xLength > power){//term already exists
             this.xFunc.terms[xLength - power - 1].coef = valx;
-        }else{
+            if(valx == 0 && xLength - power - 1 == 0 && xLength > 1){//if setting top term to zero
+                this.xFunc.terms.pop();//delete arbitrary first term
+            }
+        }else if(xLength - power - 1 > 0){//create term if necessary
             while(xLength < power){
                 this.xFunc.terms.splice(0, 0, new Term(0, xLength));
                 xLength++;
@@ -238,7 +243,10 @@ export class Para{
         let yLength = this.yFunc.terms.length;
         if(yLength > power){
             this.yFunc.terms[yLength - power - 1].coef = valy;
-        }else{
+            if(valy == 0 && yLength - power - 1 == 0 && yLength > 1){//if setting top term to zero
+                this.yFunc.terms.pop();//delete arbitrary first term
+            }
+        }else if(yLength - power - 1 > 0){
             while(yLength < power){
                 this.yFunc.terms.splice(0, 0, new Term(0, yLength));
                 yLength++;
@@ -295,19 +303,21 @@ export class Func{
         this.terms.forEach(term => {//find the sum of each term at the input
             sum += term.calc(input);
         });
-        return sum + this.Yoffset;
+        return sum;
     }
     //
     calcDomain(start, end){
         var vals = [];//all values where the function touches the screen boundary
-        vals.push(this.calcRoots(start));//length meaning: 0=function switches directions, end values will hold other domain, 1=one side of domain, 2=holds two domain
-        vals.push(this.calcRoots(end));
+        vals.push(...this.calcRoots(start));//length meaning: 0=function switches directions, end values will hold other domain, 1=one side of domain, 2=holds two domain
+        vals.push(...this.calcRoots(end));
+        console.log(vals);
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
         return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
     }
     //
     calcRoots(val = 0){//faulty, assuming term powers are in descending order: 2, 1, 0
+        console.log(`Find roots for value ${val} in case ${this.terms.length}`);
         switch(this.terms.length){
             case 1:
                 return [];//because value is constant, there are either no roots or infinite roots
