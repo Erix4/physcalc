@@ -37,6 +37,9 @@ export default class Input{
                         adding = true;
                     }
                     break;
+                case "1":
+                    command.time = 1;
+                    command.update();
             }
         });
         document.addEventListener("keyup", event => {

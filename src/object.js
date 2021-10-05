@@ -48,13 +48,13 @@ export default class Object{
         //
         this.px = this.command.scaleX.invert(px);//current values
         this.py = this.command.scaleY.invert(py);
-        this.vx = 10;
-        this.vy = 10;
+        this.vx = 5;
+        this.vy = 15;
         this.ax = 0;
-        this.ay = 0;
+        this.ay = this.gravity;
         //
         this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
-        this.profile.addComp(2, [0], [this.gravity]);
+        //this.profile.addComp(2, [0], [this.gravity]);
         /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
         this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
         this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);
@@ -106,6 +106,11 @@ export default class Object{
         this.py = this.command.scaleY.invert(py);
         //
         this.command.objUpdate(this);
+    }
+    //
+    retime(time){
+        this.px = this.profile.paras[0].calc(this.command.time)[0];
+        this.py = this.profile.paras[0].calc(this.command.time)[1];
     }
     //
     revel(vx, vy){

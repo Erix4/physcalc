@@ -47,7 +47,7 @@ export default class Command{
             obj.update();
             obj.draw(this.input);
         });
-        this.prof.draw(0, 1000);
+        this.prof.draw(0, 100);
     }
     //
     draw(){//redraw canvas

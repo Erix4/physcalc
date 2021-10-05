@@ -36,8 +36,8 @@ export default class Profile{
     draw(power, steps){
         let para = this.paras[power];//get para by power
         let dom = para.calcDomain(this.command);
-        console.log(`Domain: ${dom}`);
-        console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
+        //console.log(`Domain: ${dom}`);
+        //console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
         //
         //console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
         //console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
@@ -48,7 +48,8 @@ export default class Profile{
     setValues(power, x, y){
         //let idx = this.paras.length - power - 1;
         //
-        console.log(`Changing offset at power ${power}`);
+        console.log(this.paras[0].yFunc.terms[2].coef);
+        console.log(`Changing offset at power ${power} at time ${this.command.time}`);
         this.paras[power].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
         console.log(this.paras[power].yFunc.getCoefs());
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());//update components
@@ -97,6 +98,10 @@ export default class Profile{
                 this.paras[power].setTermX(0, this.paras[power].getTermX(0) + xOff - this.paras[power].calc(this.command.time)[0]);
                 this.paras[power].setTermY(0, this.paras[power].getTermY(0) + yOff - this.paras[power].calc(this.command.time)[1]);
                 //
+                console.log(yOff);
+                console.log(this.paras[power].getTermY(0));
+                console.log(`Should be ${this.paras[power].calc(this.command.time)[1]}`);
+                //
                 sum = 0;
                 for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
                     let comp = this.comps[power][a];
@@ -140,11 +145,12 @@ export default class Profile{
             });
             this.paras[power].setTermY(n, sum);
         }
+        //
         this.propagate(power);
     }
     //
     propagate(power){//para powers ascend (0,1,2,3,4)
-        console.log("Propagating");
+        console.log(`Propogating from power ${power}`);
         //let depth = this.paras.length - power - 1;//also is index of changed para in net list
         let current = this.paras[power];
         for(var n = power - 1; n >= 0; n--){//integrate functions of higher power
@@ -157,6 +163,7 @@ export default class Profile{
             }
             //
             let newY = [para.yFunc.terms[para.yFunc.terms.length - 1].coef];
+            console.log(`Preserved constant is ${para.calc(this.command.time)[1]}`);
             for(var a = current.yFunc.terms.length - 1; a >= 0; a--){//for every term in current integrated function
                 let p = current.yFunc.terms.length - a;//get power of function being propagated to
                 console.log(current.yFunc.terms[a].coef / p);
@@ -166,10 +173,11 @@ export default class Profile{
             this.setPower(n, newX, newY, timeOff[0], timeOff[1]);//change function
             //
             current = this.paras[n];//get new function to be integrated
-            console.log("current at 1: " + current.yFunc.terms[0].coef);
+            console.log("current at 0: " + current.yFunc.terms[0].coef);
             console.log("current at 1: " + current.yFunc.terms[1].coef);
         }
         //
+        console.log("Deriving");
         current = this.paras[power];
         for(var n = power + 1; n < this.paras.length - 1; n++){//derive to lower powers
             let newX = [];
@@ -183,6 +191,7 @@ export default class Profile{
             for(var a = current.yFunc.terms.length - 2; a >= 0; a--){//for every term except the last (the constant, which is discarded)
                 let p = current.yFunc.terms.length - a - 1;//get power of function being propagated to
                 newY.push(current.yFunc.terms[a].coef * p);
+                console.log(`${current.yFunc.terms[a].coef * p} from ${current.yFunc.terms[a].coef} * ${p}`);
             }
             //
             if(newX.length == 0){
@@ -196,6 +205,7 @@ export default class Profile{
             this.setPower(n, newX, newY);
             //
             current = this.paras[n];
+            console.log("current at 0: " + current.yFunc.terms[0].coef);
         }
     }
 }
@@ -281,11 +291,11 @@ export class Para{
     }
     setTermY(power, valy){
         let yLength = this.yFunc.terms.length;
-        console.log(`Setting term with power ${power} to ${valy} in length ${yLength}`);
+        //console.log(`Setting term with power ${power} to ${valy} in length ${yLength}`);
         if(yLength > power){
             this.yFunc.terms[yLength - power - 1].coef = valy;
             if(valy == 0 && yLength - power - 1 == 0 && yLength > 1){//if setting top term to zero
-                console.log("Deleting arbitrary term");
+                //console.log("Deleting arbitrary term");
                 this.yFunc.terms.splice(0,1);//delete arbitrary first term
             }
         }else if(yLength - power - 1 > 0){
@@ -312,7 +322,7 @@ export class Para{
             np = this.calc(t + loop);
             //
             ctx.beginPath();
-            ctx.lineJoin = "round";
+            //ctx.lineJoin = "round";
             ctx.moveTo(command.scaleX(lp[0]), command.scaleY(lp[1]));
             if(visibleLine(command, lp, np)){
                 ctx.lineTo(command.scaleX(lp[0]), command.scaleY(lp[1]));
@@ -404,9 +414,9 @@ export class Func{
     }
     //
     setOff(Xoffset, Yoffset){
-        //console.log(`Setting to offset (${Xoffset}, ${Yoffset})`);
         let orxo = Xoffset;
         Xoffset -= this.origin;
+        console.log(`Setting to offset (${Xoffset}, ${Yoffset})`);
         var sum = 0;
         if(arguments.length > 1){
             this.terms[this.terms.length - 1].coef = 0;//not covered in for loop
@@ -427,7 +437,7 @@ export class Func{
             for(var a = 0; a <= l; a++){//for every term of power less than or equal to current 
                 //console.log(`Changing term ${l - a} to ${coefs[n] * pascal[a] * Math.pow(-Xoffset, a)} from ${coefs[n]}*${pascal[a]}*${Math.pow(-Xoffset, a)}`);
                 this.terms[n + a].coef += (coefs[n] * pascal[a] * Math.pow(-Xoffset, a));
-                //console.log(`Term set to ${this.terms[n + a].coef}`);
+                console.log(`Term set to ${this.terms[n + a].coef}`);
             }
             //
             let tempPasc = [1,1];
@@ -439,6 +449,7 @@ export class Func{
         }
         //
         this.terms[this.terms.length - 1].coef += Yoffset;
+        console.log(`Term changed to ${this.terms[this.terms.length - 1].coef}`);
         this.origin = orxo;
         console.log(`New origin is ${this.origin}`);
     }
