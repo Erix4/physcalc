@@ -35,9 +35,11 @@ export default class Profile{
     draw(power, steps){
         let para = this.paras[power];//get para by power
         let dom = para.calcDomain(this.command);
+        //console.log(`Domain: ${dom}`);
+        //console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
         //
-        console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
-        console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
+        //console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
+        //console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
         para.steps = steps;
         para.draw(this.command, dom[0], dom[1]);//draw the para wherever it's on screen
     }
@@ -211,9 +213,13 @@ export class Para{
     }
     //
     calcDomain(command){
+        //console.log(`Find y roots for ${command.scaleY.domain()[0]} and ${command.scaleY.domain()[1]}`);
         var vals = this.xFunc.calcDomain(command.scaleX.domain()[0], command.scaleX.domain()[1]);//get x time domains
+        //console.log(vals);
+        //console.log(`Gives ${this.calc(vals[0])[0]} and ${this.calc(vals[1])[0]}`);
         this.yFunc.calcDomain(command.scaleY.domain()[0], command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push(val);//put them all in a list
+            //console.log(val);
         });
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
@@ -301,12 +307,14 @@ export class Para{
         for(var n = 0; n < this.steps; n++){
             np = this.calc(t + loop);
             //
+            ctx.beginPath();
+            ctx.lineJoin = "round";
+            ctx.moveTo(command.scaleX(lp[0]), command.scaleY(lp[1]));
             if(visibleLine(command, lp, np)){
-                ctx.beginPath();
-                ctx.moveTo(command.scaleX(lp[0]), command.scaleY(lp[1]));
+                ctx.lineTo(command.scaleX(lp[0]), command.scaleY(lp[1]));
                 ctx.lineTo(command.scaleX(np[0]), command.scaleY(np[1]));
-                ctx.stroke();
             }
+            ctx.stroke();
             //
             lp = np;
             t += loop;
@@ -352,13 +360,13 @@ export class Func{
     }
     //
     calcRoots(val = 0){//faulty, assuming term powers are in descending order: 2, 1, 0
-        console.log(`Find roots for value ${val} in case ${this.terms.length}`);
+        //console.log(`Find roots for value ${val} in case ${this.terms.length}`);
         switch(this.terms.length){
             case 1:
                 return [];//because value is constant, there are either no roots or infinite roots
             case 2:
                 if(this.terms[0].coef != 0){
-                    return [-this.terms[1].coef / this.terms[0].coef];//simple algebra for linear function
+                    return [(val - this.terms[1].coef) / this.terms[0].coef];//simple algebra for linear function
                 }else{
                     return [];
                 }
@@ -371,8 +379,8 @@ export class Func{
                 for(var n = 0; n < 2; n++){
                     if(a == 0 || disc < 0) continue;//break out if dividing by 0 or sqrting a negative number
                     //
-                    console.log(`${disc} from (${a}, ${b}, ${c})`);
-                    roots.push((-b + (Math.pow(-1, n)) * Math.sqrt(disc)) / 2 * a);
+                    //console.log(`${disc} from (${a}, ${b}, ${c})`);
+                    roots.push((-b + (Math.pow(-1, n)) * Math.sqrt(disc)) / (2 * a));
                 }
                 return roots;
             default:

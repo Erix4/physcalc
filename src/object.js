@@ -53,7 +53,7 @@ export default class Object{
         this.ax = 0;
         this.ay = this.gravity;
         //
-        this.profile = new Profile(2, [this.ax / 2, this.vx, 0], [this.ay / 2, this.vy, 0]);
+        this.profile = new Profile(2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
         /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
         this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
         this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);
@@ -80,7 +80,8 @@ export default class Object{
     //
     update(){
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
-        this.pFunc.setOff(this.px, this.py);
+        //this.pFunc.setOff(this.px, this.py);
+        this.profile.setValues(0, this.px, this.py);
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
             case 1:
@@ -146,11 +147,11 @@ export default class Object{
     draw(input){
         if((input.velConf || input.moveState == 3) && input.active != this){
             this.command.ctx.globalAlpha = 0.2;
-            this.pFunc.draw(this.command, -10, 10);
+            this.profile.draw(0, 1000);
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){
-            this.pFunc.draw(this.command, -10, 10);
+            this.pFunc.draw(0, 1000);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
         }
     }
