@@ -51,9 +51,10 @@ export default class Object{
         this.vx = 10;
         this.vy = 10;
         this.ax = 0;
-        this.ay = this.gravity;
+        this.ay = 0;
         //
-        this.profile = new Profile(2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
+        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
+        this.profile.addComp(2, [0], [this.gravity]);
         /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
         this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
         this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);
@@ -62,10 +63,10 @@ export default class Object{
         this.aFuncComps = [new Para(10, [0], [0]), new Para(10, [this.ax], [this.ay])];*/
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
-        this.vNet = new Arrow(command, this, this.vFunc, this.vx * this.arrStr, this.vy * this.arrStr);
+        /*this.vNet = new Arrow(command, this, this.vFunc, this.vx * this.arrStr, this.vy * this.arrStr);
         this.vComps = [new Arrow(command, this, this.vFuncComps[0], this.vx * this.arrStr, this.vy * this.arrStr)];//vector component starts out the same as the net, but is still a difference instance
         this.aNet = new Arrow(command, this, this.aFunc, this.ax * this.arrStr, this.ay * this.arrStr);
-        this.aComps = [new Arrow(command, this, this.aFuncComps[0], 0, 0), new Arrow(command, this, this.aFuncComps[1], this.ax * this.arrStr, this.ay * this.arrStr)];
+        this.aComps = [new Arrow(command, this, this.aFuncComps[0], 0, 0), new Arrow(command, this, this.aFuncComps[1], this.ax * this.arrStr, this.ay * this.arrStr)];*/
         //
         this.svg = command.svg;
         //
@@ -85,15 +86,15 @@ export default class Object{
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
             case 1:
-                this.vNet.update();
+                /*this.vNet.update();
                 this.vComps.forEach(comp => {
-                    comp.update();
-                });
+                    //comp.update();
+                });*/
             case 2:
-                this.aNet.update();
+                /*this.aNet.update();
                 this.aComps.forEach(comp => {
-                    comp.update();
-                });
+                    //comp.update();
+                });*/
             default:
                 //nothing
                 break;
@@ -151,7 +152,7 @@ export default class Object{
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){
-            this.pFunc.draw(0, 1000);
+            this.profile.draw(0, 1000);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
         }
     }

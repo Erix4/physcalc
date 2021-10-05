@@ -21,7 +21,7 @@ export default class Command{
         this.grid.calcSize();//get scales and things
         //
         this.gravity = -9.81;
-        this.time = 65;
+        this.time = 1;
         //
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //

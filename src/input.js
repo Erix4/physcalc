@@ -30,7 +30,7 @@ export default class Input{
                 case "a":
                     if(!adding){
                         if(this.velConf){
-                            command.updateVectors(this.active, command.vectorMode);
+                            //command.updateVectors(this.active, command.vectorMode);
                         }
                         command.newObject(mX, mY);
                         input.active.repos(mX, mY);
@@ -47,9 +47,9 @@ export default class Input{
                 case "v":
                     if(this.velConf){
                         if(this.active.vectorMode == 1){
-                            command.updateVectors(this.active, 2);
+                            //command.updateVectors(this.active, 2);
                         }else{
-                            command.updateVectors(this.active, 1);
+                            //command.updateVectors(this.active, 1);
                         }
                     }else{
                         switch(command.vectorMode){
@@ -60,13 +60,13 @@ export default class Input{
                                 command.vectorMode++;
                                 break;
                         }
-                        command.updateVectors();
+                        //command.updateVectors();
                     }
                     break;
                 case "Enter":
                     if(this.velConf){
                         this.velConf = false;
-                        command.updateVectors(this.active, command.vectorMode);
+                        //command.updateVectors(this.active, command.vectorMode);
                         command.update();
                     }
                     break;
@@ -112,13 +112,13 @@ export default class Input{
         command.svg.on("mouseup", function(){
             console.log(input.moveState);
             if(input.moveState == 3){
-                command.updateVectors(input.active, 1);
+                //command.updateVectors(input.active, 1);
                 input.moveState = 0;
                 input.velConf = true;
                 command.update();
             }else{
                 if(input.velConf && (mX - stX) == 0 && (mY - stY) == 0){
-                    command.updateVectors(input.active, command.vectorMode);
+                    //command.updateVectors(input.active, command.vectorMode);
                     input.velConf = false;
                     command.update();
                 }

@@ -1,6 +1,7 @@
 export default class Profile{
     constructor(command, depth, xCoefs, yCoefs){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
+        console.log(arguments);
         //
         this.paras = [new Para(command.time, 1, xCoefs, yCoefs)];
         this.comps = [[new Para(command.time, 1, xCoefs, yCoefs)]];
@@ -35,8 +36,8 @@ export default class Profile{
     draw(power, steps){
         let para = this.paras[power];//get para by power
         let dom = para.calcDomain(this.command);
-        //console.log(`Domain: ${dom}`);
-        //console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
+        console.log(`Domain: ${dom}`);
+        console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
         //
         //console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
         //console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
@@ -161,22 +162,25 @@ export default class Profile{
                 console.log(current.yFunc.terms[a].coef / p);
                 newY.push(current.yFunc.terms[a].coef / p);
             }
+            console.log(newY);
             this.setPower(n, newX, newY, timeOff[0], timeOff[1]);//change function
             //
             current = this.paras[n];//get new function to be integrated
+            console.log("current at 1: " + current.yFunc.terms[0].coef);
+            console.log("current at 1: " + current.yFunc.terms[1].coef);
         }
         //
         current = this.paras[power];
         for(var n = power + 1; n < this.paras.length - 1; n++){//derive to lower powers
             let newX = [];
             console.log(current);
-            for(var a = 0; a < current.xFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
+            for(var a = current.xFunc.terms.length - 2; a >= 0; a--){//for every term except the last (the constant, which is discarded)
                 let p = current.xFunc.terms.length - a - 1;//get power of function being propagated to
                 newX.push(current.xFunc.terms[a].coef * p);
             }
             //
             let newY = [];
-            for(var a = 0; a < current.yFunc.terms.length - 1; a++){//for every term except the last (the constant, which is discarded)
+            for(var a = current.yFunc.terms.length - 2; a >= 0; a--){//for every term except the last (the constant, which is discarded)
                 let p = current.yFunc.terms.length - a - 1;//get power of function being propagated to
                 newY.push(current.yFunc.terms[a].coef * p);
             }
