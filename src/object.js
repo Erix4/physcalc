@@ -53,7 +53,7 @@ export default class Object{
         this.ax = 0;
         this.ay = this.gravity;
         //
-        this.profile = new Profile(2, [this.ax / 2, this.vx, 0], [this.ay / 2, this.vy, 0])
+        this.profile = new Profile(2, [this.ax / 2, this.vx, 0], [this.ay / 2, this.vy, 0]);
         /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
         this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
         this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);

@@ -28,8 +28,9 @@ export default class Command{
         this.input = new Input(this);
         //
         //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
-        //this.prof = new Profile(this, 2, [1, 4], [-2,1,3]);
-        //this.prof.setValues(1, 2, 2);
+        this.prof = new Profile(this, 2, [1, 4], [-2,1,3]);
+        this.prof.setValues(1, 1, 0);
+        //this.prof.addComp(1, [2], [3]);
         //this.prof.draw(0, 100);
         //
         this.a = 1;
@@ -53,6 +54,7 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        this.prof.draw(0, 100);//draw function doesn't work on resize
     }
     //
     objUpdate(obj){

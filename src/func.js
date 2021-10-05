@@ -36,6 +36,8 @@ export default class Profile{
         let para = this.paras[power];//get para by power
         let dom = para.calcDomain(this.command);
         //
+        console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
+        console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
         para.steps = steps;
         para.draw(this.command, dom[0], dom[1]);//draw the para wherever it's on screen
     }
@@ -50,15 +52,19 @@ export default class Profile{
     }
     //
     setPower(power, xCoefs, yCoefs, xOff, yOff){//set the net functions for a given power and changes top component so sum matches
-        if(power >= this.paras.length - 1){
+        if(power >= this.paras.length){
             this.paras.splice(0, 0, new Para(this.command.time, 1, xCoefs, yCoefs));
+            if(arguments.length > 3){
+                this.paras[power].setTermX(this.paras[power].getTermX() + xOff - this.paras[power].calc(this.command.time)[0]);
+                this.paras[power].setTermY(this.paras[power].getTermY() + yOff - this.paras[power].calc(this.command.time)[1]);
+            }
             this.comps.push([this.paras[0]]);
         }else{
             //let idx = this.paras.length - power - 1;
             var sum;
             for(var n = xCoefs.length - 1; n >= 0; n--){//for every x coefficient of the x net
                 sum = 0;
-                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first at the current derivative power
+                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
                     let comp = this.comps[power][a];
                     if(comp.xFunc.terms.length - 1 >= n){//check if coefficient exists in component
                         sum += comp.xFunc.terms[n].coef;//sum up the current power x coefficients from the components
@@ -70,7 +76,7 @@ export default class Profile{
             }
             for(var n = yCoefs.length - 1; n >= 0; n--){//for every y coefficient of the y net
                 sum = 0;
-                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first at the current derivative power
+                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
                     let comp = this.comps[power][a];
                     if(comp.yFunc.terms.length - 1 >= n){//check if coefficient exists in component
                         sum += comp.yFunc.terms[n].coef;//sum up the current power y coefficients from the components
@@ -79,18 +85,35 @@ export default class Profile{
                 this.comps[power][0].setTermY(n, yCoefs[n] - sum);//set the current y coefficient of default component to value necessary to reach net goal
                 this.paras[power].setTermY(n, yCoefs[n]);
             }
-        }
-        if(arguments.length > 3){
-            this.paras[power].setOff(this.command.time, xOff, yOff)
+            if(arguments.length > 3){
+                this.paras[power].setTermX(this.paras[power].getTermX(0) + xOff - this.paras[power].calc(this.command.time)[0]);
+                this.paras[power].setTermY(this.paras[power].getTermY(0) + yOff - this.paras[power].calc(this.command.time)[1]);
+                //
+                sum = 0;
+                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
+                    let comp = this.comps[power][a];
+                    sum += comp.xFunc.terms[n].coef;//sum up the current x constants from the components
+                }
+                this.comps[power][0].setTermX(0, this.paras[power].getTermX(0) - sum);
+                //
+                sum = 0;
+                for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
+                    let comp = this.comps[power][a];
+                    sum += comp.yFunc.terms[n].coef;//sum up the current y constants from the components
+                }
+                this.comps[power][0].setTermY(0, this.paras[power].getTermY(0) - sum);
+            }
         }
     }
     //
-    addComp(power, xCoefs, yCoefs, xOff = 0, yOff = 0){//power is descending (2, 1, 0) & length is 3
+    addComp(power, xCoefs, yCoefs){//power is descending (2, 1, 0) & length is 3
+        console.log(arguments);
         let idx = this.paras.length - power - 1;//get list index of the power (derivative depth is derivative-list-length - power - 1)
-        this.comps[idx].push(new Para(this.command.time, 1, xCoefs, yCoefs, xOff, yOff));//push a new component to the desired power
+        this.comps[idx].push(new Para(this.command.time, 1, xCoefs, yCoefs));//push a new component to the desired power
+        console.log("New comp pushed succesfully");
         //
         var sum;
-        for(var n = xCoefs.length - 1; n >= 0; n++){//for every x coefficient of the new component
+        for(var n = xCoefs.length - 1; n >= 0; n--){//for every x coefficient of the new component
             sum = 0;
             this.comps[idx].forEach(comp => {//for each component at the current derivative power
                 if(comp.xFunc.terms.length - 1 >= n){//check if coefficient exists in component
@@ -99,10 +122,11 @@ export default class Profile{
             });
             this.paras[idx].setTermX(n, sum);//set the current x coefficient of index function to sum of component coefficients
         }
-        for(var n = yCoefs.length - 1; n >= 0; n++){//for every y coefficient of the new component
+        for(var n = yCoefs.length - 1; n >= 0; n--){//for every y coefficient of the new component
             sum = 0;
             this.comps[idx].forEach(comp => {//for each component at the current power
                 if(comp.yFunc.terms.length - 1 >= n){//check if coefficient exists in component
+                    console.log(`Summing term ${comp.yFunc.terms[n].coef}`);
                     sum += comp.yFunc.terms[n].coef;//sum up the current power y coefficients from the components
                 }
             });
@@ -126,6 +150,7 @@ export default class Profile{
             let newY = [para.yFunc.terms[para.yFunc.terms.length - 1].coef];
             for(var a = current.yFunc.terms.length - 1; a >= 0; a--){//for every term in current integrated function
                 let p = current.yFunc.terms.length - a;//get power of function being propagated to
+                console.log(current.yFunc.terms[a].coef / p);
                 newY.push(current.yFunc.terms[a].coef / p);
             }
             this.setPower(n, newX, newY, timeOff[0], timeOff[1]);//change function
@@ -184,7 +209,6 @@ export class Para{
         this.yFunc.calcDomain(command.scaleY.domain()[0], command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push(val);//put them all in a list
         });
-        console.log(vals);
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
         return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
@@ -229,7 +253,7 @@ export class Para{
         if(xLength > power){//term already exists
             this.xFunc.terms[xLength - power - 1].coef = valx;
             if(valx == 0 && xLength - power - 1 == 0 && xLength > 1){//if setting top term to zero
-                this.xFunc.terms.pop();//delete arbitrary first term
+                this.xFunc.terms.splice(0,1);//delete arbitrary first term
             }
         }else if(xLength - power - 1 > 0){//create term if necessary
             while(xLength < power){
@@ -244,7 +268,8 @@ export class Para{
         if(yLength > power){
             this.yFunc.terms[yLength - power - 1].coef = valy;
             if(valy == 0 && yLength - power - 1 == 0 && yLength > 1){//if setting top term to zero
-                this.yFunc.terms.pop();//delete arbitrary first term
+                console.log("Deleting arbitrary term");
+                this.yFunc.terms.splice(0,1);//delete arbitrary first term
             }
         }else if(yLength - power - 1 > 0){
             while(yLength < power){
@@ -310,10 +335,13 @@ export class Func{
         var vals = [];//all values where the function touches the screen boundary
         vals.push(...this.calcRoots(start));//length meaning: 0=function switches directions, end values will hold other domain, 1=one side of domain, 2=holds two domain
         vals.push(...this.calcRoots(end));
-        console.log(vals);
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
-        return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
+        if(vals.length > 1){
+            return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
+        }else{
+            return vals;
+        }
     }
     //
     calcRoots(val = 0){//faulty, assuming term powers are in descending order: 2, 1, 0
@@ -322,7 +350,11 @@ export class Func{
             case 1:
                 return [];//because value is constant, there are either no roots or infinite roots
             case 2:
-                return [-this.terms[1].coef / this.terms[0].coef];//simple algebra for linear function
+                if(this.terms[0].coef != 0){
+                    return [-this.terms[1].coef / this.terms[0].coef];//simple algebra for linear function
+                }else{
+                    return [];
+                }
             case 3:
                 var roots = [];
                 let a = this.terms[0].coef;//get quadratic coefficients
@@ -330,9 +362,7 @@ export class Func{
                 let c = this.terms[2].coef - val;
                 let disc = Math.pow(b, 2) - (4 * a * c);//calculate discriminant
                 for(var n = 0; n < 2; n++){
-                    if(a == 0 || disc < 0){//break out if dividing by 0 or sqrting a negative number
-                        continue;
-                    }
+                    if(a == 0 || disc < 0) continue;//break out if dividing by 0 or sqrting a negative number
                     //
                     console.log(`${disc} from (${a}, ${b}, ${c})`);
                     roots.push((-b + (Math.pow(-1, n)) * Math.sqrt(disc)) / 2 * a);
