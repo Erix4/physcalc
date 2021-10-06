@@ -25,7 +25,10 @@ export default class Command{
         //
         this.vectorMode = 1;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
+        this.selected = null;
+        //
         this.input = new Input(this);
+        this.props = new Props(this);
         //
         //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
         //
@@ -40,12 +43,15 @@ export default class Command{
     update(){//update entire field and redraw canvas
         this.draw();
         this.move();
+        this.props.update(this.selected);
     }
     //
     move(){
+        this.selected = this.input.selected;
         this.objects.forEach(obj => {
             obj.update();
         });
+        //console.log(this.selected);
     }
     //
     draw(){//redraw canvas
@@ -53,11 +59,13 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        this.props.update(this.selected);
     }
     //
     objUpdate(obj){
         obj.update();
         this.draw();
+        this.props.update(this.selected);
     }
     //
     updateVectors(object, mode){
@@ -87,7 +95,7 @@ export default class Command{
     //
     resize(){
         this.grid.resize();
-        this.move();
+        this.update();
     }
     //
     newObject(px, py){

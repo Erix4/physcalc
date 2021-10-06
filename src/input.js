@@ -4,7 +4,9 @@ export default class Input{
         this.velConf = false;//track if velocity is confirmed (or being confirmed)
         var adding = false;//track when add button is pressed
         //
-        this.active;
+        this.selected = command.selected;
+        //
+        this.active = null;
         //
         this.test = 1;
         var input = this;
@@ -143,6 +145,7 @@ export default class Input{
                 input.moveState = 2;
             }
             input.active = obj;
+            input.selected = obj;
         });
     }
     //
