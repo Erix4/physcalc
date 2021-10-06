@@ -20,10 +20,12 @@ export default class Command{
         this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 20);
         this.grid.calcSize();//get scales and things
         //
+        this.lastTime = 0;
+        //
         this.gravity = -9.81;
         this.time = 0;
         //
-        this.vectorMode = 1;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
+        this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.selected = null;
         //
@@ -43,7 +45,6 @@ export default class Command{
     update(){//update entire field and redraw canvas
         this.draw();
         this.move();
-        this.props.update(this.selected);
     }
     //
     move(){
@@ -59,13 +60,15 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        this.props.update(this.selected);
     }
     //
-    objUpdate(obj){
+    objUpdate(obj, inputMode){
         obj.update();
         this.draw();
-        this.props.update(this.selected);
+        if(arguments.length < 2 || !inputMode){
+            this.props.update(obj);
+            this.props.retime();
+        }
     }
     //
     updateVectors(object, mode){
@@ -86,11 +89,27 @@ export default class Command{
     repos(px, py){
         this.grid.repos(px, py);
         this.update();
+        this.props.update(this.selected);
     }
     //
-    retime(dt){
+    retime(dt, inputMode){
         this.time += dt;
         this.update();
+        this.props.update(this.selected);
+        if(arguments.length < 2 || !inputMode){
+            this.props.retime();
+        }
+    }
+    //
+    runTime(timeStamp){
+        let deltaTime = timeStamp - this.lastTime;
+        this.lastTime = timeStamp;
+        //
+        this.retime(deltaTime);
+        //
+        if(this.time < 5){
+            requestAnimationFrame(this.runTime);
+        }
     }
     //
     resize(){

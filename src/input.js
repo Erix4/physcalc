@@ -44,6 +44,11 @@ export default class Input{
                     break;
                 case "ArrowLeft":
                     command.retime(-.1);
+                    break;
+                case " ":
+                    console.log("Not working");
+                    requestAnimationFrame(command.runTime);
+                    break;
             }
         });
         document.addEventListener("keyup", event => {

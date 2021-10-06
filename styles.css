@@ -38,6 +38,7 @@ h1{
 
 p{
     margin: 0;
+    float: left;
 }
 
 h2{
@@ -54,8 +55,20 @@ h2{
     padding: 10px;
 }
 
+.container{
+    overflow: hidden;
+    display: inline-block;
+    outline: none;
+}
+
 #values{
     padding: 5px;
+}
+
+input{
+    width: 30%;
+    float: left;
+    display: inline-block;
 }
 /*#endregion*/
 

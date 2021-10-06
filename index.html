@@ -16,10 +16,37 @@
             <div id="props">
                 <div id="head"><h2>Object ?</p></div>
                 <div id="values">
-                    <p id="t">Time</p>
-                    <p id="pos">Position</p>
-                    <p id="vel">Velocity</p>
-                    <p id="accel">Acceleration</p>
+                    <input type="number" placeholder="time" style="margin-bottom:5px" id="t"/>s
+                    <div class="container">
+                        <p>p = &lt;</p>
+                        <input type="number" placeholder="pos x" id="posx"/>
+                        <p>, </p>
+                        <input type="number" placeholder="pos y" id="posy"/>
+                        <p>&gt;</p>
+                    </div>
+                    <div class="container">
+                    <p>v = &lt;</p>
+                        <input type="number" placeholder="vel x" id="velx"/>
+                        <p>, </p>
+                        <input type="number" placeholder="vel y" id="vely"/>
+                        <p>&gt;</p>
+                    </div>
+                    <div class="container">
+                    <p>a = &lt;</p>
+                        <input type="number" placeholder="accel x" id="accelx"/>
+                        <p>, </p>
+                        <input type="number" placeholder="accel y" id="accely"/>
+                        <p>&gt;</p>
+                    </div>
+                </div>
+                <div id="eqs">
+                    <div class="container">
+                        <p>p = &lt;</p>
+                        <input type="number" placeholder="pos x" id="posx"/>
+                        <p>,</p><br\><p>     </p>
+                        <input type="number" placeholder="pos y" id="posy"/>
+                        <p>&gt;</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -27,8 +54,8 @@
         <svg class="field" id="svg"></svg>
     </div>
     <div id="timeline">
-        <canvas class="time"></canvas>
-        <svg class="time"></svg>
+        <canvas class="time" id="tcan"></canvas>
+        <svg class="time" id="tsvg"></svg>
     </div>
     <script src="/index.js"></script>
 </body>

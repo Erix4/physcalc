@@ -75,6 +75,9 @@ export default class Object{
             });
         });
         this.nets.forEach(net => {
+            net.self.neck.raise();
+            net.self.tailA.raise();
+            net.self.tailB.raise();
             net.self.head.raise();
         })
         //
@@ -87,15 +90,24 @@ export default class Object{
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //
         command.input.newObject(this);
+        command.objUpdate(this);
     }
     //
     update(){
         this.px = this.profile.paras[0].calc(this.command.time)[0];
         this.py = this.profile.paras[0].calc(this.command.time)[1];
+        //this.vx = this.profile.paras[1].calc(this.command.time)[0];
+        //this.vy = this.profile.paras[1].calc(this.command.time)[1];
+        this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
         this.nets.forEach(net => {
             net.update();
+        });
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.update();
+            });
         });
         this.comps.forEach(comp => {
             comp.forEach(arrow => {
@@ -197,7 +209,7 @@ class netArrow{
         //
         this.pos = this.profile.paras[depth].calc(command.time);
         console.log(this.pos);
-        this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${65 - (depth * 15)}%)`);
+        this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(${240 - (depth * 20)}, 100%, 50%)`);
         this.command.input.newArrow(this);
     }
     //
@@ -217,8 +229,9 @@ class netArrow{
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         //
         this.profile.setValues(this.depth, x, y);
-        this.command.draw();
-        this.obj.update();
+        //this.command.draw();
+        //this.obj.update();
+        this.command.objUpdate(this.obj);
     }
 }
 
@@ -245,6 +258,7 @@ class compArrow{
             this.ex = this.self.sx + this.self.ex;
             this.ey = this.self.sy + this.self.ey;
         }
+        this.self.tailSize = 20;
         //
         if(this.idx > 0){
             this.command.input.newArrow(this);
@@ -306,6 +320,7 @@ class Arrow{
         this.color = color;
         //
         this.tailSize = 30;
+        this.tailAng = 60;
         this.headSize = 8;
         let tx1;
         let tx2;
@@ -319,10 +334,10 @@ class Arrow{
             ty2 = 0;
         }else{
             let theta = atan(ey, ex);
-            tx1 = this.tailSize * Math.cos(radians(theta + 135));//tail x displacement
-            tx2 = this.tailSize * Math.cos(radians(theta - 135));//tail x displacement
-            ty1 = this.tailSize * Math.sin(radians(theta + 135));//tail y displacement
-            ty2 = this.tailSize * Math.sin(radians(theta - 135));//tail y displacement
+            tx1 = this.tailSize * Math.cos(radians(theta + (90 + this.tailAng)));//tail x displacement
+            tx2 = this.tailSize * Math.cos(radians(theta - (90 + this.tailAng)));//tail x displacement
+            ty1 = this.tailSize * Math.sin(radians(theta + (90 + this.tailAng)));//tail y displacement
+            ty2 = this.tailSize * Math.sin(radians(theta - (90 + this.tailAng)));//tail y displacement
         }
         //
         this.neck = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4)
@@ -360,10 +375,10 @@ class Arrow{
             ty2 = 0;
         }else{
             let theta = atan(this.ey, this.ex);
-            tx1 = this.tailSize * Math.cos(radians(theta + 135));//tail x displacement
-            tx2 = this.tailSize * Math.cos(radians(theta - 135));//tail x displacement
-            ty1 = this.tailSize * Math.sin(radians(theta + 135));//tail y displacement
-            ty2 = this.tailSize * Math.sin(radians(theta - 135));//tail y displacement
+            tx1 = this.tailSize * Math.cos(radians(theta + (90 + this.tailAng)));//tail x displacement
+            tx2 = this.tailSize * Math.cos(radians(theta - (90 + this.tailAng)));//tail x displacement
+            ty1 = this.tailSize * Math.sin(radians(theta + (90 + this.tailAng)));//tail y displacement
+            ty2 = this.tailSize * Math.sin(radians(theta - (90 + this.tailAng)));//tail y displacement
         }
         //
         this.neck.attr("x1", this.command.scaleX(this.sx))
