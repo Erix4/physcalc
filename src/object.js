@@ -44,7 +44,7 @@ export default class Object{
         this.gravity = command.gravity;
         //
         this.status = 0;//motion status, 0 = confirm position, 1 = confirm velocity, 2 = confirm acceleration, 3 = dynamic, 4 = static
-        this.vectorMode = 0;
+        this.vectorMode = 0;//0 is hidden, anything higher corresponds to power
         //
         this.px = this.command.scaleX.invert(px);//current values
         this.py = this.command.scaleY.invert(py);
@@ -57,7 +57,10 @@ export default class Object{
         this.profile.addComp(2, [0], [this.gravity]);
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
-        this.net = new netArrow(command, this, 1);
+        this.nets = [];
+        for(var n = 1; n < this.profile.paras.length; n++){//make an arrow for every para except position
+            this.nets.push(new netArrow(command, this, n));
+        }
         //
         this.svg = command.svg;
         //
@@ -75,7 +78,9 @@ export default class Object{
         this.py = this.profile.paras[0].calc(this.command.time)[1];
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
-        this.net.update();
+        this.nets.forEach(net => {
+            net.update();
+        });
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
@@ -110,27 +115,9 @@ export default class Object{
         this.command.objUpdate(this);
     }
     //
-    revel(vx, vy){
+    reval(px, py){
         console.log("Reveling");
-        this.vx = (this.command.scaleX.invert(vx) - this.px) / this.arrStr;
-        this.vy = (this.command.scaleY.invert(vy) - this.py) / this.arrStr;
-        //
-        var xSum = 0;
-        var ySum = 0;
-        this.pFuncComps.forEach(func => {
-            xSum += func.getTermX(1);
-            ySum += func.getTermY(1);
-        });
-        //
-        this.pFunc.setTerm(1, this.vx, this.vy);
-        this.vFunc.setTerm(0, this.vx, this.vy);
-        //
-        this.vNet.ex = this.vx * this.arrStr;
-        this.vNet.ey = this.vy * this.arrStr;
-        this.vComps[0].ex = this.vx * this.arrStr;
-        this.vComps[0].ey = this.vy * this.arrStr;
-        //
-        this.command.objUpdate(this);
+        this.nets[this.vectorMode - 1].reval(px, py);
     }
     reaccel(ax, ay){
         this.ax = this.command.scaleX.invert(ax) / this.arrStr;
@@ -148,64 +135,24 @@ export default class Object{
     }
     //
     draw(input){
-        if((input.velConf || input.moveState == 3) && input.active != this){
+        if((input.velConf || input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
             this.profile.draw(0, 1000);
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
-        }else if (!(input.moveState == 3 && input.active == this)){
+        }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
             this.profile.draw(0, 1000);
-            this.net.self.show();
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
         }
     }
     //
     updateVectors(mode){
         this.vectorMode = mode;
-        switch(mode){
-            case 0:
-                this.vNet.hide();
-                this.aNet.hide();
-                //
-                this.vComps.forEach(comp => {
-                    comp.hide();
-                });
-                this.aComps.forEach(comp => {
-                    comp.hide();
-                });
-                break;
-            case 1:
-                console.log("Showing velocity vecors");
-                this.vNet.update();
-                this.vNet.show();
-                this.aNet.hide();
-                //
-                console.log(this.vNet.neck.style("visibility"));
-                if(this.vComps.length > 1){
-                    this.vComps.forEach(comp => {
-                        comp.update();
-                        comp.show();
-                    });
-                }
-                this.aComps.forEach(comp => {
-                    comp.hide();
-                });
-                break;
-            case 2:
-                this.vNet.hide();
-                this.aNet.update();
-                this.aNet.show();
-                //
-                this.vComps.forEach(comp => {
-                    comp.hide();
-                });
-                if(this.aComps.length > 1 + Math.ceil(Math.abs(this.gravity / 1000000))){
-                    this.aComps.forEach(comp => {
-                        comp.update();
-                        comp.show();
-                    });
-                }
-                break;
+        this.nets.forEach(net => {
+            net.self.hide();
+        });
+        if(this.vectorMode > 0){
+            this.nets[this.vectorMode - 1].self.show();
         }
     }
 }
@@ -220,7 +167,7 @@ class netArrow{
         //
         this.pos = this.profile.paras[depth].calc(command.time);
         console.log(this.pos);
-        this.self = new Arrow(command, obj, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr);
+        this.self = new Arrow(command, obj, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${65 - (depth * 15)}%)`);
         this.command.input.newArrow(this);
     }
     //
@@ -244,11 +191,13 @@ class netArrow{
 }
 
 class Arrow{
-    constructor(command, obj, ex, ey){
+    constructor(command, obj, ex, ey, color){
         this.command = command;
         this.obj = obj;
         this.ex = ex;//ending x
         this.ey = ey;//ending y
+        //
+        this.color = color;
         //
         this.tailSize = 30;
         this.headSize = 8;
@@ -270,17 +219,17 @@ class Arrow{
             ty2 = this.tailSize * Math.sin(radians(theta - 135));//tail y displacement
         }
         //
-        this.neck = command.svg.append("line").style("stroke", "white").style("stroke-width", 4)
+        this.neck = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4)
                         .attr("x1", command.scaleX(obj.px))
                         .attr("y1", command.scaleY(obj.py))
                         .attr("x2", command.scaleX(obj.px + this.ex))
                         .attr("y2", command.scaleY(obj.py + this.ey));
-        this.tailA = command.svg.append("line").style("stroke", "white").style("stroke-width", 4).style("stroke-linecap", "round")
+        this.tailA = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4).style("stroke-linecap", "round")
                         .attr("x1", command.scaleX(obj.px + this.ex))
                         .attr("y1", command.scaleY(obj.py + this.ey))
                         .attr("x2", command.scaleX(obj.px + this.ex) + tx1)
                         .attr("y2", command.scaleY(obj.py + this.ey) - ty1);
-        this.tailB = command.svg.append("line").style("stroke", "white").style("stroke-width", 4).style("stroke-linecap", "round")
+        this.tailB = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4).style("stroke-linecap", "round")
                         .attr("x1", command.scaleX(obj.px + this.ex))
                         .attr("y1", command.scaleY(obj.py + this.ey))
                         .attr("x2", command.scaleX(obj.px + this.ex) + tx2)

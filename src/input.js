@@ -52,9 +52,9 @@ export default class Input{
                 case "v":
                     if(this.velConf){
                         if(this.active.vectorMode == 1){
-                            //command.updateVectors(this.active, 2);
+                            command.updateVectors(this.active, 2);
                         }else{
-                            //command.updateVectors(this.active, 1);
+                            command.updateVectors(this.active, 1);
                         }
                     }else{
                         switch(command.vectorMode){
@@ -65,7 +65,7 @@ export default class Input{
                                 command.vectorMode++;
                                 break;
                         }
-                        //command.updateVectors();
+                        command.updateVectors();
                     }
                     break;
                 case "Enter":
@@ -104,7 +104,7 @@ export default class Input{
                     break;
                 case 4:
                     if(input.velConf){
-                        input.active.net.reval(mouse[0], mouse[1]);
+                        input.active.reval(mouse[0], mouse[1]);
                     }else{
                         input.active.reval(mouse[0], mouse[1]);//I'm sure naming the functions revel and reval won't come back to bite me
                     }
@@ -119,13 +119,14 @@ export default class Input{
         command.svg.on("mouseup", function(){
             //console.log(input.moveState);
             if(input.moveState == 3){
-                //command.updateVectors(input.active, 1);
+                command.updateVectors(input.active, 1);
                 input.moveState = 0;
                 input.velConf = true;
+                input.active.nets[0].self.show();
                 command.update();
             }else{
                 if(input.velConf && (mX - stX) == 0 && (mY - stY) == 0){
-                    //command.updateVectors(input.active, command.vectorMode);
+                    command.updateVectors(input.active, command.vectorMode);
                     input.velConf = false;
                     command.update();
                 }

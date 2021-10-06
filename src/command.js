@@ -28,11 +28,6 @@ export default class Command{
         this.input = new Input(this);
         //
         //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
-        this.prof = new Profile(this, 2, [1, 4], [-2,1,3]);
-        this.prof.setValues(0, 1, 0);
-        this.prof.setValues(0, 2, 2);
-        //this.prof.addComp(1, [2], [3]);
-        this.prof.draw(0, 100);
         //
         this.a = 1;
         console.log(this.a);
@@ -58,7 +53,6 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        this.prof.draw(0, 100);
     }
     //
     objUpdate(obj){
