@@ -29,11 +29,31 @@ h1{
     height: 85%;
 }
 
+/*#region props*/
 #leftcolumn{
     height: 100%;
     width: 20%;
     margin: 0;
 }
+
+p{
+    margin: 0;
+}
+
+h2{
+    margin: 0;
+}
+
+#props{
+    height: 100%;
+}
+
+#head{
+    min-height: 20px;
+    overflow: hidden;
+    padding: 10px;
+}
+/*#endregion*/
 
 #svg{
     z-index: 2;

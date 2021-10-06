@@ -131,8 +131,19 @@ export default class Profile{
         this.comps[power].push(new Para(this.command.time, 1, xCoefs, yCoefs));//push a new component to the desired power
         //console.log("New comp pushed succesfully");
         //
+        this.sumComps(power, xCoefs.length, yCoefs.length);
+    }
+    //
+    setCompVal(power, idx, x, y){
+        this.comps[power][idx].setTermX(0, x);
+        this.comps[power][idx].setTermY(0, y);
+        //
+        this.sumComps(power, this.comps[power][idx].xFunc.terms.length, this.comps[power][idx].yFunc.terms.length);
+    }
+    //
+    sumComps(power, xL, yL){
         var sum;
-        for(var n = 0; n < xCoefs.length; n++){//for every x coefficient of the new component
+        for(var n = 0; n < xL; n++){//for every x coefficient of the new component
             sum = 0;
             this.comps[power].forEach(comp => {//for each component at the current derivative power
                 //console.log(`${comp.xFunc.terms.length} and n: ${n}`);
@@ -142,7 +153,7 @@ export default class Profile{
             });
             this.paras[power].setTermX(n, sum);//set the current x coefficient of index function to sum of component coefficients
         }
-        for(var n = 0; n < yCoefs.length; n++){//for every y coefficient of the new component
+        for(var n = 0; n < yL; n++){//for every y coefficient of the new component
             sum = 0;
             this.comps[power].forEach(comp => {//for each component at the current power
                 if(n < comp.yFunc.terms.length){//check if coefficient exists in component

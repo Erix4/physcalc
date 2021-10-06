@@ -58,9 +58,25 @@ export default class Object{
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
         this.nets = [];
+        this.comps = [];
         for(var n = 1; n < this.profile.paras.length; n++){//make an arrow for every para except position
             this.nets.push(new netArrow(command, this, n));
+            this.profile.comps[n].forEach(comp => {
+                this.comps.push([]);
+            });
+            console.log(this.comps);
+            for(var a = 0; a < this.profile.comps[n].length; a++){
+                this.comps[n - 1][this.profile.comps[n].length - a - 1] = new compArrow(command, this, n, this.profile.comps[n].length - a - 1);
+            }
         }
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.self.head.raise();
+            });
+        });
+        this.nets.forEach(net => {
+            net.self.head.raise();
+        })
         //
         this.svg = command.svg;
         //
@@ -80,6 +96,11 @@ export default class Object{
         //this.pFunc.setOff(this.px, this.py);
         this.nets.forEach(net => {
             net.update();
+        });
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.update();
+            });
         });
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
@@ -148,11 +169,20 @@ export default class Object{
     //
     updateVectors(mode){
         this.vectorMode = mode;
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.self.hide();
+            });
+        });
         this.nets.forEach(net => {
             net.self.hide();
         });
+        //
         if(this.vectorMode > 0){
             this.nets[this.vectorMode - 1].self.show();
+            this.comps[this.vectorMode - 1].forEach(arrow => {
+                arrow.show();
+            });
         }
     }
 }
@@ -167,7 +197,7 @@ class netArrow{
         //
         this.pos = this.profile.paras[depth].calc(command.time);
         console.log(this.pos);
-        this.self = new Arrow(command, obj, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${65 - (depth * 15)}%)`);
+        this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${65 - (depth * 15)}%)`);
         this.command.input.newArrow(this);
     }
     //
@@ -175,6 +205,8 @@ class netArrow{
         //console.log("updating");
         this.pos = this.profile.paras[this.depth].calc(this.command.time);
         //
+        this.self.sx = this.obj.px;
+        this.self.sy = this.obj.py;
         this.self.ex = this.pos[0] * this.obj.arrStr;
         this.self.ey = this.pos[1] * this.obj.arrStr;
         this.self.update();
@@ -186,14 +218,88 @@ class netArrow{
         //
         this.profile.setValues(this.depth, x, y);
         this.command.draw();
-        this.update();
+        this.obj.update();
+    }
+}
+
+class compArrow{
+    constructor(command, obj, depth, idx){
+        this.command = command;
+        this.obj = obj;
+        this.depth = depth;
+        this.idx = idx;
+        //
+        this.profile = obj.profile;
+        //
+        console.log(this.obj.comps);
+        this.pos = this.profile.comps[depth][idx].calc(command.time);
+        console.log(this.pos);
+        console.log(`depth: ${depth}, idx: ${idx}, length: ${this.profile.comps[depth].length}`);
+        if(this.idx == this.profile.comps[depth].length - 1){
+            this.ex = obj.px + this.pos[0] * obj.arrStr;
+            this.ey = obj.py + this.pos[1] * obj.arrStr;
+            this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
+        }else{
+            console.log(this.obj.comps[depth - 2]);
+            this.self = new Arrow(command, this.obj.comps[this.depth - 2][0].ex, this.obj.comps[this.depth - 2][0].ey, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
+            this.ex = this.self.sx + this.self.ex;
+            this.ey = this.self.sy + this.self.ey;
+        }
+        //
+        if(this.idx > 0){
+            this.command.input.newArrow(this);
+        }
+    }
+    //
+    update(){
+        //console.log("updating");
+        this.pos = this.profile.comps[this.depth][this.idx].calc(this.command.time);
+        //
+        if(this.idx == this.profile.comps[this.depth].length - 1){
+            this.self.sx = this.obj.px;
+            this.self.sy = this.obj.py;
+            this.ex = this.obj.px + this.pos[0] * this.obj.arrStr;
+            this.ey = this.obj.py + this.pos[1] * this.obj.arrStr;
+        }else{
+            this.self.sx = this.obj.comps[this.depth - 1][this.idx + 1].ex;//set start of vector to end of last one
+            this.self.sy = this.obj.comps[this.depth - 1][this.idx + 1].ey;
+        }
+        //
+        this.self.ex = this.pos[0] * this.obj.arrStr;
+        this.self.ey = this.pos[1] * this.obj.arrStr;
+        this.ex = this.self.sx + this.self.ex;
+        this.ey = this.self.sy + this.self.ey;
+        this.self.update();
+    }
+    //
+    reval(px, py){
+        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
+        let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
+        //
+        this.profile.setCompVal(this.depth, this.idx, x, y);
+        this.command.draw();
+        this.obj.update();
+    }
+    //
+    show(){
+        if(this.idx > 0){
+            this.self.show();
+        }else if(this.profile.comps[this.depth].length > 1 && 
+                this.profile.paras[this.depth].xFunc.getCoefs() != this.profile.comps[this.depth][this.idx].xFunc.getCoefs() &&
+                this.profile.paras[this.depth].yFunc.getCoefs() != this.profile.comps[this.depth][this.idx].yFunc.getCoefs()){//head of default comp is never shown
+            //
+            this.self.neck.style("visibility", "visible");
+            this.self.tailA.style("visibility", "visible");
+            this.self.tailB.style("visibility", "visible");
+        }
     }
 }
 
 class Arrow{
-    constructor(command, obj, ex, ey, color){
+    constructor(command, sx, sy, ex, ey, color){
         this.command = command;
-        this.obj = obj;
+        this.sx = sx;
+        this.sy = sy;
         this.ex = ex;//ending x
         this.ey = ey;//ending y
         //
@@ -220,23 +326,23 @@ class Arrow{
         }
         //
         this.neck = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4)
-                        .attr("x1", command.scaleX(obj.px))
-                        .attr("y1", command.scaleY(obj.py))
-                        .attr("x2", command.scaleX(obj.px + this.ex))
-                        .attr("y2", command.scaleY(obj.py + this.ey));
+                        .attr("x1", command.scaleX(this.sx))
+                        .attr("y1", command.scaleY(this.sy))
+                        .attr("x2", command.scaleX(this.sx + this.ex))
+                        .attr("y2", command.scaleY(this.sy + this.ey));
         this.tailA = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4).style("stroke-linecap", "round")
-                        .attr("x1", command.scaleX(obj.px + this.ex))
-                        .attr("y1", command.scaleY(obj.py + this.ey))
-                        .attr("x2", command.scaleX(obj.px + this.ex) + tx1)
-                        .attr("y2", command.scaleY(obj.py + this.ey) - ty1);
+                        .attr("x1", command.scaleX(this.sx + this.ex))
+                        .attr("y1", command.scaleY(this.sy + this.ey))
+                        .attr("x2", command.scaleX(this.sx + this.ex) + tx1)
+                        .attr("y2", command.scaleY(this.sy + this.ey) - ty1);
         this.tailB = command.svg.append("line").style("stroke", this.color).style("stroke-width", 4).style("stroke-linecap", "round")
-                        .attr("x1", command.scaleX(obj.px + this.ex))
-                        .attr("y1", command.scaleY(obj.py + this.ey))
-                        .attr("x2", command.scaleX(obj.px + this.ex) + tx2)
-                        .attr("y2", command.scaleY(obj.py + this.ey) - ty2);
+                        .attr("x1", command.scaleX(this.sx + this.ex))
+                        .attr("y1", command.scaleY(this.sy + this.ey))
+                        .attr("x2", command.scaleX(this.sx + this.ex) + tx2)
+                        .attr("y2", command.scaleY(this.sy + this.ey) - ty2);
         this.head = command.svg.append("circle").style("fill", "white")
-                        .attr("cx", command.scaleX(obj.px + this.ex))
-                        .attr("cy", command.scaleY(obj.py + this.ey))
+                        .attr("cx", command.scaleX(this.sx + this.ex))
+                        .attr("cy", command.scaleY(this.sy + this.ey))
                         .attr("r", this.headSize);
         //
         this.hide();
@@ -260,20 +366,20 @@ class Arrow{
             ty2 = this.tailSize * Math.sin(radians(theta - 135));//tail y displacement
         }
         //
-        this.neck.attr("x1", this.command.scaleX(this.obj.px))
-                .attr("y1", this.command.scaleY(this.obj.py))
-                .attr("x2", this.command.scaleX(this.obj.px + this.ex))
-                .attr("y2", this.command.scaleY(this.obj.py + this.ey));
-        this.tailA.attr("x1", this.command.scaleX(this.obj.px + this.ex))
-                .attr("y1", this.command.scaleY(this.obj.py + this.ey))
-                .attr("x2", this.command.scaleX(this.obj.px + this.ex) + tx1)
-                .attr("y2", this.command.scaleY(this.obj.py + this.ey) - ty1);
-        this.tailB.attr("x1", this.command.scaleX(this.obj.px + this.ex))
-                .attr("y1", this.command.scaleY(this.obj.py + this.ey))
-                .attr("x2", this.command.scaleX(this.obj.px + this.ex) + tx2)
-                .attr("y2", this.command.scaleY(this.obj.py + this.ey) - ty2);
-        this.head.attr("cx", this.command.scaleX(this.obj.px + this.ex))
-                .attr("cy", this.command.scaleY(this.obj.py + this.ey))
+        this.neck.attr("x1", this.command.scaleX(this.sx))
+                .attr("y1", this.command.scaleY(this.sy))
+                .attr("x2", this.command.scaleX(this.sx + this.ex))
+                .attr("y2", this.command.scaleY(this.sy + this.ey));
+        this.tailA.attr("x1", this.command.scaleX(this.sx + this.ex))
+                .attr("y1", this.command.scaleY(this.sy + this.ey))
+                .attr("x2", this.command.scaleX(this.sx + this.ex) + tx1)
+                .attr("y2", this.command.scaleY(this.sy + this.ey) - ty1);
+        this.tailB.attr("x1", this.command.scaleX(this.sx + this.ex))
+                .attr("y1", this.command.scaleY(this.sy + this.ey))
+                .attr("x2", this.command.scaleX(this.sx + this.ex) + tx2)
+                .attr("y2", this.command.scaleY(this.sy + this.ey) - ty2);
+        this.head.attr("cx", this.command.scaleX(this.sx + this.ex))
+                .attr("cy", this.command.scaleY(this.sy + this.ey))
                 .attr("r", this.headSize);
     }
     //
