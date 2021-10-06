@@ -21,16 +21,17 @@ export default class Command{
         this.grid.calcSize();//get scales and things
         //
         this.gravity = -9.81;
-        this.time = 1;
+        this.time = 0;
         //
-        this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
+        this.vectorMode = 1;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.input = new Input(this);
         //
         //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
         this.prof = new Profile(this, 2, [1, 4], [-2,1,3]);
-        this.prof.setValues(1, 1, 0);
-        this.prof.addComp(1, [2], [3]);
+        this.prof.setValues(0, 1, 0);
+        this.prof.setValues(0, 2, 2);
+        //this.prof.addComp(1, [2], [3]);
         this.prof.draw(0, 100);
         //
         this.a = 1;
@@ -42,12 +43,14 @@ export default class Command{
     }
     //
     update(){//update entire field and redraw canvas
-        this.grid.draw(this.ctx);
+        this.draw();
+        this.move();
+    }
+    //
+    move(){
         this.objects.forEach(obj => {
             obj.update();
-            obj.draw(this.input);
         });
-        this.prof.draw(0, 100);
     }
     //
     draw(){//redraw canvas
@@ -55,7 +58,7 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        this.prof.draw(0, 100);//draw function doesn't work on resize
+        this.prof.draw(0, 100);
     }
     //
     objUpdate(obj){
@@ -83,9 +86,14 @@ export default class Command{
         this.update();
     }
     //
+    retime(dt){
+        this.time += dt;
+        this.update();
+    }
+    //
     resize(){
         this.grid.resize();
-        this.update();
+        this.move();
     }
     //
     newObject(px, py){

@@ -49,24 +49,15 @@ export default class Object{
         this.px = this.command.scaleX.invert(px);//current values
         this.py = this.command.scaleY.invert(py);
         this.vx = 5;
-        this.vy = 15;
+        this.vy = 5;
         this.ax = 0;
-        this.ay = this.gravity;
+        this.ay = 0;
         //
         this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
-        //this.profile.addComp(2, [0], [this.gravity]);
-        /*this.pFunc = new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py);//make parametric functions for p, v, a
-        this.pFuncComps = [new Para(1000, [this.vx, 0], [this.ay / 2, this.vy, 0], this.px, this.py)];//make parametric functions for p, v, a
-        this.vFunc = new Para(1000, [this.vx], [this.ay, this.vy]);
-        this.vFuncComps = [new Para(1000, [this.vx], [this.ay, this.vy])];
-        this.aFunc = new Para(10, [0], [this.ay]);
-        this.aFuncComps = [new Para(10, [0], [0]), new Para(10, [this.ax], [this.ay])];*/
+        this.profile.addComp(2, [0], [this.gravity]);
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
-        /*this.vNet = new Arrow(command, this, this.vFunc, this.vx * this.arrStr, this.vy * this.arrStr);
-        this.vComps = [new Arrow(command, this, this.vFuncComps[0], this.vx * this.arrStr, this.vy * this.arrStr)];//vector component starts out the same as the net, but is still a difference instance
-        this.aNet = new Arrow(command, this, this.aFunc, this.ax * this.arrStr, this.ay * this.arrStr);
-        this.aComps = [new Arrow(command, this, this.aFuncComps[0], 0, 0), new Arrow(command, this, this.aFuncComps[1], this.ax * this.arrStr, this.ay * this.arrStr)];*/
+        this.net = new netArrow(command, this, 1);
         //
         this.svg = command.svg;
         //
@@ -80,9 +71,12 @@ export default class Object{
     }
     //
     update(){
+        this.px = this.profile.paras[0].calc(this.command.time)[0];
+        this.py = this.profile.paras[0].calc(this.command.time)[1];
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
-        this.profile.setValues(0, this.px, this.py);
+        this.net.update();
+        //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
             case 1:
@@ -104,13 +98,16 @@ export default class Object{
     repos(px, py){
         this.px = this.command.scaleX.invert(px);
         this.py = this.command.scaleY.invert(py);
+        this.profile.setValues(0, this.px, this.py);
         //
         this.command.objUpdate(this);
     }
     //
-    retime(time){
+    retime(){
         this.px = this.profile.paras[0].calc(this.command.time)[0];
         this.py = this.profile.paras[0].calc(this.command.time)[1];
+        //
+        this.command.objUpdate(this);
     }
     //
     revel(vx, vy){
@@ -158,6 +155,7 @@ export default class Object{
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){
             this.profile.draw(0, 1000);
+            this.net.self.show();
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
         }
     }
@@ -212,14 +210,45 @@ export default class Object{
     }
 }
 
+class netArrow{
+    constructor(command, obj, depth){
+        this.command = command;
+        this.obj = obj;
+        this.depth = depth;
+        //
+        this.profile = obj.profile;
+        //
+        this.pos = this.profile.paras[depth].calc(command.time);
+        console.log(this.pos);
+        this.self = new Arrow(command, obj, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr);
+        this.command.input.newArrow(this);
+    }
+    //
+    update(){
+        //console.log("updating");
+        this.pos = this.profile.paras[this.depth].calc(this.command.time);
+        //
+        this.self.ex = this.pos[0] * this.obj.arrStr;
+        this.self.ey = this.pos[1] * this.obj.arrStr;
+        this.self.update();
+    }
+    //
+    reval(px, py){
+        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
+        let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
+        //
+        this.profile.setValues(this.depth, x, y);
+        this.command.draw();
+        this.update();
+    }
+}
+
 class Arrow{
-    constructor(command, obj, func, ex, ey){
+    constructor(command, obj, ex, ey){
         this.command = command;
         this.obj = obj;
         this.ex = ex;//ending x
         this.ey = ey;//ending y
-        //
-        this.func = func;
         //
         this.tailSize = 30;
         this.headSize = 8;
@@ -261,11 +290,8 @@ class Arrow{
                         .attr("cy", command.scaleY(obj.py + this.ey))
                         .attr("r", this.headSize);
         //
-        this.command.input.newArrow(this);
         this.hide();
     }
-    //
-    
     //
     update(){
         let tx1;

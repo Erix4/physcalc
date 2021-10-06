@@ -37,9 +37,11 @@ export default class Input{
                         adding = true;
                     }
                     break;
-                case "1":
-                    command.time = 1;
-                    command.update();
+                case "ArrowRight":
+                    command.retime(.1);
+                    break;
+                case "ArrowLeft":
+                    command.retime(-.1);
             }
         });
         document.addEventListener("keyup", event => {
@@ -102,7 +104,9 @@ export default class Input{
                     break;
                 case 4:
                     if(input.velConf){
-                        input.active.revel(mouse[0], mouse[1]);
+                        input.active.net.reval(mouse[0], mouse[1]);
+                    }else{
+                        input.active.reval(mouse[0], mouse[1]);//I'm sure naming the functions revel and reval won't come back to bite me
                     }
                 default:
                     break;
@@ -113,7 +117,7 @@ export default class Input{
         });
         //
         command.svg.on("mouseup", function(){
-            console.log(input.moveState);
+            //console.log(input.moveState);
             if(input.moveState == 3){
                 //command.updateVectors(input.active, 1);
                 input.moveState = 0;
@@ -143,7 +147,7 @@ export default class Input{
     //
     newArrow(arrow){
         var input = this;
-        arrow.head.on("mousedown", function(){
+        arrow.self.head.on("mousedown", function(){
             if(input.moveState == 0){
                 if(!input.velConf){
                     input.active = arrow;
