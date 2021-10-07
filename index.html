@@ -40,11 +40,11 @@
                     </div>
                 </div>
                 <div id="eqs">
-                    <div class="container">
+                    <div style="margin-top:7px" class="container">
                         <p>p = &lt;</p>
-                        <input type="number" placeholder="pos x" id="posx"/>
-                        <p>,</p><br\><p>     </p>
-                        <input type="number" placeholder="pos y" id="posy"/>
+                        <input class="eq" type="number" placeholder="coef 1" id="posx"/>
+                        <p>t<sup>2</sup>,</p><br\><p>     </p>
+                        <input class="eq" type="number" placeholder="coef 1" id="posy"/>
                         <p>&gt;</p>
                     </div>
                 </div>
@@ -54,8 +54,11 @@
         <svg class="field" id="svg"></svg>
     </div>
     <div id="timeline">
+        <div id="bar"></div>
         <canvas class="time" id="tcan"></canvas>
-        <svg class="time" id="tsvg"></svg>
+        <svg class="time" id="tsvg">
+            <!--<polygon points="" />-->
+        </svg>
     </div>
     <script src="/index.js"></script>
 </body>

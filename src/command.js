@@ -5,6 +5,7 @@ import Profile from "./func";
 import Props from "./props";
 import {Para} from "./func";
 import {Func} from "./func";
+import Timeline from "./time";
 
 export default class Command{
     constructor(canvas, svg){
@@ -17,7 +18,7 @@ export default class Command{
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
         //
-        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 20);
+        this.grid = new Grid(this, this.ctx, this.svg, 0, 0.1, 15);
         this.grid.calcSize();//get scales and things
         //
         this.lastTime = 0;
@@ -28,6 +29,9 @@ export default class Command{
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.selected = null;
+        //
+        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 50);
+        console.log(this.time.scrH);
         //
         this.input = new Input(this);
         this.props = new Props(this);
@@ -45,6 +49,7 @@ export default class Command{
     update(){//update entire field and redraw canvas
         this.draw();
         this.move();
+        this.timeline.move();
     }
     //
     move(){

@@ -60,6 +60,9 @@ h2{
     display: inline-block;
     outline: none;
 }
+.eq{
+    width: 15%;
+}
 
 #values{
     padding: 5px;
@@ -93,12 +96,33 @@ input{
 /*#endregion*/
 
 .time{
-    top: 90%;
+    top: 92.5%;
     width: 100%;
-    height: 10%;
+    height: 7.5%;
     position: absolute;
 }
 
 #timeline{
     height: 10%;
+    padding: 0;
+    outline: hidden;
+}
+
+#bar{
+    height:2.5%;
+    width: 100%;
+    top: 90%;
+    margin: 0;
+    padding: 0;
+    outline: hidden;
+    position: absolute;
+}
+
+#tcan{
+    background-color: rgb(28, 28, 28);
+    z-index: 1;
+}
+
+#tsvg{
+    z-index: 2;
 }

@@ -86,7 +86,7 @@ export default class Grid{
         let mx = this.command.scaleX.invert(px);
         let my = this.command.scaleY.invert(py);
         //
-        this.cx = mx - ((mx - this.cx) * c);//this is slightly wrong and I don't know why
+        this.cx = mx - ((mx - this.cx) * c);
         this.cy = my - ((my - this.cy) * c);
         //
         this.calcSize();

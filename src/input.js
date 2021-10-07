@@ -1,8 +1,12 @@
 export default class Input{
     constructor(command){
-        this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change
+        this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
         this.velConf = false;//track if velocity is confirmed (or being confirmed)
         var adding = false;//track when add button is pressed
+        //
+        this.overState = 0;//track what the mouse is over, 0 = field, 1 = header, 2 = left column, 3= timeline
+        //
+        this.timeline = command.timeline;
         //
         this.selected = command.selected;
         //
@@ -87,6 +91,7 @@ export default class Input{
         //
         command.svg.on("mousedown", function(){
             let mouse = d3.mouse(this);
+            console.log(input.moveState);
             //
             if(input.moveState == 0){
                 input.moveState = 1;
@@ -96,50 +101,65 @@ export default class Input{
             stY = mouse[1];
         });
         //
-        d3.select("svg").on("mousemove", function(){
-            let mouse = d3.mouse(this);
+        document.addEventListener("mousemove", event => {
+            var emx = event.clientX;
+            var emy = event.clientY;
+            emx -= parseInt(d3.select("#leftcolumn").style("width"));
+            emy -= parseInt(d3.select("#header").style("height"));
             //
-            switch(input.moveState){
+            switch(this.moveState){
                 case 1:
-                    command.repos(mouse[0] - mX, mouse[1] - mY);
+                    command.repos(emx - mX, emy - mY);
                     break;
                 case 2:
-                    input.active.repos(mouse[0], mouse[1]);
+                    this.active.repos(emx, emy);
                     break;
                 case 3: 
-                    input.active.repos(mouse[0], mouse[1]);
+                    this.active.repos(emx, emy);
                     break;
                 case 4:
-                    if(input.velConf){
-                        input.active.reval(mouse[0], mouse[1]);
+                    if(this.velConf){
+                        this.active.reval(emx, emy);
                     }else{
-                        input.active.reval(mouse[0], mouse[1]);//I'm sure naming the functions revel and reval won't come back to bite me
+                        this.active.reval(emx, emy);
                     }
+                    break;
+                case 5:
+                    console.log("why");
+                    //command.time = command.timeline.timeX.invert(event.clientX);
+                    command.retime(.1);
+                    break;
                 default:
                     break;
             }
             //
-            mX = mouse[0];
-            mY = mouse[1];
+            //console.log(emy);
+            mX = emx;
+            mY = emy;
         });
         //
-        command.svg.on("mouseup", function(){
-            //console.log(input.moveState);
-            if(input.moveState == 3){
+        document.addEventListener("mouseup", event => {//this is kinda broken
+            if(this.moveState == 3){
                 command.updateVectors(input.active, 1);
-                input.moveState = 0;
-                input.velConf = true;
-                input.active.nets[0].self.show();
+                this.moveState = 0;
+                //input.velConf = true;
+                this.active.nets[0].self.show();
                 command.update();
             }else{
-                if(input.velConf && (mX - stX) == 0 && (mY - stY) == 0){
-                    command.updateVectors(input.active, command.vectorMode);
-                    input.velConf = false;
+                if(this.velConf && (mX - stX) == 0 && (mY - stY) == 0){
+                    command.updateVectors(this.active, command.vectorMode);
+                    this.velConf = false;
                     command.update();
                 }
-                input.moveState = 0;
+                this.moveState = 0;
             }
         });
+        //
+        this.timeline.svg.on("mousedown", function(){
+            this.moveState = 5;
+            console.log("huh");
+        });
+        //
     }
     //
     newObject(obj){
