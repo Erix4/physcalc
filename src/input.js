@@ -53,6 +53,8 @@ export default class Input{
                     console.log("Not working");
                     requestAnimationFrame(command.runTime);
                     break;
+                case "Backspace":
+                    command.objects.splice(this.active.id, 1);
             }
         });
         document.addEventListener("keyup", event => {
