@@ -6,6 +6,7 @@ export default class Props{
         //
         this.column = d3.select("#column");
         //
+        this.head = d3.select("#head");
         this.t = d3.select("#t");
         this.posx = d3.select("#posx");
         this.posy = d3.select("#posy");
@@ -89,6 +90,7 @@ export default class Props{
         if(this.selected != null){
             //console.log(this.selected);
             //
+            this.head.text(`Object: ${this.selected.id}`);
             this.posx.property("value", this.selected.profile.paras[0].calc(this.command.time)[0].toFixed(2));
             this.posy.property("value", this.selected.profile.paras[0].calc(this.command.time)[1].toFixed(2));
             this.velx.property("value", this.selected.profile.paras[1].calc(this.command.time)[0].toFixed(2));

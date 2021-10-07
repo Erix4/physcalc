@@ -41,6 +41,10 @@ export default class Object{
         this.command = command;
         this.field = command.field;
         //
+        this.id = command.objects.length;
+        //
+        this.hue = 35 * this.id;//0 = red
+        //
         this.gravity = command.gravity;
         //
         this.status = 0;//motion status, 0 = confirm position, 1 = confirm velocity, 2 = confirm acceleration, 3 = dynamic, 4 = static
@@ -53,7 +57,7 @@ export default class Object{
         this.ax = 0;
         this.ay = 0;
         //
-        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py]);
+        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], `hsl(${this.hue}, 100%, 50%`);
         this.profile.addComp(2, [0], [this.gravity]);
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
@@ -83,7 +87,7 @@ export default class Object{
         //
         this.svg = command.svg;
         //
-        this.self = this.svg.append("circle").style("fill", "dark-gray").style("stroke", "white").style("stroke-width", 4)
+        this.self = this.svg.append("circle").style("fill", `hsl(${this.hue}, 100%, 50%`).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7)
         .attr("r", 20)
         /*.style("visibility", "hidden")*/;
         //

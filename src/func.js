@@ -1,10 +1,13 @@
 export default class Profile{
-    constructor(command, depth, xCoefs, yCoefs){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
+    constructor(command, depth, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
+        this.obj = command.objects[command.objects.length - 1];
         console.log(`--XX-- Making parametric function with x:[${xCoefs}] and y:[${yCoefs}]`);
         //console.log(arguments);
         //
-        this.paras = [new Para(command.time, 1, xCoefs, yCoefs)];
+        this.color = color;
+        //
+        this.paras = [new Para(command.time, 1, xCoefs, yCoefs, this.color)];
         this.comps = [[new Para(command.time, 1, xCoefs, yCoefs)]];
         for(var n = 0; n < depth; n++){//generate derivatives
             xCoefs = [];
@@ -25,7 +28,7 @@ export default class Profile{
             if(yCoefs.length == 0){
                 yCoefs.push(0);
             }
-            this.paras.push(new Para(0, 1, xCoefs, yCoefs));
+            this.paras.push(new Para(0, 1, xCoefs, yCoefs, this.color));
             this.comps.push([new Para(0, 1, xCoefs, yCoefs)]);//add current net function as top component
         }
         console.log(`Initialzing complete, with x:[${this.paras[0].xFunc.getCoefs()}] and y:[${this.paras[0].yFunc.getCoefs()}]`);
@@ -243,10 +246,13 @@ export default class Profile{
 }
 
 export class Para{
-    constructor(time, steps, xCoefs, yCoefs){
+    constructor(time, steps, xCoefs, yCoefs, color){
         this.steps = steps;
         //
         this.color = "red";
+        if(arguments.length > 4){
+            this.color = color;
+        }
         //
         this.xFunc = (new Func(this.steps, xCoefs));
         this.yFunc = (new Func(this.steps, yCoefs));
