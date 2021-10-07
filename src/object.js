@@ -84,8 +84,8 @@ export default class Object{
         this.svg = command.svg;
         //
         this.self = this.svg.append("circle").style("fill", "dark-gray").style("stroke", "white").style("stroke-width", 4)
-        .style("r", 20)
-        .style("visibility", "hidden");
+        .attr("r", 20)
+        /*.style("visibility", "hidden")*/;
         //
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //

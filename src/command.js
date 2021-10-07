@@ -30,7 +30,7 @@ export default class Command{
         //
         this.selected = null;
         //
-        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 50);
+        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
         console.log(this.time.scrH);
         //
         this.input = new Input(this);
@@ -98,6 +98,7 @@ export default class Command{
     }
     //
     retime(dt, inputMode){
+        console.log("Retiming");
         this.time += dt;
         this.update();
         this.props.update(this.selected);

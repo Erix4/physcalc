@@ -125,9 +125,9 @@ export default class Input{
                     }
                     break;
                 case 5:
-                    console.log("why");
-                    //command.time = command.timeline.timeX.invert(event.clientX);
-                    command.retime(.1);
+                    //console.log("why");
+                    command.time = command.timeline.timeX.invert(event.clientX);
+                    command.retime(0);
                     break;
                 default:
                     break;
@@ -156,8 +156,10 @@ export default class Input{
         });
         //
         this.timeline.svg.on("mousedown", function(){
-            this.moveState = 5;
-            console.log("huh");
+            input.moveState = 5;
+            command.time = command.timeline.timeX.invert(d3.mouse(this)[0]);
+            command.retime(0);
+            //console.log("huh");
         });
         //
     }
