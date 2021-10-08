@@ -5,6 +5,7 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-axis@3"></script>
+    <script src="https://kit.fontawesome.com/e8a3873f26.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="styles.css"><!--Javascript before CSS is slightly faster-->
 </head>
 <body>
@@ -54,7 +55,14 @@
         <svg class="field" id="svg"></svg>
     </div>
     <div id="timeline">
-        <div id="bar"></div>
+        <div id="bar">
+            <div class="toggle" id="playback">
+                <button><i id="stepback" class="fas fa-fast-backward"></i></button>
+                <button><i id="backplay" class="fas fa-play"></i></button>
+                <button><i class="fas fa-play"></i></button>
+                <button><i id="stepforward" class="fas fa-fast-forward"></i></i></button>
+            </div>
+        </div>
         <canvas class="time" id="tcan"></canvas>
         <svg class="time" id="tsvg">
             <!--<polygon points="" />-->
