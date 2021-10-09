@@ -2,6 +2,7 @@
     font-family: 'heavitas';/*not licensed for professional use ($15 fee)*/
     src: url('/fonts/Heavitas.ttf');
 }
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
 
 body{
     width: 100%;
@@ -11,17 +12,21 @@ body{
 }
 
 div{
-    background-color: gray;
-    outline: 3px solid black;
+    background-color: #254441;
 }
 
 #header{
     height: 5%;
+    display: flex;
+    align-items: center; 
+    background-color: #ff6f59;
 }
 
 h1{
-    margin: 0;
+    margin-left: 10px;
     font-family: 'Heavitas';
+    font-size: 2.3rem;
+    color: #254441;
 }
 
 /*#region Interface*/
@@ -32,17 +37,26 @@ h1{
 /*#region props*/
 #leftcolumn{
     height: 100%;
-    width: 20%;
+    width: 25%;
     margin: 0;
+    background-color: #bec5ad;
+    border-bottom: #254441;
 }
 
 p{
     margin: 0;
     float: left;
+    color: #A5CBC3;
+    font-family: "nunito", "sans-serif";
+    font-weight: 600;
+    font-size: 24px;
 }
 
 h2{
     margin: 0;
+    color: #A5CBC3;
+    font-family: "Heavitas";
+    font-size: 28px;
 }
 
 #props{
@@ -53,25 +67,44 @@ h2{
     min-height: 20px;
     overflow: hidden;
     padding: 10px;
+    padding-bottom: 5px;
+    border-bottom: 8px solid #172b29;
 }
 
 .container{
     overflow: hidden;
     display: inline-block;
     outline: none;
+    padding-left: 12px;
 }
 .eq{
     width: 15%;
 }
 
 #values{
-    padding: 5px;
+    /*padding: 5px;*/
+    border-bottom: 8px solid #172b29;
 }
 
-input{
-    width: 30%;
+input {
+    width: 20%;
+    height: 1.4rem;
     float: left;
     display: inline-block;
+    border: 0;
+    margin: 3px;
+    margin-top: 0;
+    margin-bottom: 0;
+    box-shadow: 3px 11px 4px -9px #A5CBC3, 3px 11px 4px -9px #A5CBC3;
+    -webkit-transition: box-shadow 0.3s;
+    transition: box-shadow 0.3s;
+    background-color: transparent;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 800;
+  }
+input:focus {
+    outline: none;
+    box-shadow: -8px 10px 0px -7px #ff6f59, 8px 10px 0px -7px #ff6f59;
 }
 /*#endregion*/
 
@@ -86,9 +119,9 @@ input{
 }
 
 .field{
-    left: 20%;
+    left: 25%;
     top: 5%;
-    width: 80%;
+    width: 75%;
     height: 85%;
     float: left;
     position: absolute;
@@ -116,8 +149,9 @@ input{
     padding: 0;
     outline: none;
     position: absolute;
-    display: flex;
+    display: inline-flex;
     align-items: center; 
+    background-color: #ff6f59;
 }
 
 .toggle{
@@ -125,31 +159,35 @@ input{
     overflow: hidden;
     outline: none;
     border: none;
-    background-color: darkgray;
+    background-color: #ffa294;
 }
 
 #playback{
-    width: 10%;
-    left: 55%;
-    position: relative;
+    width: 13%;
+    left: 45%;
+    position: absolute;
+    margin-right: 0;
 }
 
-button{
-    background-color: darkgray;
+.button{
+    background-color: #ffa294;
+    position: relative;
     border: none;
     outline: none;
-    width: 22%;
+    width: 25%;
     margin: 0;
     padding: 0;
     height: 100%;
+    display: inline-block;
+    text-align: center; 
 }
 
-button:hover{
-    background-color: gray;
+.button:hover{
+    background-color: #ff6f59;
 }
 
-button:active{
-    background-color: #363636;
+.button:active{
+    background-color: #ff472b;
 }
 
 #backplay{
@@ -166,4 +204,10 @@ button:active{
 
 #tsvg{
     z-index: 2;
+}
+
+i{
+    position: relative;
+    top: .7px;
+    font-size: 2px;
 }
