@@ -79,13 +79,11 @@ export default class Timeline{
     }
     //
     move(){
-        console.log("moving");
         let x = this.timeX(this.command.time);
         let x1 = x - (this.triSize / 2);
         let x2 = x + (this.triSize / 2);
         //
         let y = this.triSize / 2 * Math.sqrt(2);
-        console.log(`x: ${x}, x1: ${x1}, x2: ${x2}, y: ${y}`);
         //
         //let points = [{x: x, y: 0}, {x: x1, y: y}, {x: x2, y: y}];
         let points = `${x1},0 ${x2},0 ${x},${y}`;
@@ -123,6 +121,17 @@ export default class Timeline{
             ctx.stroke();
             curX += res;//increment by grid line resolution
         }
+        //
+        ctx.lineWidth = 4;
+        var n = 1;
+        this.command.objects.forEach(object => {
+            ctx.strokeStyle = object.color;
+            ctx.beginPath();
+            ctx.moveTo(0, 12 * n);//draw line from bottom to top at current x
+            ctx.lineTo(this.scrW, 12 * n);
+            ctx.stroke();
+            n++;
+        });
     }
     //
     sizeLine(ctx, pos){

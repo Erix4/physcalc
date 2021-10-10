@@ -42,10 +42,14 @@ export default class Object{
         this.field = command.field;
         //
         this.id = command.objects.length;
+        this.toBeDeleted = false;
         //
         this.hue = 35 * this.id;//0 = red
+        this.color = `hsl(${this.hue}, 100%, 50%`;
         //
         this.gravity = command.gravity;
+        //
+        this.lock = false;
         //
         this.status = 0;//motion status, 0 = confirm position, 1 = confirm velocity, 2 = confirm acceleration, 3 = dynamic, 4 = static
         this.vectorMode = 0;//0 is hidden, anything higher corresponds to power
@@ -57,7 +61,7 @@ export default class Object{
         this.ax = 0;
         this.ay = 0;
         //
-        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], `hsl(${this.hue}, 100%, 50%`);
+        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], this.color);
         this.profile.addComp(2, [0], [this.gravity]);
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
@@ -87,7 +91,7 @@ export default class Object{
         //
         this.svg = command.svg;
         //
-        this.self = this.svg.append("circle").style("fill", `hsl(${this.hue}, 100%, 50%`).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7)
+        this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7)
         .attr("r", 20)
         /*.style("visibility", "hidden")*/;
         //
@@ -98,26 +102,39 @@ export default class Object{
     }
     //
     update(){
-        this.px = this.profile.paras[0].calc(this.command.time)[0];
-        this.py = this.profile.paras[0].calc(this.command.time)[1];
+        if(!this.lock){
+            this.px = this.profile.paras[0].calc(this.command.time)[0];
+            this.py = this.profile.paras[0].calc(this.command.time)[1];
+            //
+            this.nets.forEach(net => {
+                net.update();
+            });
+            this.comps.forEach(comp => {
+                comp.forEach(arrow => {
+                    arrow.update();
+                });
+            });
+            this.comps.forEach(comp => {
+                comp.forEach(arrow => {
+                    arrow.update();
+                });
+            });
+        }else{
+            this.profile.setValues(0, this.px, this.py);
+            this.nets.forEach(net => {
+                net.self.update();
+            });
+            this.comps.forEach(comp => {
+                comp.forEach(arrow => {
+                    arrow.self.update();
+                });
+            });
+        }
         //this.vx = this.profile.paras[1].calc(this.command.time)[0];
         //this.vy = this.profile.paras[1].calc(this.command.time)[1];
         this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
-        this.nets.forEach(net => {
-            net.update();
-        });
-        this.comps.forEach(comp => {
-            comp.forEach(arrow => {
-                arrow.update();
-            });
-        });
-        this.comps.forEach(comp => {
-            comp.forEach(arrow => {
-                arrow.update();
-            });
-        });
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
@@ -153,7 +170,7 @@ export default class Object{
     }
     //
     reval(px, py){
-        console.log("Reveling");
+        //console.log("Reveling");
         this.nets[this.vectorMode - 1].reval(px, py);
     }
     reaccel(ax, ay){
@@ -169,6 +186,16 @@ export default class Object{
         this.aComps[0].ey = this.ay * this.arrStr;
         //
         this.command.objUpdate(this);
+    }
+    //
+    toggleLock(){
+        console.log("attempting to lock");
+        this.lock = !this.lock;
+        if(this.lock){
+            this.self.style("fill", "gray");
+        }else{
+            this.self.style("fill", this.color);
+        }
     }
     //
     draw(input){
@@ -200,6 +227,21 @@ export default class Object{
                 arrow.show();
             });
         }
+    }
+    //
+    delete(){
+        this.toBeDeleted = true;
+        //
+        this.self.remove();
+        //
+        this.nets.forEach(net => {
+            net.self.delete();
+        });
+        this.comps.forEach(comp => {
+            comp.self.delete();
+        });
+        //
+        this.command.update();
     }
 }
 
@@ -414,6 +456,13 @@ class Arrow{
         this.tailA.style("visibility", "visible");
         this.tailB.style("visibility", "visible");
         this.head.style("visibility", "visible");
+    }
+    //
+    delete(){
+        this.neck.remove();
+        this.tailA.remove();
+        this.tailB.remove();
+        this.head.remove();
     }
 }
 

@@ -95,16 +95,34 @@ input {
     margin: 3px;
     margin-top: 0;
     margin-bottom: 0;
-    box-shadow: 3px 11px 4px -9px #A5CBC3, 3px 11px 4px -9px #A5CBC3;
+    box-shadow: 0px 10px 0px -7px #A5CBC3, 0px 10px 0px -7px #A5CBC3;
     -webkit-transition: box-shadow 0.3s;
     transition: box-shadow 0.3s;
     background-color: transparent;
     font-family: 'Courier New', Courier, monospace;
     font-weight: 800;
+    font-size: 18px;
+    padding-left: 8px;
+    color: #A5CBC3;
   }
 input:focus {
     outline: none;
     box-shadow: -8px 10px 0px -7px #ff6f59, 8px 10px 0px -7px #ff6f59;
+}
+
+input:-ms-input-placeholder, input::-webkit-input-placeholder{
+    padding: 10px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
 }
 /*#endregion*/
 
@@ -149,7 +167,7 @@ input:focus {
     padding: 0;
     outline: none;
     position: absolute;
-    display: inline-flex;
+    display: flex;
     align-items: center; 
     background-color: #ff6f59;
 }
@@ -163,7 +181,7 @@ input:focus {
 }
 
 #playback{
-    width: 13%;
+    width: 10%;
     left: 45%;
     position: absolute;
     margin-right: 0;
@@ -174,7 +192,7 @@ input:focus {
     position: relative;
     border: none;
     outline: none;
-    width: 25%;
+    width: 20%;
     margin: 0;
     padding: 0;
     height: 100%;
@@ -190,11 +208,17 @@ input:focus {
     background-color: #ff472b;
 }
 
+#stepback{
+    width: 25%;
+    left: 0px;
+}
+
 #backplay{
     transform: scaleX(-1);
     -moz-transform: scaleX(-1);
     -webkit-transform: scaleX(-1);
     -ms-transform: scaleX(-1);
+    width: 25%;
 }
 
 #tcan{
@@ -209,5 +233,4 @@ input:focus {
 i{
     position: relative;
     top: .7px;
-    font-size: 2px;
 }

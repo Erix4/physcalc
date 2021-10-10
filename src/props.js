@@ -85,7 +85,7 @@ export default class Props{
     //
     update(selected){
         this.selected = selected;
-        console.log("updating");
+        //console.log("updating");
         //console.log(selected);
         if(this.selected != null){
             //console.log(this.selected);

@@ -51,14 +51,21 @@ export default class Profile{
         para.draw(this.command, dom[0], dom[1]);//draw the para wherever it's on screen
     }
     //
+    fullSet(x, y){
+        console.log("Full set");
+        for(var n = this.paras.length - 1; n >= 0; n--){
+            this.setValues(n, x, y)
+        }
+    }
+    //
     setValues(power, x, y){
         //console.log(arguments);
         //console.log(`Setting values at power ${power} to (${x.toFixed(2)}, ${y.toFixed(2)})`);
-        console.log(`--1. Set offset at t=${this.command.time} to (${x}, ${y})`);
+        //console.log(`--1. Set offset at t=${this.command.time} to (${x}, ${y})`);
         this.paras[power].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
-        console.log(`Complete, with x:[${this.paras[power].xFunc.getCoefs()}], y:[${this.paras[power].yFunc.getCoefs()}]`);
+        //console.log(`Complete, with x:[${this.paras[power].xFunc.getCoefs()}], y:[${this.paras[power].yFunc.getCoefs()}]`);
         //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
-        console.log(`Current vel: (${this.paras[1].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[1].yFunc.calc(this.command.time.toFixed(2))})`);
+        //console.log(`Current vel: (${this.paras[1].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[1].yFunc.calc(this.command.time.toFixed(2))})`);
         //console.log(`--2. Setting power`);
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());//update components
         //console.log(`Complete, with comp 0 x:[${this.comps[power][0].xFunc.getCoefs()}], y:[${this.comps[power][0].yFunc.getCoefs()}]`);
@@ -340,7 +347,7 @@ export class Para{
             while(yLength < power){
                 this.yFunc.terms.splice(0, 0, new Term(0, yLength));
                 yLength++;
-                console.log(yLength);
+                //console.log(yLength);
             }
             this.yFunc.terms.splice(0, 0, new Term(valy, yLength));
         }

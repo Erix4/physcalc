@@ -1,11 +1,11 @@
 export default class Input{
     constructor(command){
         this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
-        this.velConf = false;//track if velocity is confirmed (or being confirmed)
         var adding = false;//track when add button is pressed
         //
         this.overState = 0;//track what the mouse is over, 0 = field, 1 = header, 2 = left column, 3= timeline
         //
+        this.command = command;
         this.timeline = command.timeline;
         //
         this.selected = command.selected;
@@ -35,9 +35,6 @@ export default class Input{
             switch(event.key){
                 case "a":
                     if(!adding){
-                        if(this.velConf){
-                            //command.updateVectors(this.active, command.vectorMode);
-                        }
                         command.newObject(mX, mY);
                         input.active.repos(mX, mY);
                         adding = true;
@@ -50,11 +47,16 @@ export default class Input{
                     command.retime(-.1);
                     break;
                 case " ":
-                    console.log("Not working");
-                    requestAnimationFrame(command.runTime);
+                    //console.log("Not working");
+                    command.running = !command.running;
+                    window.requestAnimationFrame(command.loopStart);
                     break;
                 case "Backspace":
-                    command.objects.splice(this.active.id, 1);
+                    input.selected.delete();
+                    break;
+                case "l":
+                    input.selected.toggleLock();
+                    break;
             }
         });
         document.addEventListener("keyup", event => {
@@ -63,30 +65,17 @@ export default class Input{
                     adding = false;
                     break;
                 case "v":
-                    if(this.velConf){
-                        if(this.active.vectorMode == 1){
-                            command.updateVectors(this.active, 2);
-                        }else{
-                            command.updateVectors(this.active, 1);
-                        }
-                    }else{
-                        switch(command.vectorMode){
-                            case 2:
-                                command.vectorMode = 0;
-                                break;
-                            default:
-                                command.vectorMode++;
-                                break;
-                        }
-                        command.updateVectors();
+                    switch(command.vectorMode){
+                        case 2:
+                            command.vectorMode = 0;
+                            break;
+                        default:
+                            command.vectorMode++;
+                            break;
                     }
+                    command.updateVectors();
                     break;
                 case "Enter":
-                    if(this.velConf){
-                        this.velConf = false;
-                        //command.updateVectors(this.active, command.vectorMode);
-                        command.update();
-                    }
                     break;
             }
         })
@@ -120,11 +109,7 @@ export default class Input{
                     this.active.repos(emx, emy);
                     break;
                 case 4:
-                    if(this.velConf){
-                        this.active.reval(emx, emy);
-                    }else{
-                        this.active.reval(emx, emy);
-                    }
+                    this.active.reval(emx, emy);
                     break;
                 case 5:
                     //console.log("why");
@@ -148,11 +133,6 @@ export default class Input{
                 this.active.nets[0].self.show();
                 command.update();
             }else{
-                if(this.velConf && (mX - stX) == 0 && (mY - stY) == 0){
-                    command.updateVectors(this.active, command.vectorMode);
-                    this.velConf = false;
-                    command.update();
-                }
                 this.moveState = 0;
             }
         });
@@ -175,6 +155,7 @@ export default class Input{
             }
             input.active = obj;
             input.selected = obj;
+            obj.command.retime(0);
         });
     }
     //
@@ -182,12 +163,8 @@ export default class Input{
         var input = this;
         arrow.self.head.on("mousedown", function(){
             if(input.moveState == 0){
-                if(!input.velConf){
-                    input.active = arrow;
-                    input.moveState = 4;
-                }else if(arrow.obj == input.active){
-                    input.moveState = 4;
-                }
+                input.active = arrow;
+                input.moveState = 4;
             }
         });
     }

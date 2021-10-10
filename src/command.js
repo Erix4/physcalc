@@ -8,7 +8,7 @@ import {Func} from "./func";
 import Timeline from "./time";
 
 export default class Command{
-    constructor(canvas, svg){
+    constructor(loopStart, canvas, svg){
         this.darkMode = true;
         //
         this.canvas = canvas;
@@ -26,9 +26,13 @@ export default class Command{
         this.gravity = -9.81;
         this.time = 0;
         //
+        this.running = false;
+        this.loopStart = loopStart;
+        //
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
         //
         this.selected = null;
+        this.objects = [];
         //
         this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
         console.log(this.time.scrH);
@@ -43,13 +47,14 @@ export default class Command{
         this.a +=1;
         console.log(this.a);
         //
-        this.objects = [];
     }
     //
     update(){//update entire field and redraw canvas
+        this.objects = this.objects.filter(obj => !obj.toBeDeleted);
         this.draw();
         this.move();
         this.timeline.move();
+        this.timeline.draw(this.timeline.ctx);
     }
     //
     move(){
@@ -107,20 +112,10 @@ export default class Command{
         }
     }
     //
-    runTime(timeStamp){
-        let deltaTime = timeStamp - this.lastTime;
-        this.lastTime = timeStamp;
-        //
-        this.retime(deltaTime);
-        //
-        if(this.time < 5){
-            requestAnimationFrame(this.runTime);
-        }
-    }
-    //
     resize(){
         this.grid.resize();
         this.update();
+        this.timeline.calcSize();
     }
     //
     newObject(px, py){
