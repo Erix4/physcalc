@@ -37,11 +37,11 @@ Object capabilities:
 import Profile from "./func";
 
 export default class Object{
-    constructor(command, px, py){
+    constructor(command, id, px, py){
         this.command = command;
         this.field = command.field;
         //
-        this.id = command.objects.length;
+        this.id = id;
         this.toBeDeleted = false;
         //
         this.hue = 35 * this.id;//0 = red
@@ -54,15 +54,24 @@ export default class Object{
         this.status = 0;//motion status, 0 = confirm position, 1 = confirm velocity, 2 = confirm acceleration, 3 = dynamic, 4 = static
         this.vectorMode = 0;//0 is hidden, anything higher corresponds to power
         //
+        this.depth = 2;
+        //
         this.px = this.command.scaleX.invert(px);//current values
         this.py = this.command.scaleY.invert(py);
-        this.vx = 5;
+        this.xS = [];//refactor for expandable values, power ascends (0, 1, 2...)
+        this.yS = [];
+        this.vx = 5;//starting values, not used later
         this.vy = 5;
         this.ax = 0;
         this.ay = 0;
         //
-        this.profile = new Profile(this.command, 2, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], this.color);
+        this.profile = new Profile(this.command, this.depth, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], this.color);
         this.profile.addComp(2, [0], [this.gravity]);
+        //
+        for(var n = 0; n <= this.depth; n++){
+            this.xS.push(this.profile.calc(n, command.time)[0]);
+            this.yS.push(this.profile.calc(n, command.time)[1]);
+        }
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
         this.nets = [];
@@ -92,7 +101,7 @@ export default class Object{
         this.svg = command.svg;
         //
         this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7)
-        .attr("r", 20)
+        .attr("r", 20);
         /*.style("visibility", "hidden")*/;
         //
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
@@ -103,8 +112,12 @@ export default class Object{
     //
     update(){
         if(!this.lock){
-            this.px = this.profile.paras[0].calc(this.command.time)[0];
-            this.py = this.profile.paras[0].calc(this.command.time)[1];
+            this.px = this.profile.calc(0, this.command.time)[0];
+            this.py = this.profile.calc(0, this.command.time)[1];
+            for(var n = 0; n <= this.depth; n++){
+                this.xS[n] = this.profile.calc(n, this.command.time)[0];
+                this.yS[n] = this.profile.calc(n, this.command.time)[1];
+            }
             //
             this.nets.forEach(net => {
                 net.update();
@@ -130,8 +143,6 @@ export default class Object{
                 });
             });
         }
-        //this.vx = this.profile.paras[1].calc(this.command.time)[0];
-        //this.vy = this.profile.paras[1].calc(this.command.time)[1];
         this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
@@ -162,6 +173,20 @@ export default class Object{
         this.command.objUpdate(this);
     }
     //
+    rekey({power, xShift, yShift, xPos, yPos}={}){
+        console.log(xShift);
+        if(xShift != undefined || yShift != undefined){
+            if(xShift == undefined){
+                xShift = 0;
+            }
+            if(yShift == undefined){
+                yShift = 0;
+            }
+        }else{
+            //
+        }
+    }
+    //
     retime(){
         this.px = this.profile.paras[0].calc(this.command.time)[0];
         this.py = this.profile.paras[0].calc(this.command.time)[1];
@@ -172,20 +197,6 @@ export default class Object{
     reval(px, py){
         //console.log("Reveling");
         this.nets[this.vectorMode - 1].reval(px, py);
-    }
-    reaccel(ax, ay){
-        this.ax = this.command.scaleX.invert(ax) / this.arrStr;
-        this.ay = this.command.scaleY.invert(ay) / this.arrStr;
-        this.pFunc = setTerm(2, this.ax / 2, this.ay / 2);
-        this.vFunc = setTerm(1, this.ax, this.ay);
-        this.aFunc = setTerm(0, this.ax, this.ay);
-        //
-        this.aNet.ex = this.ax * this.arrStr;
-        this.aNet.ey = this.ay * this.arrStr;
-        this.aComps[0].ex = this.ax * this.arrStr;
-        this.aComps[0].ey = this.ay * this.arrStr;
-        //
-        this.command.objUpdate(this);
     }
     //
     toggleLock(){
@@ -238,10 +249,13 @@ export default class Object{
             net.self.delete();
         });
         this.comps.forEach(comp => {
-            comp.self.delete();
+            comp.forEach(c => {
+                c.self.delete();
+            });
         });
         //
         this.command.update();
+        this.command.select();
     }
 }
 
@@ -337,7 +351,7 @@ class compArrow{
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         //
         this.profile.setCompVal(this.depth, this.idx, x, y);
-        this.command.draw();
+        this.command.objUpdate(this.obj);
         this.obj.update();
     }
     //

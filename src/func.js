@@ -250,6 +250,10 @@ export default class Profile{
             //console.log("current at 0: " + current.yFunc.terms[0].coef);
         }
     }
+    //
+    calc(power, time){
+        return this.paras[power].calc(time);
+    }
 }
 
 export class Para{
