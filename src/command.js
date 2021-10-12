@@ -36,7 +36,7 @@ export default class Command{
         this.selected = null;
         this.objects = [];
         //
-        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 300);
+        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
         console.log(this.time.scrH);
         //
         this.input = new Input(this);
@@ -49,8 +49,6 @@ export default class Command{
         this.a +=1;
         console.log(this.a);
         //
-        this.sel = this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", 4).style("stroke-opacity", .6)
-        .attr("r", 25).style("visibility", "hidden");
         this.sels = [];
         this.selObs = [];
     }
@@ -68,8 +66,10 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.update();
         });
-        this.select(this.input.selected);
-        //console.log(this.selected);
+        this.sels.forEach((sel, idx) => {
+            sel.attr("cx", this.scaleX(this.selObs[idx].px))
+            sel.attr("cy", this.scaleY(this.selObs[idx].py));
+        });
     }
     //
     draw(){//redraw canvas
@@ -107,16 +107,17 @@ export default class Command{
     repos(px, py){
         this.grid.repos(px, py);
         this.update();
-        this.selObs.forEach(obj => {
-            //
-        })
         this.props.update(this.selected);
     }
     //
-    reposObj(px, py){
+    shiftObj(cx, cy){
+        var n = 0;
         this.selObs.forEach(obj => {
-            console.log("Calling repos");
-            obj.repos(px, py);
+            //console.log("Calling repos");
+            obj.rekey({power: 0, xShift: cx, yShift: cy});
+            if(n == 0){
+                //this.sel.attr("cx", )
+            }
         });
         this.update();
         this.props.update(this.selected);
@@ -144,35 +145,64 @@ export default class Command{
         this.selObs.push(this.input.active);
         this.objects.push(this.input.active);
         this.idCount++;
-        this.sel.raise();
+        this.select(this.selected);
         this.selected.self.raise();
     }
     //
     select(obj){
         if(arguments.length == 0 || obj == null){
-            this.sel.style("visibility", "hidden");
             this.sels.forEach(sell => {
                 sell.remove();
-                this.sels.slice(0, 1);
             });
+            this.sels = [];
             console.log("hiding");
         }else if(!this.input.shifting){
-            this.sel.style("visibility", "visible")
-                    .attr("cx", this.scaleX(obj.px))
-                    .attr("cy", this.scaleY(obj.py));
-            this.selObs = [obj];
             this.sels.forEach(sell => {
                 sell.remove();
-                this.sels.slice(0, 1);
             });
+            this.sels = [this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", 4).style("stroke-opacity", .6)
+                    .attr("r", 25)
+                    .attr("cx", this.scaleX(obj.px))
+                    .attr("cy", this.scaleY(obj.py))];
+            this.selObs = [obj];
+            obj.self.raise();
         }
     }
     //
     shiftSelect(obj){
-        this.sels.push(this.svg.append("circle").style("stroke", "#47d7ff").style("stroke-width", 4).style("fill", "transparent").style("stroke-opacity", .6)
-                        .attr("r", 25).style("visibility", "visible")
-                        .attr("cx", this.scaleX(obj.px))
-                        .attr("cy", this.scaleY(obj.py)));
-        this.selObs.push(obj);
+        if(this.selObs.includes(obj)){//object has already been selected
+            var idx = this.selObs.indexOf(obj);
+            if(idx == 0 && this.sels.length > 1){//object is main select but there are other selects
+                this.selObs.splice(idx, 1);//remove select
+                this.sels[idx].remove();
+                this.sels.splice(idx, 1);
+                this.sels[0].style("stroke", "#47a3ff");
+            }else if(idx == 0){//object is main select and there are no other selects
+                this.select();//deselect all
+            }else{//object is misc. select
+                console.log(this.selObs);
+                console.log(this.sels);
+                console.log(idx);
+                this.selObs.splice(idx, 1);//remove select
+                this.sels[idx].remove();
+                this.sels.splice(idx, 1);
+            }
+        }else{//object had not been selected
+            this.sels.push(this.svg.append("circle").style("stroke", "#47d7ff").style("stroke-width", 4).style("fill", "transparent").style("stroke-opacity", .6)
+                            .attr("r", 25)
+                            .attr("cx", this.scaleX(obj.px))
+                            .attr("cy", this.scaleY(obj.py)));
+            this.selObs.push(obj);
+        }
+        obj.self.raise();
+    }
+    //
+    mainSelect(obj){//change which object is main (and whose props are displayed)
+        var idx = this.selObs.indexOf(obj);
+        this.selObs.splice(0, 0, this.selObs.splice(idx, 1)[0]);
+        this.sels.splice(0, 0, this.sels.splice(idx, 1)[0]);
+        //
+        this.sels[0].style("stroke", "#47a3ff");
+        this.sels[1].style("stroke", "#47d7ff");
     }
 }

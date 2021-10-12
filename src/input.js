@@ -3,6 +3,7 @@ export default class Input{
         this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
         var adding = false;//track when add button is pressed
         this.shifting = false;
+        this.dragging = false;//track is mouse is being dragged
         //
         this.overState = 0;//track what the mouse is over, 0 = field, 1 = header, 2 = left column, 3= timeline
         //
@@ -66,7 +67,10 @@ export default class Input{
                     break;
                 case "Backspace":
                     if(!this.propsState){
-                        input.selected.delete();
+                        this.command.selObs.forEach(obj => {
+                            obj.delete();
+                        });
+                        this.command.select();
                     }
                     break;
                 case "l":
@@ -131,7 +135,7 @@ export default class Input{
                     command.repos(emx - mX, emy - mY);
                     break;
                 case 2:
-                    this.command.reposObj(emx, emy);
+                    this.command.shiftObj(emx - mX, emy - mY);
                     break;
                 case 3: 
                     this.active.repos(emx, emy);
@@ -162,13 +166,19 @@ export default class Input{
                 //this.active.nets[0].self.show();
                 command.update();
             }else{
-                console.log(`mx: ${mX}, stX: ${stX}`);
-                if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState != 2){//click, no movement (y start has to be rounded for some reason)
+                if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState == 1){//click on grid, no movement (y start has to be rounded for some reason)
                     console.log("trying to hide");
-                    command.select();
+                    command.select();//deselect all
                     this.active = null;
+                    this.selected = null;
+                }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState == 2 && !this.shifting){//click on object no movement
+                    input.command.select(this.selected);
+                    this.selected.self.raise();
+                }else if(input.moveState == 2){
+                    this.selected.self.raise();
                 }
                 this.moveState = 0;
+                console.log(this.command.selObs);
             }
         });
         //
@@ -184,21 +194,23 @@ export default class Input{
     //
     newObject(obj){
         var input = this;
-        console.log("object clicked");
-        obj.self.on("mousedown", function(){
-            if(input.moveState == 0){
-                input.moveState = 2;
-            }
+        //console.log("object clicked");
+        obj.self.on("mousedown", function(){//when object clicked
+            input.moveState = 2;
             input.active = obj;
             input.selected = obj;
+            //console.log(input.command.selObs);
             obj.command.retime(0);
-            if(input.shifting){
-                console.log("Shifting");
+            //console.log(input.command.selObs);
+            if(input.shifting){//shift key is pressed
+                //console.log("Shifting");
                 input.command.shiftSelect(obj);
-                obj.self.raise();
-            }else{
+            }else if(input.command.selObs.length == 1){//only one object selected
                 input.command.select(obj);
-                obj.self.raise();
+                //console.log("Raising");
+            }else{//multiple objects selected
+                input.command.mainSelect(obj);
+                //console.log("Remaining");
             }
         });
     }

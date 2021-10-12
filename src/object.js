@@ -174,7 +174,7 @@ export default class Object{
     }
     //
     rekey({power, xShift, yShift, xPos, yPos}={}){
-        console.log(xShift);
+        //console.log(xShift);
         if(xShift != undefined || yShift != undefined){
             if(xShift == undefined){
                 xShift = 0;
@@ -182,9 +182,20 @@ export default class Object{
             if(yShift == undefined){
                 yShift = 0;
             }
+            xPos = this.command.scaleX(this.px) + xShift;
+            yPos = this.command.scaleY(this.py) + yShift
         }else{
-            //
+            if(xPos == undefined){
+                xPos = this.command.scaleX(this.px);
+            }
+            if(yPos == undefined){
+                yPos = this.command.scaleY(this.py);
+            }
         }
+        //
+        this.px = this.command.scaleX.invert(xPos);
+        this.py = this.command.scaleY.invert(yPos);
+        this.profile.setValues(power, this.px, this.py);
     }
     //
     retime(){
