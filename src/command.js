@@ -57,8 +57,6 @@ export default class Command{
         this.objects = this.objects.filter(obj => !obj.toBeDeleted);
         this.draw();
         this.move();
-        this.timeline.move();
-        this.timeline.draw(this.timeline.ctx);
     }
     //
     move(){
@@ -70,6 +68,7 @@ export default class Command{
             sel.attr("cx", this.scaleX(this.selObs[idx].px))
             sel.attr("cy", this.scaleY(this.selObs[idx].py));
         });
+        this.timeline.move();
     }
     //
     draw(){//redraw canvas
@@ -77,6 +76,8 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        this.timeline.draw();
+        this.timeline.move();
     }
     //
     objUpdate(obj, inputMode){
@@ -120,6 +121,7 @@ export default class Command{
             }
         });
         this.update();
+        this.timeline.draw();
         this.props.update(this.selected);
     }
     //
@@ -127,9 +129,12 @@ export default class Command{
         this.time += dt;
         this.update();
         this.props.update(this.selected);
-        if(arguments.length < 2 || !inputMode){
+        if(arguments.length < 2 || !inputMode){//time directly set
             this.props.retime();
         }
+    }
+    setTime(time, inputMode = false){//same thing, just set instead of shift
+        this.retime(time - this.time, inputMode);
     }
     //
     resize(){

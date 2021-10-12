@@ -74,7 +74,9 @@ export default class Input{
                     }
                     break;
                 case "l":
-                    input.selected.toggleLock();
+                    this.command.selObs.forEach(obj => {
+                        obj.toggleLock();
+                    })
                     break;
                 case "Enter":
                     if(this.propsState){
@@ -147,6 +149,11 @@ export default class Input{
                     command.time = command.timeline.timeX.invert(event.clientX);
                     command.retime(0);
                     break;
+                case 6:
+                    command.time = command.timeline.timeX.invert(event.clientX);
+                    console.log(this.selected);
+                    this.selected.slideTime();
+                    break;
                 default:
                     break;
             }
@@ -175,18 +182,38 @@ export default class Input{
                     this.selected.self.raise();
                 }
                 this.moveState = 0;
-                console.log(this.command.selObs);
+                //console.log(this.command.selObs);
             }
         });
         //
         this.timeline.svg.on("mousedown", function(){
-            input.moveState = 5;
-            command.time = command.timeline.timeX.invert(d3.mouse(this)[0]);
-            command.retime(0);
-            input.propsState = false;
-            console.log("huh");
+            if(input.moveState == 0){
+                input.moveState = 5;
+                command.time = command.timeline.timeX.invert(d3.mouse(this)[0]);
+                command.retime(0);
+                input.propsState = false;
+                console.log("huh");
+            }
         });
         //
+    }
+    //
+    newPoint(point){
+        var input = this;
+        point.on("mousedown", function(){
+            input.command.setTime(parseFloat(point.attr("val")));
+            input.moveState = 6;
+            //
+            console.log(point.attr("ob"));
+            let idx = input.command.objects.indexOf(obj => obj.id == parseInt(point.attr("ob")));
+            console.log(`idx: ${idx}`);
+            input.selected = input.command.objects[idx];
+            console.log("Going to time");
+        });
+    }
+    //
+    removePoint(point){
+        point.on("mousedown", null);
     }
     //
     newObject(obj){

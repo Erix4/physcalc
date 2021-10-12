@@ -68,6 +68,9 @@ export default class Object{
         this.profile = new Profile(this.command, this.depth, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], this.color);
         this.profile.addComp(2, [0], [this.gravity]);
         //
+        this.extremes = [];
+        this.points = [];//svg points that illustrate extremes
+        //
         for(var n = 0; n <= this.depth; n++){
             this.xS.push(this.profile.calc(n, command.time)[0]);
             this.yS.push(this.profile.calc(n, command.time)[1]);
@@ -133,15 +136,7 @@ export default class Object{
                 });
             });
         }else{
-            this.profile.setValues(0, this.px, this.py);
-            this.nets.forEach(net => {
-                net.self.update();
-            });
-            this.comps.forEach(comp => {
-                comp.forEach(arrow => {
-                    arrow.self.update();
-                });
-            });
+            this.slideTime();
         }
         this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
@@ -163,6 +158,19 @@ export default class Object{
                 //nothing
                 break;
         }
+        //
+    }
+    //
+    slideTime(){
+        this.profile.setValues(0, this.px, this.py);
+        this.nets.forEach(net => {
+            net.self.update();
+        });
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.self.update();
+            });
+        });
     }
     //
     repos(px, py){
@@ -221,14 +229,44 @@ export default class Object{
     }
     //
     draw(input){
+        this.extremes = this.profile.getExtremes();
         if((input.velConf || input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
-            this.profile.draw(0, 1000);
+            this.profile.draw(0, 500);
+            this.movePoints();
+            //this.profile.drawPoints(this.extremes);
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
-            this.profile.draw(0, 1000);
+            this.profile.draw(0, 500);
+            this.movePoints();
+            //this.profile.drawPoints(this.extremes);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
+        }
+    }
+    //
+    movePoints(){
+        //let idx = this.command.objects.indexOf(this);
+        var n;
+        for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+            this.points[n].attr("val", this.extremes[n])
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+        }
+        while(this.points.length < this.extremes.length){//add points until there are the same name number
+            this.points.push(this.svg.append("circle").style("fill", this.color)
+                .attr("r", 6)
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
+                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
+            this.points[n].lower();
+            n++;
+            //this.command.input.newPoint(this.points[this.points.length - 1]);
+        }
+        while(this.points.length > this.extremes.length){
+            this.points[this.points.length - 1].remove();
+            //this.command.input.removePoint(this.points[idx][this.points[idx].length - 1]);
+            this.points.pop();
+            console.log("Removing circle");
         }
     }
     //

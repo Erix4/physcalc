@@ -138,6 +138,23 @@ export default class Profile{
         }
     }
     //
+    getExtremes(){
+        var exts = [];
+        //
+        this.paras.forEach(para => {
+            exts.push(...para.xFunc.calcRoots());
+            exts.push(...para.yFunc.calcRoots());
+        });
+        //
+        return exts;
+    }
+    //
+    drawPoints(points){
+        points.forEach(point => {
+            this.paras[0].drawPoint(this.command, point);
+        });
+    }
+    //
     setOrigin(power){
         if(arguments.length > 0){
             this.paras[power].xFunc.origin = this.command.time;
@@ -383,6 +400,16 @@ export class Para{
             lp = np;
             t += loop;
         }
+    }
+    //
+    drawPoint(command, val){
+        let ctx = command.ctx;
+        let lp = this.calc(val);
+        //
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(command.scaleX(lp[0]), command.scaleY(lp[1]), 5, 0, 2 * Math.PI);
+        ctx.fill();
     }
 }
 

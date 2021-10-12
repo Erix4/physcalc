@@ -16,7 +16,7 @@ export default class Props{
         this.accely = d3.select("#accely");
         //
         this.t.on("input", function(){
-            command.retime(this.value - command.time, true);
+            command.setTime(this.value, true);
         });
         //
         var self = this;
@@ -32,17 +32,21 @@ export default class Props{
             //console.log(this.selected);
             //
             this.head.text(`Object: ${this.selected.id + 1}`);
-            this.posx.property("value", this.selected.xS[0]);
-            this.posy.property("value", this.selected.yS[0]);
-            this.velx.property("value", this.selected.xS[1]);
-            this.vely.property("value", this.selected.yS[1]);
-            this.accelx.property("value", this.selected.xS[2]);
-            this.accely.property("value", this.selected.yS[2]);
+            this.posx.property("value", this.selected.xS[0].toFixed(3));
+            this.posy.property("value", this.selected.yS[0].toFixed(3));
+            this.velx.property("value", this.selected.xS[1].toFixed(3));
+            this.vely.property("value", this.selected.yS[1].toFixed(3));
+            this.accelx.property("value", this.selected.xS[2].toFixed(3));
+            this.accely.property("value", this.selected.yS[2].toFixed(3));
+            //
+            var x1Str = "\\(x(t) = " + (this.selected.xS[2] / 2).toFixed(3) + "t^2" + "\\)";
+            d3.select("#testeq").text(x1Str);
+            //MathJax.Hub.Queue(["Typeset", MathJax.Hub, 'demo']);
         }
     }
     //
     retime(){
-        this.t.property("value", this.command.time.toFixed(1));
+        this.t.property("value", this.command.time.toFixed(3));
     }
     //
     newObj(){

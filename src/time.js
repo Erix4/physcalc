@@ -26,6 +26,8 @@ export default class Timeline{
         this.gridMin = this.getGridRes() / 2;//minimum distance between grid lines (pixels)
         this.gridMax = this.getGridRes() * 2;//minimum distance between grid lines (pixels)
         //
+        this.timePoints = [];
+        //
         this.draw(this.ctx);
         //
         this.cursor = this.svg.append("line").style("stroke", "#47a3ff").style("stroke-width", 4);
@@ -85,7 +87,6 @@ export default class Timeline{
         //
         let y = this.triSize / 2 * Math.sqrt(2);
         //
-        //let points = [{x: x, y: 0}, {x: x1, y: y}, {x: x2, y: y}];
         let points = `${x1},0 ${x2},0 ${x},${y}`;
         this.tri.attr("points", points);
         this.cursor
@@ -93,16 +94,45 @@ export default class Timeline{
             .attr("y1", 0)
             .attr("x2", this.timeX(this.command.time))
             .attr("y2", this.scrH);
-        /*this.tri.data([points])
-        .enter().append("polygon")
-          .attr("points",function(d) { 
-              return d.map(function(d) {
-                  return [d.x,d.y].join(",");
-              }).join(" ");
-          });*/
+        //
+        this.command.objects.forEach((obj, idx) => {
+            if(idx < this.timePoints.length){//object has already been pointed
+                var n;
+                for(n = 0; n < this.timePoints[idx].length && n < obj.extremes.length; n++){//set position for every point that already exists
+                    this.timePoints[idx][n].attr("val", obj.extremes[n])
+                        .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels
+                        .attr("cy", 12 * idx + 12);//height from top depends on object index
+                }
+                while(this.timePoints[idx].length < obj.extremes.length){//add points until there are the same name number
+                    this.timePoints[idx].push(this.svg.append("circle").style("fill", obj.color).attr("val", obj.extremes[n]).attr("ob", obj.id)
+                    .attr("r", 5)
+                    .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels
+                    .attr("cy", 12 * idx + 12));//height from top depends on object index
+                    n++;
+                    this.command.input.newPoint(this.timePoints[idx][this.timePoints[idx].length - 1]);
+                }
+                while(this.timePoints[idx].length > obj.extremes.length){
+                    this.timePoints[idx][this.timePoints[idx].length - 1].remove();
+                    this.command.input.removePoint(this.timePoints[idx][this.timePoints[idx].length - 1]);
+                    this.timePoints[idx].pop();
+                    console.log("Removing circle");
+                }
+            }else{//object has not yet been pointed
+                var objPoints = [];
+                obj.extremes.forEach(extr => {
+                    objPoints.push(this.svg.append("circle").style("fill", obj.color).attr("val", extr).attr("ob", obj.id)
+                    .attr("r", 5)
+                    .attr("cx", this.timeX(extr))//convert time of extreme to x in pixels
+                    .attr("cy", 12 * idx + 12));
+                    this.command.input.newPoint(objPoints[objPoints.length - 1]);
+                });
+                this.timePoints.push(objPoints);
+            }
+        });
     }
     //
-    draw(ctx){
+    draw(){
+        var ctx = this.ctx;
         ctx.clearRect(0, 0, this.scrW, this.scrH);
         //
         let res = this.res;
@@ -126,10 +156,18 @@ export default class Timeline{
         var n = 1;
         this.command.objects.forEach(object => {
             ctx.strokeStyle = object.color;
+            ctx.fillStyle = object.color;
             ctx.beginPath();
-            ctx.moveTo(0, 12 * n);//draw line from bottom to top at current x
+            ctx.moveTo(0, 12 * n);
             ctx.lineTo(this.scrW, 12 * n);
             ctx.stroke();
+            //
+            /*object.extremes.forEach(extr => {
+                ctx.beginPath();
+                ctx.arc(this.timeX(extr), 12 * n, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            });*/
+            //
             n++;
         });
     }
