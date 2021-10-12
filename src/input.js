@@ -113,7 +113,6 @@ export default class Input{
         //
         command.svg.on("mousedown", function(){
             let mouse = d3.mouse(this);
-            console.log(input.moveState);
             input.propsState = false;
             //
             if(input.moveState == 0){
@@ -158,12 +157,10 @@ export default class Input{
         });
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
-            if(this.moveState == 3){
+            if(this.moveState == 3){//position had been confirmed
                 command.vectorMode = 1;
                 command.updateVectors();
                 this.moveState = 0;
-                //input.velConf = true;
-                //this.active.nets[0].self.show();
                 command.update();
             }else{
                 if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState == 1){//click on grid, no movement (y start has to be rounded for some reason)
@@ -196,12 +193,12 @@ export default class Input{
         var input = this;
         //console.log("object clicked");
         obj.self.on("mousedown", function(){//when object clicked
-            input.moveState = 2;
+            if(input.moveState == 0){//this is here for a reason, idiot
+                input.moveState = 2;
+            }
             input.active = obj;
             input.selected = obj;
-            //console.log(input.command.selObs);
             obj.command.retime(0);
-            //console.log(input.command.selObs);
             if(input.shifting){//shift key is pressed
                 //console.log("Shifting");
                 input.command.shiftSelect(obj);
