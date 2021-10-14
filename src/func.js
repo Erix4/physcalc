@@ -597,13 +597,17 @@ export class Func{
         //
         //REDO the ordering section to favor non-zero times first
         //for every input in inputs, [value, power, time]
-        var powerSets = [];//lists of inputs with the same power, like [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
-        for(var n = 0; n <= len; n++){
+        var powerSets = [];//lists of inputs with the same power, but times != 0 first, like [[#, #, 1]], [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
+        for(var n = 0; n <= len + 1; n++){
             powerSets.push([]);//cannot be done all at once because fill populates it with an identical reference list
         }
         //
         inputs.forEach(input => {//reorder inputs in power sets with descending power
-            powerSets[len - input[1]].push(input);
+            if(input[2] != 0){
+                powerSets[0].push(input);
+            }else{
+                powerSets[len - input[1] + 1].push(input);
+            }
         });
         //
         let orderedInputs = [];//list of inputs in order (ready to be converted to matrix)
@@ -648,13 +652,19 @@ export class Func{
                     L[i][j] = U[i][j] / U[j][j];
                 }
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
+                console.log(U.slice());
             }
         }
         //
         console.log(L);
         console.log(U);
-        console.log("Check:");
-        console.log(multMatricis(L, U));//verified
+        //console.log("Check:");
+        //console.log(multMatricis(L, U));//verified
+        if(checkEqual(multMatricis(L, U), A)){
+            console.log("CONFIRMED");
+        }else{
+            console.log("INCORRECT");
+        }
         //
         //solve for Y temporary values
         var Y = [orderedInputs[0][0] / L[0][0]];
@@ -700,6 +710,17 @@ function multMatricis(A, B){//assumes square matricies of the same size
         P.push(newRow);
     }
     return P;
+}
+
+function checkEqual(A, B){
+    A.forEach((row, i) => {
+        row.forEach((val, j) => {
+            if(val != B[i][j]){
+                return false;
+            }
+        });
+    });
+    return true;
 }
 
 function genDerMults(len, power, i){//length of matrix, power of input, and index of value in matrix
