@@ -151,8 +151,8 @@ export default class Input{
                     break;
                 case 6:
                     command.time = command.timeline.timeX.invert(event.clientX);
-                    console.log(this.selected);
                     this.selected.slideTime();
+                    command.update();
                     break;
                 default:
                     break;
@@ -203,17 +203,45 @@ export default class Input{
         point.on("mousedown", function(){
             input.command.setTime(parseFloat(point.attr("val")));
             input.moveState = 6;
-            //
-            console.log(point.attr("ob"));
-            let idx = input.command.objects.indexOf(obj => obj.id == parseInt(point.attr("ob")));
+            let id = parseInt(point.attr("ob"))
+            console.log(id);
+            let idx = input.command.objects.findIndex(obj => obj.id == id);
             console.log(`idx: ${idx}`);
             input.selected = input.command.objects[idx];
             console.log("Going to time");
         });
+        //
+        point.on("mouseenter", function(){
+            point.attr("r", 6);
+        });
+        //
+        point.on("mouseleave", function(){
+            point.attr("r", 5);
+        });
     }
     //
-    removePoint(point){
-        point.on("mousedown", null);
+    newObjPoint(point){
+        var input = this;
+        let color = point.style("fill");
+        var selected = false;
+        point.on("mouseenter", function(){
+            point.attr("r", 7);
+        });
+        //
+        point.on("mouseleave", function(){
+            point.attr("r", 6);
+        });
+        //
+        point.on("mousedown", function(){
+            if(selected){
+                point.style("fill", color);
+            }else{
+                point.style("fill", "white");
+            }
+            selected = !selected;
+            input.moveState = 2;
+            input.command.timeline.move();
+        })
     }
     //
     newObject(obj){

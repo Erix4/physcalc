@@ -249,7 +249,7 @@ export default class Object{
         //let idx = this.command.objects.indexOf(this);
         var n;
         for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
-            this.points[n].attr("val", this.extremes[n])
+            this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                 .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
                 .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
         }
@@ -260,6 +260,7 @@ export default class Object{
                 .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
             this.points[n].lower();
             n++;
+            this.command.input.newObjPoint(this.points[this.points.length - 1]);
             //this.command.input.newPoint(this.points[this.points.length - 1]);
         }
         while(this.points.length > this.extremes.length){

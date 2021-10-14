@@ -99,12 +99,12 @@ export default class Timeline{
             if(idx < this.timePoints.length){//object has already been pointed
                 var n;
                 for(n = 0; n < this.timePoints[idx].length && n < obj.extremes.length; n++){//set position for every point that already exists
-                    this.timePoints[idx][n].attr("val", obj.extremes[n])
+                    this.timePoints[idx][n].attr("val", obj.extremes[n]).style("fill", obj.points[n].style("fill"))
                         .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels
                         .attr("cy", 12 * idx + 12);//height from top depends on object index
                 }
                 while(this.timePoints[idx].length < obj.extremes.length){//add points until there are the same name number
-                    this.timePoints[idx].push(this.svg.append("circle").style("fill", obj.color).attr("val", obj.extremes[n]).attr("ob", obj.id)
+                    this.timePoints[idx].push(this.svg.append("circle").style("fill", obj.points[n].style("fill")).attr("val", obj.extremes[n]).attr("ob", obj.id)
                     .attr("r", 5)
                     .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels
                     .attr("cy", 12 * idx + 12));//height from top depends on object index
@@ -113,14 +113,13 @@ export default class Timeline{
                 }
                 while(this.timePoints[idx].length > obj.extremes.length){
                     this.timePoints[idx][this.timePoints[idx].length - 1].remove();
-                    this.command.input.removePoint(this.timePoints[idx][this.timePoints[idx].length - 1]);
                     this.timePoints[idx].pop();
                     console.log("Removing circle");
                 }
             }else{//object has not yet been pointed
                 var objPoints = [];
-                obj.extremes.forEach(extr => {
-                    objPoints.push(this.svg.append("circle").style("fill", obj.color).attr("val", extr).attr("ob", obj.id)
+                obj.extremes.forEach((extr, n) => {
+                    objPoints.push(this.svg.append("circle").style("fill", obj.points[n].style("fill")).attr("val", extr).attr("ob", obj.id)
                     .attr("r", 5)
                     .attr("cx", this.timeX(extr))//convert time of extreme to x in pixels
                     .attr("cy", 12 * idx + 12));
