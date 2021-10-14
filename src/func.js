@@ -595,6 +595,7 @@ export class Func{
         //size of input list is number of inputs and size of matrix
         let len = inputs.length - 1;
         //
+        //REDO the ordering section to favor non-zero times first
         //for every input in inputs, [value, power, time]
         var powerSets = [];//lists of inputs with the same power, like [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
         for(var n = 0; n <= len; n++){
@@ -641,7 +642,11 @@ export class Func{
         //
         for(var i = 1; i <= len; i++){//i is row index (I know it's flipped, I did it by accident and can't change it)
             for(var j = 0; j < i; j++){
-                L[i][j] = U[i][j] / U[j][j];
+                if(U[j][j] == 0){
+                    L[i][j] = 0;
+                }else{
+                    L[i][j] = U[i][j] / U[j][j];
+                }
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
             }
         }
