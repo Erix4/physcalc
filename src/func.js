@@ -651,23 +651,33 @@ export class Func{
         //
         for(var i = 1; i <= len; i++){//i is row index (I know it's flipped, I did it by accident and can't change it)
             for(var j = 0; j < i; j++){
-                let mult = U[i][j] / U[j][j];
+                let mult;
+                if(U[j][j] == 0){
+                    mult = 0;
+                }else{
+                    mult = U[i][j] / U[j][j];
+                }
                 if(j < len){
                     var c = 0
-                    while(U[i][j + 1] == (mult * U[j][j + 1]) && c < len){
+                    while(U[i][j + 1] == (mult * U[j][j]) && c < len){
+                        console.log(`RO bc ${U[i][j + 1]} == ${(mult * U[j][j])}, ${mult} * ${U[j][j]}`);
+                        console.log(`Evaluates ${U[i][j + 1] == (mult * U[j][j])}`);
                         U.push(...U.splice(i, 1));
                         orderedInputs.push(...orderedInputs.splice(i, 1));
+                        //
+                        if(U[j][j] == 0){
+                            mult = 0;
+                        }else{
+                            mult = U[i][j] / U[j][j];
+                        }
+                        //
                         c++;
                     }
                     if(c == len){
                         console.log("Reorder failed");
                     }
                 }
-                //if(U[j][j] == 0){
-                    //L[i][j] = 0;
-                //}else{
-                    L[i][j] = mult;
-                //}
+                L[i][j] = mult;
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
                 console.log(U.slice());
             }
