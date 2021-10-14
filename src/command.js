@@ -51,6 +51,10 @@ export default class Command{
         //
         this.sels = [];
         this.selObs = [];
+        //
+        this.func = new Func(1, [1, 1]);
+        //
+        this.func.matrixCalc([[62, 0, -2], [4, 0, 0], [6, 2, 0], [-54, 2, 2]]);
     }
     //
     update(){//update entire field and redraw canvas

@@ -274,7 +274,7 @@ export default class Profile{
 }
 
 export class Para{
-    constructor(time, steps, xCoefs, yCoefs, color){
+    constructor(time, steps, xCoefs, yCoefs, color = "white"){
         this.steps = steps;
         //
         this.color = "red";
@@ -590,9 +590,172 @@ export class Func{
             4. Adjust position for lines
         */
     }
+    //
+    matrixCalc(inputs){
+        //size of input list is number of inputs and size of matrix
+        let len = inputs.length - 1;
+        //
+        //for every input in inputs, [value, power, time]
+        var powerSets = [];//lists of inputs with the same power, like [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
+        for(var n = 0; n <= len; n++){
+            powerSets.push([]);//cannot be done all at once because fill populates it with an identical reference list
+        }
+        //
+        inputs.forEach(input => {//reorder inputs in power sets with descending power
+            powerSets[len - input[1]].push(input);
+        });
+        //
+        let orderedInputs = [];//list of inputs in order (ready to be converted to matrix)
+        powerSets.forEach(set => {//make sure each set is order correctly
+            if(set.length > 0 && set[0][2] == 0){//if first value in power set is set at time 0
+                let len1 = set.length - 1;
+                set.splice(len1, 0, ...set.splice(0, 1));//reposition the value to the last in the set
+            }
+            orderedInputs.push(...set);
+        });
+        //
+        console.log(orderedInputs);
+        //
+        var A = [];
+        orderedInputs.forEach(input => {//for each input (j is index), add a new row to the matrix
+            var row = [];
+            for(var i = 0; i <= len; i++){
+                if(len - input[1] - i > 0){//make sure not taking 0 to a negative power
+                    row.push(genDerMults(len, input[1], i) * Math.pow(input[2], len - input[1] - i));
+                }else{
+                    row.push(genDerMults(len, input[1], i));
+                }
+                console.log(`Pushed ${row[row.length - 1]} from ${genDerMults(len, input[1], i)} * ${Math.pow(input[2], len - input[1] - i)}`);
+            }
+            A.push(row);
+        });
+        //
+        console.log(A.slice());
+        //LU Decompositon
+        var U = A.slice();//set upper triangular matrix equal to current matrix
+        var L = [];
+        for(var n = 0; n <= len; n++){//set lower matrix to default values
+            L.push(Array(len + 1).fill(0));//fill row with 0s
+            L[n][n] = 1;//set diagonal to 1
+        }
+        //
+        for(var i = 1; i <= len; i++){//i is row index (I know it's flipped, I did it by accident and can't change it)
+            for(var j = 0; j < i; j++){
+                L[i][j] = U[i][j] / U[j][j];
+                U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
+            }
+        }
+        //
+        console.log(L);
+        console.log(U);
+        console.log("Check:");
+        console.log(multMatricis(L, U));//verified
+        //
+        //solve for Y temporary values
+        var Y = [orderedInputs[0][0] / L[0][0]];
+        for(var i = 1; i <= len; i++){
+            Y.push(calcRowSolLower(orderedInputs[i][0], L, i, Y));
+            console.log(Y[Y.length - 1]);
+        }
+        console.log(Y);
+        //solve for solutions (X)
+        var X = [Y[len] / U[len][len]];
+        for(var i = len - 1; i >= 0; i--){
+            X.splice(0, 0 , calcRowSolUpper(Y[i], U, i, X));
+        }
+        console.log("Solutions: ");
+        console.log(X);
+        //
+        console.log("Check:");
+        orderedInputs.forEach((input, i) => {
+            console.log(`Equation ${i} should be ${input[0]}`);
+            var build = A[i][0] * X[0];
+            var total = A[i][0] * X[0];
+            for(var j = 1; j <= len; j++){
+                build += " + " + A[i][j] * X[j];
+                total += A[i][j] * X[j];
+            }
+            console.log(`Evaluates to ${total} from ${build}`);
+        });
+    }
 }
 
+function multMatricis(A, B){//assumes square matricies of the same size
+    let len = A.length - 1;
+    var P = [];
+    for(var i = 0; i <= len; i++){//row loop
+        var newRow = [];
+        for(var j = 0; j <= len; j++){//column loop
+            var sum = 0;
+            for(var n = 0; n <= len; n++){
+                sum += A[i][n] * B[n][j];
+            }
+            newRow.push(sum);
+        }
+        P.push(newRow);
+    }
+    return P;
+}
 
+function genDerMults(len, power, i){//length of matrix, power of input, and index of value in matrix
+    if(len - i < power){
+        return 0;//derivative is too high, term must be 0
+    }else{
+        return factorial(len - i, power);//basically (num - i)!/(num - power - i)!
+    }
+}
+
+function subRow(row1, row2, mult){
+    var newRow = [];
+    row1.forEach((val, n) => {
+        newRow.push(val - mult * row2[n]);
+    });
+    return newRow;
+}
+
+function calcRowSolution(input, sumList, idx, start, end, solutions){
+    var sum = 0;
+    for(var i = start; i <= end; i++){
+        console.log(`Adding sum ${sumList[idx][i] * solutions[i]}`);
+        sum += sumList[idx][i] * solutions[i];
+    }
+    //
+    console.log(`from (i-s)/L to (${input} - ${sum}) / ${sumList[idx][idx]}`);
+    return (input - sum) / sumList[idx][idx];
+}
+
+function calcRowSolLower(input, L, idx, Y){
+    var sum = 0;
+    for(var i = 0; i < idx; i++){
+        console.log(`Adding sum ${L[idx][i] * Y[i]}`);
+        sum += L[idx][i] * Y[i];
+    }
+    //
+    console.log(`from (i-s)/L to (${input} - ${sum}) / ${L[idx][idx]}`);
+    return (input - sum) / L[idx][idx];
+}
+
+function calcRowSolUpper(input, U, idx, X){
+    var sum = 0;
+    for(var i = idx + 1; i < U.length; i++){
+        console.log(`Adding sum ${U[idx][i] * X[i - idx - 1]}`);
+        sum += U[idx][i] * X[i - idx - 1];
+    }
+    //
+    console.log(`from (i-s)/L to (${input} - ${sum}) / ${U[idx][idx]}`);
+    return (input - sum) / U[idx][idx];
+}
+
+function factorial(num, len){//basically (num)!/(num - len)!, and 0! = 1, so factorial(4, 2) would be 4*3
+    if (num == 0){
+        return 1;
+    }
+    var val = 1;
+    for(var n = 0; n < len; n++){
+        val *= num - n;
+    }
+    return val;
+}
 
 class Term{//single coefficient and power of input (i.e. 4*x^3)
     constructor(coef, power){
