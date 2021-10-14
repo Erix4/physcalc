@@ -597,7 +597,7 @@ export class Func{
         //
         //REDO the ordering section to favor non-zero times first
         //for every input in inputs, [value, power, time]
-        var powerSets = [];//lists of inputs with the same power, but times != 0 first, like [[#, #, 1]], [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
+        /*var powerSets = [];//lists of inputs with the same power, but times != 0 first, like [[#, #, 1]], [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
         for(var n = 0; n <= len + 1; n++){
             powerSets.push([]);//cannot be done all at once because fill populates it with an identical reference list
         }
@@ -617,9 +617,8 @@ export class Func{
                 set.splice(len1, 0, ...set.splice(0, 1));//reposition the value to the last in the set
             }
             orderedInputs.push(...set);
-        });
-        //
-        console.log(orderedInputs);
+        });*/
+        var orderedInputs = inputs.slice();
         //
         var A = [];
         orderedInputs.forEach(input => {//for each input (j is index), add a new row to the matrix
@@ -635,6 +634,12 @@ export class Func{
             A.push(row);
         });
         //
+        while(A[0][0] == 0){
+            A.push(...A.splice(0, 1));
+            orderedInputs.push(...orderedInputs.splice(0, 1));
+        }
+        //
+        console.log("Initial matrix A:");
         console.log(A.slice());
         //LU Decompositon
         var U = A.slice();//set upper triangular matrix equal to current matrix
@@ -646,11 +651,23 @@ export class Func{
         //
         for(var i = 1; i <= len; i++){//i is row index (I know it's flipped, I did it by accident and can't change it)
             for(var j = 0; j < i; j++){
-                if(U[j][j] == 0){
-                    L[i][j] = 0;
-                }else{
-                    L[i][j] = U[i][j] / U[j][j];
+                let mult = U[i][j] / U[j][j];
+                if(j < len){
+                    var c = 0
+                    while(U[i][j + 1] == (mult * U[j][j + 1]) && c < len){
+                        U.push(...U.splice(i, 1));
+                        orderedInputs.push(...orderedInputs.splice(i, 1));
+                        c++;
+                    }
+                    if(c == len){
+                        console.log("Reorder failed");
+                    }
                 }
+                //if(U[j][j] == 0){
+                    //L[i][j] = 0;
+                //}else{
+                    L[i][j] = mult;
+                //}
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
                 console.log(U.slice());
             }
