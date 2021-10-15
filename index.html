@@ -18,7 +18,7 @@
         <div id="leftcolumn">
             <div id="props">
                 <div id="head"><h2>Object ?</h2></div>
-                <div id="values">
+                <div class="section" id="values">
                     <input type="number" placeholder="time" style="" id="t"/>s
                     <div class="container">
                         <p>p = &lt;</p>
@@ -28,21 +28,21 @@
                         <p>&gt;</p>
                     </div>
                     <div class="container">
-                    <p>v = &lt;</p>
+                        <p>v = &lt;</p>
                         <input type="number" placeholder="vel x" id="velx"/>
                         <p>, </p>
                         <input type="number" placeholder="vel y" id="vely"/>
                         <p>&gt;</p>
                     </div>
                     <div class="container">
-                    <p>a = &lt;</p>
+                        <p>a = &lt;</p>
                         <input type="number" placeholder="accel x" id="accelx"/>
                         <p>, </p>
                         <input type="number" placeholder="accel y" id="accely"/>
                         <p>&gt;</p>
                     </div>
                 </div>
-                <div id="eqs">
+                <div class="section" id="eqs">
                     <div style="margin-top:7px" class="container">
                         <p>p = &lt;</p>
                         <input class="eq" type="number" placeholder="coef 1" id="posx"/>
@@ -50,7 +50,17 @@
                         <input class="eq" type="number" placeholder="coef 1" id="posy"/>
                         <p>&gt;</p>
                     </div>
-                    <p id="testeq">\(p(t) = at^2 + bt + c\)</p>
+                    <!--<p id="testeq">\(p(t) = at^2 + bt + c\)</p>-->
+                </div>
+                <div class="section" id="calc">
+                    <!--<h3>Calculator</h3>-->
+                    <div style="margin-top:7px" class="container">
+                        <select>
+                            <option>p</option>
+                            <option>v</option>
+                            <option>a</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>

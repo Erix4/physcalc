@@ -77,11 +77,12 @@ h2{
     outline: none;
     padding-left: 12px;
 }
+
 .eq{
     width: 15%;
 }
 
-#values{
+.section{
     /*padding: 5px;*/
     border-bottom: 8px solid #172b29;
 }
@@ -143,6 +144,11 @@ input[type=number] {
     height: 85%;
     float: left;
     position: absolute;
+}
+
+select{
+    height: 30px;
+    border-radius: 2px;
 }
 /*#endregion*/
 

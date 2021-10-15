@@ -591,34 +591,69 @@ export class Func{
         */
     }
     //
+    resolve(inputs){
+        let X = this.approxMatrix(inputs);
+        this.terms = [];
+        //
+        let len = X.length - 1;
+        X.forEach((coef, idx) => {
+            this.addTerm(coef, len - idx);
+        });
+    }
+    //
+    approxMatrix(inputs){
+        let X = this.matrixCalc(inputs);
+        //
+        let c = 0;
+        while(X.length == 0 && c < 5){
+            //inputs.forEach(input => input[2] += .1);
+            inputs[c][2] += .1;
+            X = this.matrixCalc(inputs);
+            c++;
+        }
+        if(X.length == 0){
+            console.log("APPROX FAILED.");
+        }
+        console.log(X);
+        return X;
+    }
+    //
     matrixCalc(inputs){
         //size of input list is number of inputs and size of matrix
-        let len = inputs.length - 1;
+        let len = inputs.length - 1;//also is the power of the solution
         //
-        //REDO the ordering section to favor non-zero times first
         //for every input in inputs, [value, power, time]
-        /*var powerSets = [];//lists of inputs with the same power, but times != 0 first, like [[#, #, 1]], [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
-        for(var n = 0; n <= len + 1; n++){
-            powerSets.push([]);//cannot be done all at once because fill populates it with an identical reference list
+        var powerSets = [[], []];//lists of inputs with the same power, within time != 0 and time == 0, like [[#, #, 1]], [[#, 3, #],[#, 3, #]], [[#, 2, #]], [], [[#, 0 , #]]
+        for(var n = 0; n < len + 1; n++){
+            powerSets[0].push([]);//cannot be done all at once because fill populates it with an identical reference list
+            powerSets[1].push([]);
         }
         //
         inputs.forEach(input => {//reorder inputs in power sets with descending power
-            if(input[2] != 0){
-                powerSets[0].push(input);
+            if(input[2] == 0){//check if time is zero
+                powerSets[1][len - input[1]].push(input);
             }else{
-                powerSets[len - input[1] + 1].push(input);
+                powerSets[0][len - input[1]].push(input);
             }
         });
         //
+        //let tlen = powerSets[0].length - 1;//record length of nonzero inputs - 1
+        let tlen = -1;//tlen is index of last, not length
+        powerSets[0].forEach(set => {tlen += (set.length > 0 ? 1 : 0)});//count number on nonempty lists in the nonzero power set
+        console.log(tlen);
+        //
         let orderedInputs = [];//list of inputs in order (ready to be converted to matrix)
-        powerSets.forEach(set => {//make sure each set is order correctly
-            if(set.length > 0 && set[0][2] == 0){//if first value in power set is set at time 0
+        powerSets.forEach(time => {//make sure each set is order correctly
+            /*if(set.length > 0 && set[0][2] == 0){//if first value in power set is set at time 0
                 let len1 = set.length - 1;
                 set.splice(len1, 0, ...set.splice(0, 1));//reposition the value to the last in the set
-            }
-            orderedInputs.push(...set);
-        });*/
-        var orderedInputs = inputs.slice();
+            }*/
+            time.forEach(set => {
+                orderedInputs.push(...set);
+            })
+        });
+        //var orderedInputs = inputs.slice();
+        console.log(orderedInputs.slice());
         //
         var A = [];
         orderedInputs.forEach(input => {//for each input (j is index), add a new row to the matrix
@@ -634,10 +669,12 @@ export class Func{
             A.push(row);
         });
         //
-        while(A[0][0] == 0){
-            A.push(...A.splice(0, 1));
-            orderedInputs.push(...orderedInputs.splice(0, 1));
-        }
+        /*while(A[0][0] == 0){
+            A.splice(0, 0, A.pop());
+            //A.push(...A.splice(0, 1));
+            orderedInputs.splice(0, 0, orderedInputs.pop());
+            //orderedInputs.push(...orderedInputs.splice(0, 1));
+        }*/
         //
         console.log("Initial matrix A:");
         console.log(A.slice());
@@ -657,19 +694,31 @@ export class Func{
                 }else{
                     mult = U[i][j] / U[j][j];
                 }
-                if(j < len){
+                console.log(`Multiplier: ${mult}, j: ${j}`);
+                if(j < len && i < len){
                     var c = 0
-                    while(U[i][j + 1] == (mult * U[j][j]) && c < len){
-                        console.log(`RO bc ${U[i][j + 1]} == ${(mult * U[j][j])}, ${mult} * ${U[j][j]}`);
-                        console.log(`Evaluates ${U[i][j + 1] == (mult * U[j][j])}`);
-                        U.push(...U.splice(i, 1));
-                        orderedInputs.push(...orderedInputs.splice(i, 1));
+                    console.log(`Check bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
+                    console.log(`\tBut next  = ${U[i + 1][j + 1]}`);
+                    while(U[i][j + 1] == (mult * U[j][j + 1]) && c < len && U[i + 1][j + 1] != 0){
+                        console.log(`RO bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
+                        console.log(`Evaluates ${U[i][j + 1] == (mult * U[j][j + 1])}`);
+                        //
+                        if(orderedInputs[i][2] != 0 && i < tlen){//if input time is nonzero and it's not the last in the nonzero list
+                            U.splice(tlen, 0, ...U.splice(i, 1));//move row and corresponding input to last in nonzero list
+                            orderedInputs.splice(tlen, 0, ...orderedInputs.splice(i, 1));
+                        }else if(orderedInputs[i][2] == 0 && i < len){//if input time is zero and it's not the last in the list
+                            U.push(...U.splice(i, 1));//move row and corresponding input to last in list
+                            orderedInputs.push(...orderedInputs.splice(i, 1));
+                        }else{
+                            console.log("Uh oh");
+                        }
                         //
                         if(U[j][j] == 0){
                             mult = 0;
                         }else{
                             mult = U[i][j] / U[j][j];
                         }
+                        console.log(`Multiplier: ${mult}, j: ${j}`);
                         //
                         c++;
                     }
@@ -680,6 +729,12 @@ export class Func{
                 L[i][j] = mult;
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
                 console.log(U.slice());
+                let zeroCheck = 0;
+                U[i].forEach(val => {zeroCheck += val});
+                if(zeroCheck == 0){
+                    console.log("Processed failed. Exiting function.");
+                    return [];
+                }
             }
         }
         //
@@ -703,12 +758,13 @@ export class Func{
         //solve for solutions (X)
         var X = [Y[len] / U[len][len]];
         for(var i = len - 1; i >= 0; i--){
-            X.splice(0, 0 , calcRowSolUpper(Y[i], U, i, X));
+            X.splice(0, 0 , Math.round(calcRowSolUpper(Y[i], U, i, X), 5));
         }
         console.log("Solutions: ");
         console.log(X);
         //
         console.log("Check:");
+        let check = true;
         orderedInputs.forEach((input, i) => {
             console.log(`Equation ${i} should be ${input[0]}`);
             var build = A[i][0] * X[0];
@@ -718,7 +774,16 @@ export class Func{
                 total += A[i][j] * X[j];
             }
             console.log(`Evaluates to ${total} from ${build}`);
+            if(total != input[0]){
+                check = false;
+            }
         });
+        if(check){
+            console.log("SUCCESS!!");
+        }else{
+            console.log("FAILED.");
+        }
+        return X;
     }
 }
 
@@ -808,6 +873,10 @@ function factorial(num, len){//basically (num)!/(num - len)!, and 0! = 1, so fac
         val *= num - n;
     }
     return val;
+}
+
+function round(num, digits){
+    return Math.round(num * digits) / digits;
 }
 
 class Term{//single coefficient and power of input (i.e. 4*x^3)
