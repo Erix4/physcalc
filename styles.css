@@ -149,6 +149,9 @@ input[type=number] {
 select{
     height: 30px;
     border-radius: 2px;
+    font-family: "nunito", "sans-serif";
+    font-size: 20px;
+    font-weight: 700;
 }
 /*#endregion*/
 
