@@ -63,6 +63,7 @@ export default class Input{
                 case " ":
                     //console.log("Not working");
                     command.running = !command.running;
+                    command.rate = 1;
                     window.requestAnimationFrame(command.loopStart);
                     break;
                 case "Backspace":
@@ -130,6 +131,7 @@ export default class Input{
             var emy = event.clientY;
             emx -= parseInt(d3.select("#leftcolumn").style("width"));
             emy -= parseInt(d3.select("#header").style("height"));
+            console.log(this.moveState);
             //
             switch(this.moveState){
                 case 1:
@@ -140,6 +142,7 @@ export default class Input{
                     break;
                 case 3: 
                     this.active.repos(emx, emy);
+                    //this.command.shiftObj(emx - mX, emy - mY);
                     break;
                 case 4:
                     this.active.reval(emx, emy);
@@ -196,6 +199,17 @@ export default class Input{
             }
         });
         //
+        d3.select("#forplay").on("mousedown", function(){
+            command.running = !command.running;
+            command.rate = 1;
+            window.requestAnimationFrame(command.loopStart);
+        });
+        //
+        d3.select("#backplay").on("mousedown", function(){
+            command.running = !command.running;
+            command.rate = -1;
+            window.requestAnimationFrame(command.loopStart);
+        });
     }
     //
     newPoint(point){
@@ -240,7 +254,7 @@ export default class Input{
             }
             selected = !selected;
             input.moveState = 2;
-            input.command.timeline.move();
+            input.command.timeline.repoint();
         })
     }
     //

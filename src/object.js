@@ -141,6 +141,7 @@ export default class Object{
         this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
+        this.reposPoints();
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
         switch(this.vectorMode){
@@ -201,6 +202,8 @@ export default class Object{
             }
         }
         //
+        this.movePoints();
+        //
         this.px = this.command.scaleX.invert(xPos);
         this.py = this.command.scaleY.invert(yPos);
         this.profile.setValues(power, this.px, this.py);
@@ -233,13 +236,13 @@ export default class Object{
         if((input.velConf || input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
             this.profile.draw(0, 500);
-            this.movePoints();
+            //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
             this.profile.draw(0, 500);
-            this.movePoints();
+            //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
         }
@@ -249,11 +252,14 @@ export default class Object{
         //let idx = this.command.objects.indexOf(this);
         var n;
         for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+            console.log("repos point " + n + " bc " + this.extremes.length);
+            console.log(this.extremes[n] + " to " + this.profile.calc(0, this.extremes[n])[1]);
             this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                 .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
-                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
         }
         while(this.points.length < this.extremes.length){//add points until there are the same name number
+            console.log("Adding points");
             this.points.push(this.svg.append("circle").style("fill", this.color)
                 .attr("r", 6)
                 .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
@@ -268,6 +274,14 @@ export default class Object{
             //this.command.input.removePoint(this.points[idx][this.points[idx].length - 1]);
             this.points.pop();
             console.log("Removing circle");
+        }
+    }
+    //
+    reposPoints(){
+        for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
+            this.points[n].attr("val", this.extremes[n])
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
         }
     }
     //

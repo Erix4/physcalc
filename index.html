@@ -26,6 +26,12 @@
                         <p>, </p>
                         <input type="number" placeholder="pos y" id="posy"/>
                         <p>&gt;</p>
+                        <select class="units">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
                     </div>
                     <div class="container">
                         <p>v = &lt;</p>
@@ -33,6 +39,13 @@
                         <p>, </p>
                         <input type="number" placeholder="vel y" id="vely"/>
                         <p>&gt;</p>
+                        <select class="units">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
+                        <p>/s</p>
                     </div>
                     <div class="container">
                         <p>a = &lt;</p>
@@ -40,6 +53,13 @@
                         <p>, </p>
                         <input type="number" placeholder="accel y" id="accely"/>
                         <p>&gt;</p>
+                        <select class="units">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
+                        <p>/s<sup>2</sup></p>
                     </div>
                 </div>
                 <div class="section" id="eqs">
@@ -52,6 +72,7 @@
                     </div>
                     <!--<p id="testeq">\(p(t) = at^2 + bt + c\)</p>-->
                 </div>
+                <img href="assetts/moreButtonL.png"/>
                 <div class="section" id="calc">
                     <!--<h3>Calculator</h3>-->
                     <div style="margin-top:7px" class="container">
@@ -61,6 +82,12 @@
                                 <option>v</option>
                                 <option>a</option>
                             </select>
+                            <p>= &lt;</p>
+                            <input type="number" step=".5" placeholder="pos x"/>
+                            <p>, </p>
+                            <input type="number" placeholder="pos y"/>
+                            <p>&gt;, t = </p>
+                            <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
                         <div class="container">
                             <select>
@@ -68,6 +95,12 @@
                                 <option>v</option>
                                 <option>a</option>
                             </select>
+                            <p>= &lt;</p>
+                            <input type="number" step=".5" placeholder="pos x"/>
+                            <p>, </p>
+                            <input type="number" placeholder="pos y"/>
+                            <p>&gt;, t = </p>
+                            <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
                         <div class="container">
                             <select>
@@ -75,7 +108,14 @@
                                 <option>v</option>
                                 <option>a</option>
                             </select>
+                            <p>= &lt;</p>
+                            <input type="number" step=".5" placeholder="pos x"/>
+                            <p>, </p>
+                            <input type="number" placeholder="pos y"/>
+                            <p>&gt;, t = </p>
+                            <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
+                        <button>Calc!</button>
                     </div>
                 </div>
             </div>
@@ -86,10 +126,10 @@
     <div id="timeline">
         <div id="bar">
             <div class="toggle" id="playback">
-                <div id="stepback" class="button">a<!--<i class="fas fa-fast-backward"></i>--></div>
-                <div id="backplay" class="button">b<!--<i class="fas fa-play"></i>--></div>
-                <div id="forplay" class="button">c<!--<i class="fas fa-play"></i>--></div>
-                <div id="stepforward" class="button">d<!--<i class="fas fa-fast-forward"></i>--></div>
+                <div id="stepback" class="button"><i class="fas fa-fast-backward"></i></div>
+                <div id="backplay" class="button"><i class="fas fa-play"></i></div>
+                <div id="forplay" class="button"><i class="fas fa-play"></i></div>
+                <div id="stepforward" class="button"><i class="fas fa-fast-forward"></i></div>
             </div>
         </div>
         <canvas class="time" id="tcan"></canvas>

@@ -25,6 +25,7 @@ export default class Command{
         //
         this.gravity = -9.81;
         this.time = 0;
+        this.rate = 1;//seconds / second
         //
         this.running = false;
         this.loopStart = loopStart;
@@ -129,6 +130,7 @@ export default class Command{
         });
         this.update();
         this.timeline.draw();
+        this.timeline.repoint();
         this.props.update(this.selected);
     }
     //

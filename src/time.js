@@ -95,6 +95,9 @@ export default class Timeline{
             .attr("x2", this.timeX(this.command.time))
             .attr("y2", this.scrH);
         //
+    }
+    //
+    repoint(){
         this.command.objects.forEach((obj, idx) => {
             if(idx < this.timePoints.length){//object has already been pointed
                 var n;
@@ -104,6 +107,8 @@ export default class Timeline{
                         .attr("cy", 12 * idx + 12);//height from top depends on object index
                 }
                 while(this.timePoints[idx].length < obj.extremes.length){//add points until there are the same name number
+                    console.log("Adding points at index " + idx);
+                    console.log(this.timePoints);
                     this.timePoints[idx].push(this.svg.append("circle").style("fill", obj.points[n].style("fill")).attr("val", obj.extremes[n]).attr("ob", obj.id)
                     .attr("r", 5)
                     .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels

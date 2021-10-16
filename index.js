@@ -18,7 +18,7 @@ function loop(timeStamp){
     let deltaTime = (timeStamp - lastTime) / 1000;
     lastTime = timeStamp;
     //
-    comm.retime(deltaTime);
+    comm.retime(deltaTime * comm.rate);
     //
     if(comm.running){//use comm.running
         window.requestAnimationFrame(loop);
