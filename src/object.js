@@ -141,6 +141,7 @@ export default class Object{
         this.profile.setOrigin();
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //this.pFunc.setOff(this.px, this.py);
+        //this.movePoints();
         this.reposPoints();
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);

@@ -73,7 +73,7 @@ export default class Command{
             obj.update();
         });
         this.sels.forEach((sel, idx) => {
-            sel.attr("cx", this.scaleX(this.selObs[idx].px))
+            sel.attr("cx", this.scaleX(this.selObs[idx].px));
             sel.attr("cy", this.scaleY(this.selObs[idx].py));
         });
         this.timeline.move();
@@ -91,11 +91,13 @@ export default class Command{
     objUpdate(obj, inputMode){
         obj.update();
         this.draw();
+        this.timeline.repoint();
         if(arguments.length < 2 || !inputMode){
             this.props.update(obj);
             this.props.retime();
         }
         this.select(obj);
+        this.sels[0].attr("cx", this.scaleX(this.selObs[0].px)).attr("cy", this.scaleY(this.selObs[0].py));
     }
     //
     updateVectors(object, mode){

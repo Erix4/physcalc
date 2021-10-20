@@ -190,6 +190,11 @@ button:active{
 .units{
     margin-left: 8px;
 }
+
+img{
+    width: (25*1.2)px;
+    height: (11*1.2)px;
+}
 /*#endregion*/
 
 .time{
