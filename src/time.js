@@ -36,6 +36,9 @@ export default class Timeline{
         //console.log(`Domain: ${this.timeX.domain()[0]} to ${this.timeX.domain()[1]}, Range: ${this.timeX.range()[0]} to ${this.timeX.range()[1]}`);
     }
     //
+    /**
+     * Recalculate time scale (timeX)
+     */
     calcSize(){
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
@@ -46,6 +49,9 @@ export default class Timeline{
         this.timeX = d3.scaleLinear().domain([lf, rt]).range([0, this.scrW]);
     }
     //
+    /**
+     * reformat canvas on resize event
+     */
     resize(){
         this.calcSize();
         this.canvas.width = this.scrW;
