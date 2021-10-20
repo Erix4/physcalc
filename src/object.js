@@ -110,10 +110,182 @@ export default class Object{
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
         //
         command.input.newObject(this);
-        command.objUpdate(this);
+        command.drawGrid();
+        command.drawTimeline();
     }
     //
+    //#region Illustration
+    /**
+     * Update all internal values by function
+     */
     update(){
+        if(this.lock){
+            this.setValue(0, this.px, this.py);//resolve function to shift the time
+        }
+        this.px = this.profile.calc(0, this.command.time)[0];
+        this.py = this.profile.calc(0, this.command.time)[1];
+        for(var n = 0; n <= this.depth; n++){
+            this.xS[n] = this.profile.calc(n, this.command.time)[0];
+            this.yS[n] = this.profile.calc(n, this.command.time)[1];
+        }
+        //
+        this.nets.forEach(net => {
+            net.update();
+        });
+        for(var n = 0; n < 2; n++){//repeat to propagate changes
+            this.comps.forEach(comp => {
+                comp.forEach(arrow => {
+                    arrow.update();
+                });
+            });
+        }
+        this.profile.setOrigin();
+    }
+    //
+    /**
+     * Move the SVG element for the object
+     */
+    move(){
+        this.self.attr("cx", this.command.scaleX(this.px))
+                .attr("cy", this.command.scaleY(this.py))
+                .style("visibility", "visible");
+        //
+        this.nets.forEach(net => {
+            net.move();
+        });
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.move();
+            });
+        });
+    }
+    //
+    /**
+     * Draw the function of the object
+     * @param {Class} input input handler
+     */
+    draw(input){
+        this.extremes = this.profile.getExtremes();
+        if((input.moveState == 3) && input.active != this){//new object is being created
+            this.command.ctx.globalAlpha = 0.2;
+            this.profile.draw(0, 500);
+            //this.movePoints();
+            //this.profile.drawPoints(this.extremes);
+            this.command.ctx.globalAlpha = 1.0;
+            this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
+        }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
+            this.profile.draw(0, 500);
+            //this.movePoints();
+            //this.profile.drawPoints(this.extremes);
+            this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
+        }
+    }
+    //
+    /**
+     * toggle/set the vector mode for this object
+     * @param {number} mode vectormode to set object to
+     */
+    toggleVectors(mode){
+        this.vectorMode = mode;
+        this.comps.forEach(comp => {
+            comp.forEach(arrow => {
+                arrow.self.hide();
+            });
+        });
+        this.nets.forEach(net => {
+            net.self.hide();
+        });
+        //
+        if(this.vectorMode > 0){
+            this.nets[this.vectorMode - 1].self.show();
+            this.comps[this.vectorMode - 1].forEach(arrow => {
+                arrow.show();
+            });
+        }
+    }
+    //#endregion
+    //
+    /**
+     * shift the net value at a given power with pixels
+     * @param {Number} power  power of value to shift (2=x^2)
+     * @param {Number} xShift x shift in pixels
+     * @param {Number} yShift y shift in pixels
+     */
+    shiftValue(power, xShift, yShift){
+        let xPos = this.command.scaleX.invert(this.command.scaleX(this.px) + xShift);
+        let yPos = this.command.scaleY.invert(this.command.scaleY(this.py) + yShift);
+        this.setValue(power, xPos, yPos);
+    }
+    //
+    /**
+     * set the net value at a given power with units
+     * @param {Number} power power of value to set
+     * @param {Number} xPos  x value in units
+     * @param {Number} yPos  y value in units
+     */
+    setValue(power, xPos, yPos){
+        this.profile.setValues(power, xPos, yPos);
+    }
+    //
+    /**
+     * lock the object so it slide in time
+     */
+    toggleLock(){
+        this.lock = !this.lock;
+        if(this.lock){
+            this.self.style("fill", "gray");
+        }else{
+            this.self.style("fill", this.color);
+        }
+    }
+    //
+    /**
+     * remove and respawn extreme points
+     */
+    spawnExtremes(){
+        var n;
+        for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+            this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
+        }
+        while(this.points.length < this.extremes.length){//add points until there are the same name number
+            this.points.push(this.svg.append("circle").style("fill", this.color)
+                .attr("r", 6)
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
+                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
+            this.points[n].lower();
+            this.command.input.newObjPoint(this.points[this.points.length - 1]);
+            n++;
+        }
+        while(this.points.length > this.extremes.length){
+            this.points[this.points.length - 1].remove();
+            this.points.pop();
+        }
+    }
+    //
+    /**
+     * Delete this object and its SVG elements
+     */
+    delete(){
+        this.toBeDeleted = true;
+        //
+        this.self.remove();
+        //
+        this.nets.forEach(net => {
+            net.self.delete();
+        });
+        this.comps.forEach(comp => {
+            comp.forEach(c => {
+                c.self.delete();
+            });
+        });
+        //
+        this.command.update();
+        this.command.select();
+    }
+    //
+    /*update(){
         if(!this.lock){
             this.px = this.profile.calc(0, this.command.time)[0];
             this.py = this.profile.calc(0, this.command.time)[1];
@@ -145,21 +317,6 @@ export default class Object{
         this.reposPoints();
         //
         //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-        switch(this.vectorMode){
-            case 1:
-                /*this.vNet.update();
-                this.vComps.forEach(comp => {
-                    //comp.update();
-                });*/
-            case 2:
-                /*this.aNet.update();
-                this.aComps.forEach(comp => {
-                    //comp.update();
-                });*/
-            default:
-                //nothing
-                break;
-        }
         //
     }
     //
@@ -232,23 +389,6 @@ export default class Object{
         }
     }
     //
-    draw(input){
-        this.extremes = this.profile.getExtremes();
-        if((input.velConf || input.moveState == 3) && input.active != this){//new object is being created
-            this.command.ctx.globalAlpha = 0.2;
-            this.profile.draw(0, 500);
-            //this.movePoints();
-            //this.profile.drawPoints(this.extremes);
-            this.command.ctx.globalAlpha = 1.0;
-            this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
-        }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
-            this.profile.draw(0, 500);
-            //this.movePoints();
-            //this.profile.drawPoints(this.extremes);
-            this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
-        }
-    }
-    //
     movePoints(){
         //let idx = this.command.objects.indexOf(this);
         var n;
@@ -304,24 +444,7 @@ export default class Object{
             });
         }
     }
-    //
-    delete(){
-        this.toBeDeleted = true;
-        //
-        this.self.remove();
-        //
-        this.nets.forEach(net => {
-            net.self.delete();
-        });
-        this.comps.forEach(comp => {
-            comp.forEach(c => {
-                c.self.delete();
-            });
-        });
-        //
-        this.command.update();
-        this.command.select();
-    }
+    */
 }
 
 class netArrow{
@@ -346,7 +469,10 @@ class netArrow{
         this.self.sy = this.obj.py;
         this.self.ex = this.pos[0] * this.obj.arrStr;
         this.self.ey = this.pos[1] * this.obj.arrStr;
-        this.self.update();
+    }
+    //
+    move(){
+        this.self.move();
     }
     //
     reval(px, py){
@@ -408,7 +534,10 @@ class compArrow{
         this.self.ey = this.pos[1] * this.obj.arrStr;
         this.ex = this.self.sx + this.self.ex;
         this.ey = this.self.sy + this.self.ey;
-        this.self.update();
+    }
+    //
+    move(){
+        this.self.move();
     }
     //
     reval(px, py){
@@ -488,7 +617,7 @@ class Arrow{
         this.hide();
     }
     //
-    update(){
+    move(){
         let tx1;
         let tx2;
         let ty1;

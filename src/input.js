@@ -135,7 +135,7 @@ export default class Input{
             //
             switch(this.moveState){
                 case 1:
-                    command.repos(emx - mX, emy - mY);
+                    command.shiftView(emx - mX, emy - mY);
                     break;
                 case 2:
                     this.command.shiftObj(emx - mX, emy - mY);

@@ -1,13 +1,3 @@
-/*
-Notes
-It is not the field's job to keep track of inputs or resizing events
--> it is the field's job to resize the field when it is told to do so and remember what size it's supposed to be
-
-While pixel values are y increasing top-down, everything else is top-up
-*/
-
-import {Func} from "./func";
-
 export default class Grid{
     constructor(command, ctx, svg, cx, cy, scale){
         this.command = command;
@@ -63,12 +53,16 @@ export default class Grid{
         //fix_dpi(this.command.canvas);
     }
     //
-    repos(px, py){//reposition field
-        this.cx -= this.conX(px);
-        this.cy -= this.conY(py);
+    /**
+     * Shift grid position
+     * @param {Number} cx change in x in pixels
+     * @param {Number} cy change in y in pixels
+     */
+    shiftPos(cx, cy){//reposition field
+        this.cx -= this.conX(cx);
+        this.cy -= this.conY(cy);
         //
         this.calcSize();
-        //this.drawField();
     }
     //
     zoom(c, px, py){
@@ -95,17 +89,10 @@ export default class Grid{
         return this.scrH / (this.scale / this.res);
     }
     //
-    drawField(){
-        //
-        //d3.select("canvas").style("width", this.scrW).style("height", this.nScrH);
-        //d3.select("svg").style("width", this.scrW).style("height", this.nScrH);
-        //this.grid.draw(this.ctx);
-        //
-        this.functions.forEach(func => {
-            //func.draw(this, this.ctx, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-        });
-    }
-    //
+    /**
+     * Draw the grid (lines and axis)
+     * @param {any} ctx contex of canvas
+     */
     draw(ctx){
         ctx.clearRect(0, 0, this.scrW, this.scrH);
         //
