@@ -97,6 +97,18 @@ export default class Timeline{
         //
     }
     //
+    /**
+     * move all the extreme points for certain objects
+     * @param {Array<Number} objIs list of indexs of objects
+     */
+    movePoints(objIs){
+        objIs.forEach(id => {
+            this.timeline[id].forEach((point, n) => {
+                point.attr("cx", this.timeX(obj.extremes[n]));//convert time of extreme to x in pixels
+            });
+        });
+    }
+    //
     repoint(){
         this.command.objects.forEach((obj, idx) => {
             if(idx < this.timePoints.length){//object has already been pointed

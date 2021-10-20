@@ -123,7 +123,7 @@ export default class Command{
      * redraw timeline (canvas)
      */
     drawTimeline(){
-        //
+        this.timeline.draw();
     }
     //
     /**
@@ -141,13 +141,15 @@ export default class Command{
     }
     //
     /**
-     * move all or some svg elements in grid
+     * move all or some svg elements in timelin
      * @param {Array<Object>} [objs] list of objects to move
      */
     moveTimeline(objs){
         if(!objs){
             objs = this.objects;
         }
+        //
+        this.timeline.move();
     }
     //
     /**
@@ -185,6 +187,11 @@ export default class Command{
         if(!objs){
             objs = this.objects;
         }
+        //
+        objs.forEach(obj => {
+            obj.spawnExtremes();
+        });
+        this.timeline.repoint();
     }
     //
     /**
