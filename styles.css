@@ -154,6 +154,7 @@ select{
     font-weight: 700;
     float: left;
     margin-right: 5px;
+    border: none;
 }
 
 button{

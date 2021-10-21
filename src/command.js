@@ -54,9 +54,9 @@ export default class Command{
         this.sels = [];
         this.selObs = [];
         //
-        this.func = new Func(1000, [1, 1]);
-        this.func.resolve([[31, 0, -2], [-1, 0, 0], [14, 1, 1], [38, 2, -2]]);
-        this.func.draw(this, -10, 10);
+        //this.func = new Func(1000, [1, 1]);
+        //this.func.resolve([[31, 0, -2], [-1, 0, 0], [14, 1, 1], [38, 2, -2]]);
+        //this.func.draw(this, -10, 10);
         this.moveGrid()
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
@@ -336,15 +336,14 @@ export default class Command{
     //#region Selecting
     /**
      * select a new main object and deselect all others
-     * @param {Object} obj object to select
+     * @param {Object} [obj] object to select
      */
     select(obj){
-        if(arguments.length == 0 || obj == null){
+        if(!obj){
             this.sels.forEach(sell => {
                 sell.remove();
             });
             this.sels = [];
-            console.log("hiding");
         }else if(!this.input.shifting){
             this.sels.forEach(sell => {
                 sell.remove();

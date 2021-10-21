@@ -184,7 +184,11 @@ export default class Input{
                 this.command.drawGrid();
                 this.command.spawnExtremes([this.selected]);
             }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
-                //
+                switch(this.moveState){
+                    case 1:
+                        this.command.select();
+                        break;
+                }
             }else{//movement
                 //
             }
