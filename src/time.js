@@ -56,6 +56,8 @@ export default class Timeline{
         this.calcSize();
         this.canvas.width = this.scrW;
         this.canvas.height = this.scrH;
+        this.move();
+        this.movePoints();
     }
     //
     /**
@@ -120,14 +122,27 @@ export default class Timeline{
     //
     /**
      * move all the extreme points for certain objects
-     * @param {Array<Number} objIs list of indexs of objects
+     * @param {Array<Number} [objIs] list of indexs of objects
      */
     movePoints(objIs){
+        if(!objIs){
+            var objIs = this.command.findIdxs(this.command.objects);
+        }
+        //
         objIs.forEach(id => {
-            this.timeline[id].forEach((point, n) => {
-                point.attr("cx", this.timeX(obj.extremes[n]));//convert time of extreme to x in pixels
+            this.command.objects[id].extremes = this.command.objects[id].profile.getExtremes();
+            this.timePoints[id].forEach((point, n) => {
+                point.attr("val", this.command.objects[id].extremes[n]).attr("cx", this.timeX(this.command.objects[id].extremes[n]));//convert time of extreme to x in pixels
             });
         });
+    }
+    //
+    colorPoints(objIds){
+        objIds.forEach(idx => {
+            this.timePoints[idx].forEach((point, n) => {
+                point.style("fill", this.command.objects[idx].points[n].style("fill"));
+            });
+        })
     }
     //
     /**
@@ -173,6 +188,9 @@ export default class Timeline{
         });
     }
     //
+    /**
+     * draw the grid lines on the timeline
+     */
     draw(){
         var ctx = this.ctx;
         ctx.clearRect(0, 0, this.scrW, this.scrH);

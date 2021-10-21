@@ -129,17 +129,32 @@ export default class Object{
             this.yS[n] = this.profile.calc(n, this.command.time)[1];
         }
         //
-        this.nets.forEach(net => {
-            net.update();
-        });
-        for(var n = 0; n < 2; n++){//repeat to propagate changes
-            this.comps.forEach(comp => {
-                comp.forEach(arrow => {
-                    arrow.update();
-                });
-            });
-        }
+        this.updateVectors();
         this.profile.setOrigin();
+    }
+    //
+    /**
+     * update all or one vector position(s)
+     * @param {Number} [power] the power of the vectors to be updated (1=vel)
+     */
+    updateVectors(power){
+        if(this.power){
+            this.nets[power - 1].update();
+            this.comps[power - 1].forEach(comp => {
+                comp.update();
+            });
+        }else{
+            this.nets.forEach(net => {
+                net.update();
+            });
+            for(var n = 0; n < 2; n++){//repeat to propagate changes
+                this.comps.forEach(comp => {
+                    comp.forEach(arrow => {
+                        arrow.update();
+                    });
+                });
+            }
+        }
     }
     //
     /**
@@ -150,14 +165,29 @@ export default class Object{
                 .attr("cy", this.command.scaleY(this.py))
                 .style("visibility", "visible");
         //
-        this.nets.forEach(net => {
-            net.move();
-        });
-        this.comps.forEach(comp => {
-            comp.forEach(arrow => {
-                arrow.move();
+        this.moveVectors();
+    }
+    //
+    /**
+     * move all SVG elements of all or one power of vectors
+     * @param {Number} power power of vectors to move
+     */
+    moveVectors(power){
+        if(power){
+            this.nets[power - 1].move();
+            this.comps[power - 1].forEach(comp => {
+                comp.move();
             });
-        });
+        }else{
+            this.nets.forEach(net => {
+                net.move();
+            });
+            this.comps.forEach(comp => {
+                comp.forEach(arrow => {
+                    arrow.move();
+                });
+            });
+        }
     }
     //
     /**
@@ -165,7 +195,6 @@ export default class Object{
      * @param {Class} input input handler
      */
     draw(input){
-        this.extremes = this.profile.getExtremes();
         if((input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
             this.profile.draw(0, 500);
@@ -186,6 +215,9 @@ export default class Object{
      * @param {number} mode vectormode to set object to
      */
     toggleVectors(mode){
+        this.updateVectors(mode);
+        this.moveVectors(mode);
+        //
         this.vectorMode = mode;
         this.comps.forEach(comp => {
             comp.forEach(arrow => {
@@ -205,6 +237,7 @@ export default class Object{
     }
     //#endregion
     //
+    //#region Setting Values
     /**
      * shift the net value at a given power with pixels
      * @param {Number} power  power of value to shift (2=x^2)
@@ -227,9 +260,30 @@ export default class Object{
         this.profile.setValues(power, xPos, yPos);
     }
     //
+    /**
+     * shift the value of a component (in pixels)
+     * @param {Number} power  power of component
+     * @param {Number} idx    index of component
+     * @param {Number} xShift x shift amount in pixels
+     * @param {Number} yShift y shift amount in pixels
+     */
     shiftCompValue(power, idx, xShift, yShift){
-        //DO THIS
+        let xPos = this.command.scaleX.invert(this.command.scaleX(this.profile.comps[power][idx].getTermX(0)) + xShift);
+        let yPos = this.command.scaleY.invert(this.command.scaleY(this.profile.comps[power][idx].getTermY(0)) + yShift);
+        this.setCompValue(power, idx, xPos, yPos);
     }
+    //
+    /**
+     * set the value of a component (in units)
+     * @param {Number} power power of component
+     * @param {Number} idx   index of component
+     * @param {Number} xPos  new x position in units
+     * @param {Number} yPos  new y position in units
+     */
+    setCompValue(power, idx, xPos, yPos){
+        this.profile.setCompVal(power, idx, xPos, yPos);
+    }
+    //#endregion
     //
     /**
      * lock the object so it slide in time
@@ -247,6 +301,7 @@ export default class Object{
      * remove and respawn extreme points
      */
     spawnExtremes(){
+        this.extremes = this.profile.getExtremes();
         var n;
         for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
             this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
@@ -259,12 +314,23 @@ export default class Object{
                 .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
                 .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
             this.points[n].lower();
-            this.command.input.newObjPoint(this.points[this.points.length - 1]);
+            this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
             n++;
         }
         while(this.points.length > this.extremes.length){
             this.points[this.points.length - 1].remove();
             this.points.pop();
+        }
+    }
+    //
+    /**
+     * move all extreme points (when grid is shifted)
+     */
+    movePoints(){
+        for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
+            this.points[n].attr("val", this.extremes[n])
+                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
         }
     }
     //
@@ -480,8 +546,12 @@ class netArrow{
     }
     //
     reval(px, py){
-        this.obj.shiftValue(this.depth, px, py);
-        this.funcChange([this.obj]);
+        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
+        let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
+        this.obj.setValue(this.depth, x, y);
+        this.command.funcChange([this.obj]);
+        this.obj.updateVectors(this.depth);
+        this.obj.moveVectors(this.depth);
     }
 }
 
@@ -543,15 +613,10 @@ class compArrow{
         let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         //
-        this.profile.setCompVal(this.depth, this.idx, x, y);
-        this.command.objUpdate(this.obj);
-        this.obj.update();
-    }
-    //
-    reval(px, py){
-        this.obj.shiftValue(this.depth, px, py);
-        //
-        this.funcChange([this.obj]);
+        this.obj.setCompValue(this.depth, this.idx, x, y);
+        this.command.funcChange([this.obj]);
+        this.obj.updateVectors(this.depth);
+        this.obj.moveVectors(this.depth);
     }
     //
     show(){

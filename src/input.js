@@ -46,12 +46,12 @@ export default class Input{
                     break;
                 case "ArrowRight":
                     if(!this.propsState){
-                        command.retime(.1);
+                        command.shiftTime(.1);
                     }
                     break;
                 case "ArrowLeft":
                     if(!this.propsState){
-                        command.retime(-.1);
+                        command.shiftTime(-.1);
                     }
                     break;
                 case "ArrowUp":
@@ -60,10 +60,16 @@ export default class Input{
                     }
                     break;
                 case " ":
-                    //console.log("Not working");
                     command.running = !command.running;
                     command.rate = 1;
-                    window.requestAnimationFrame(command.loopStart);
+                    if(command.running){
+                        window.requestAnimationFrame(command.loopStart);
+                        d3.select("#forpl").attr("class", "fas fa-pause");
+                        d3.select("#backpl").attr("class", "fas fa-play");
+                    }else{
+                        d3.select("#forpl").attr("class", "fas fa-play");
+                        d3.select("#backpl").attr("class", "fas fa-play");
+                    }
                     break;
                 case "Backspace":
                     if(!this.propsState){
@@ -95,14 +101,14 @@ export default class Input{
                     adding = false;
                     break;
                 case "v":
-                    switch(command.vectorMode){
-                        case 2:
-                            this.command.toggleVectors(0);
-                            break;
-                        default:
-                            this.command.toggleVectors(command.vectorMode++);
-                            break;
+                    let newMode = command.vectorMode + 1;
+                    console.log(newMode);
+                    if(newMode == 3){
+                        newMode = 0;
                     }
+                    console.log(newMode);
+                    this.command.toggleVectors(newMode);
+                    console.log(`Toggling vectors: ${this.command.vectorMode}`);
                     break;
                 case "Enter":
                     break;
@@ -137,10 +143,10 @@ export default class Input{
                     break;
                 case 2:
                     this.selected.shiftValue(0, emx - mX, emy - mY);
-                    this.command.updateGrid([this.command.selected]);
-                    this.command.moveGrid([this.command.selected]);
+                    this.command.updateGrid(this.command.selObs);
+                    this.command.moveGrid(this.command.selObs);
                     this.command.drawGrid();
-                    this.command.spawnExtremes([this.command.selected]);
+                    this.command.spawnExtremes(this.command.selObs);
                     //this.command.shiftObj(emx - mX, emy - mY);
                     break;
                 case 3: 
@@ -152,14 +158,15 @@ export default class Input{
                     this.active.reval(emx, emy);
                     break;
                 case 5:
-                    //console.log("why");
-                    command.time = command.timeline.timeX.invert(event.clientX);
-                    command.retime(0);
+                    command.setTime(command.timeline.timeX.invert(event.clientX));
                     break;
                 case 6:
                     command.time = command.timeline.timeX.invert(event.clientX);
-                    this.selected.slideTime();
-                    command.update();
+                    this.selected.setValue(0, this.selected.px, this.selected.py);
+                    command.timeline.move();
+                    command.updateGrid();
+                    command.moveGrid();
+                    command.timeline.movePoints();
                     break;
                 default:
                     break;
@@ -207,23 +214,37 @@ export default class Input{
         this.timeline.svg.on("mousedown", function(){
             if(input.moveState == 0){
                 input.moveState = 5;
-                command.time = command.timeline.timeX.invert(d3.mouse(this)[0]);
-                command.retime(0);
+                command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
                 input.propsState = false;
-                console.log("huh");
             }
         });
         //
         d3.select("#forplay").on("mousedown", function(){
-            command.running = !command.running;
+            if(!command.running || command.rate == 1){
+                command.running = !command.running;
+            }
             command.rate = 1;
-            window.requestAnimationFrame(command.loopStart);
+            if(command.running){
+                window.requestAnimationFrame(command.loopStart);
+                d3.select("#forpl").attr("class", "fas fa-pause");
+                d3.select("#backpl").attr("class", "fas fa-play");
+            }else{
+                d3.select("#forpl").attr("class", "fas fa-play");
+            }
         });
         //
         d3.select("#backplay").on("mousedown", function(){
-            command.running = !command.running;
+            if(!command.running || command.rate == -1){
+                command.running = !command.running;
+            }
             command.rate = -1;
-            window.requestAnimationFrame(command.loopStart);
+            if(command.running){
+                window.requestAnimationFrame(command.loopStart);
+                d3.select("#backpl").attr("class", "fas fa-pause");
+                d3.select("#forpl").attr("class", "fas fa-play");
+            }else{
+                d3.select("#backpl").attr("class", "fas fa-play");
+            }
         });
     }
     //
@@ -249,10 +270,9 @@ export default class Input{
         });
     }
     //
-    newObjPoint(point){
+    newObjPoint(obj, point){
         var input = this;
         let color = point.style("fill");
-        var selected = false;
         point.on("mouseenter", function(){
             point.attr("r", 7);
         });
@@ -262,14 +282,13 @@ export default class Input{
         });
         //
         point.on("mousedown", function(){
-            if(selected){
+            if(point.style("fill") == "white"){
                 point.style("fill", color);
             }else{
                 point.style("fill", "white");
             }
-            selected = !selected;
             input.moveState = 2;
-            input.command.timeline.repoint();
+            input.timeline.colorPoints(input.command.findIdxs([obj]));
         })
     }
     //

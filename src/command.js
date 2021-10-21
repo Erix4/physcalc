@@ -74,7 +74,7 @@ export default class Command{
         this.drawGrid();
         this.moveGrid();
         this.moveSelects();
-        this.movePoints()//add function to object to shift extreme point positions
+        this.moveExtremes()//add function to object to shift extreme point positions
     }
     //
     /**
@@ -95,6 +95,10 @@ export default class Command{
         //
         this.grid.cx = cx;
         this.grid.cy = cy;
+        this.drawGrid();
+        this.moveGrid();
+        this.moveSelects();
+        this.moveExtremes();
     }
     //
     /**
@@ -107,6 +111,8 @@ export default class Command{
         this.grid.zoom(c, px, py);
         this.drawGrid();
         this.moveGrid();
+        this.moveExtremes();
+        this.moveSelects();
     }
     //
     /**
@@ -116,7 +122,10 @@ export default class Command{
         this.grid.resize();
         this.timeline.resize();
         this.drawGrid();
+        this.moveGrid();
         this.drawTimeline();
+        this.moveExtremes();
+        this.moveSelects();
     }
     //#endregion
     //
@@ -155,7 +164,7 @@ export default class Command{
     //
     /**
      * update the values of all or some objects
-     * @param {Array<Object>} objs list of objects to update
+     * @param {Array<Object>} [objs] list of objects to update
      */
     updateGrid(objs){
         if(!objs){
@@ -197,11 +206,15 @@ export default class Command{
     toggleVectors(mode, objs){
         if(!objs){
             objs = this.objects;
+            if(mode || mode == 0){
+                this.vectorMode = mode;
+            }
         }
         if(!mode){
             mode = this.vectorMode;
         }
         //
+        console.log("mode is " + mode);
         objs.forEach(obj => {
             obj.toggleVectors(mode);
         });
@@ -236,6 +249,12 @@ export default class Command{
         this.timeline.movePoints(this.findIdxs(objs));
     }
     //
+    moveExtremes(){
+        this.objects.forEach(obj => {
+            obj.movePoints();
+        });
+    }
+    //
     /**
      * Find indexs of objects
      * @param {Array<Object>} objs list of objects to find the index of
@@ -253,22 +272,28 @@ export default class Command{
     //#region Value Setting
     /**
      * shift the position of objects
+     * @param {Number} power      power of position to shift
      * @param {Number} cx         change in x in pixels
      * @param {Number} cy         change in y in pixels
      * @param {Array<Object} objs list of objects to shift
      */
-    shiftPos(cx, cy, objs){
-        //new code here
+    shiftPos(power, cx, cy, objs){
+        objs.forEach(obj => {
+            let x = this.scaleX.invert(this.scaleX(obj.xS[power]) + cx);
+            let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
+            this.setPos(power, x, y, obj);
+        });
     }
     //
     /**
      * set the position of an object
-     * @param {Number} px  new x position in units
-     * @param {Number} py  new y position in units
-     * @param {Object} obj object to set position of
+     * @param {Number} power power of position to set
+     * @param {Number} px    new x position in units
+     * @param {Number} py    new y position in units
+     * @param {Object} obj   object to set position of
      */
-    setPos(px, py, obj){
-        //new code here
+    setPos(power, px, py, obj){
+        obj.setPos(power, px, py);
     }
     //
     /**
@@ -276,7 +301,7 @@ export default class Command{
      * @param {Number} dt change in time in seconds
      */
     shiftTime(dt){
-        //new code here
+        this.setTime(this.time + dt);
     }
     //
     /**
@@ -284,7 +309,10 @@ export default class Command{
      * @param {Number} t new time in seconds
      */
     setTime(t){
-        //new code here
+        this.time = t;
+        this.updateGrid();
+        this.moveGrid();
+        this.timeline.move();
     }
     //
     /**
