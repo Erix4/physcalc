@@ -36,6 +36,7 @@ export default class Command{
         //
         this.selected = null;
         this.objects = [];
+        this.selectedIdxs = [];
         //
         this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
         console.log(this.time.scrH);
@@ -105,6 +106,16 @@ export default class Command{
         this.drawGrid();
         this.moveGrid();
     }
+    //
+    /**
+     * resize all elements on resize event
+     */
+    resize(){
+        this.grid.resize();
+        this.timeline.resize();
+        this.drawGrid();
+        this.drawTimeline();
+    }
     //#endregion
     //
     //#region Illustration
@@ -138,6 +149,21 @@ export default class Command{
         objs.forEach(obj => {
             obj.move();
         });
+    }
+    //
+    /**
+     * update the values of all or some objects
+     * @param {Array<Object>} objs list of objects to update
+     */
+    updateGrid(objs){
+        if(!objs){
+            objs = this.objects;
+        }
+        //
+        objs.forEach(obj => {
+            obj.update();
+        });
+        this.moveSelects();
     }
     //
     /**
@@ -188,10 +214,12 @@ export default class Command{
             objs = this.objects;
         }
         //
+        var objIds = [];
         objs.forEach(obj => {
             obj.spawnExtremes();
+            objIds.push(this.objects.indexOf(obj));
         });
-        this.timeline.repoint();
+        this.timeline.spawnExtremes(objIds);
     }
     //
     /**
@@ -202,6 +230,21 @@ export default class Command{
         if(!objs){
             objs = this.objects;
         }
+        //
+        this.timeline.movePoints(this.findIdxs(objs));
+    }
+    //
+    /**
+     * Find indexs of objects
+     * @param {Array<Object>} objs list of objects to find the index of
+     * @returns {Array<Number>} list of indexs of those objects (in order)
+     */
+    findIdxs(objs){
+        var idxs = [];
+        objs.forEach(obj => {
+            idxs.push(this.objects.indexOf(obj));
+        });
+        return idxs;
     }
     //#endregion
     //
@@ -256,6 +299,7 @@ export default class Command{
         this.idCount++;
         this.select(this.selected);
         this.selected.self.raise();
+        this.drawTimeline();
     }
     //#endregion
     //
@@ -282,6 +326,15 @@ export default class Command{
             this.selObs = [obj];
             obj.self.raise();
         }
+    }
+    //
+    /**
+     * move all selection SVG elements
+     */
+    moveSelects(){
+        this.sels.forEach((sel, idx) => {
+            sel.attr("cx", this.scaleX(this.selObs[idx].px)).attr("cy", this.scaleY(this.selObs[idx].py));
+        });
     }
     //
     /**

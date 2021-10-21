@@ -41,7 +41,6 @@ export default class Input{
                 case "a":
                     if(!adding){
                         command.newObject(mX, mY);
-                        input.active.repos(mX, mY);
                         adding = true;
                     }
                     break;
@@ -138,11 +137,17 @@ export default class Input{
                     command.shiftView(emx - mX, emy - mY);
                     break;
                 case 2:
-                    this.command.shiftObj(emx - mX, emy - mY);
+                    this.selected.shiftValue(0, emx - mX, emy - mY);
+                    this.command.updateGrid([this.command.selected]);
+                    this.command.moveGrid([this.command.selected]);
+                    this.command.drawGrid();
+                    this.command.spawnExtremes([this.command.selected]);
+                    //this.command.shiftObj(emx - mX, emy - mY);
                     break;
                 case 3: 
-                    this.active.repos(emx, emy);
-                    //this.command.shiftObj(emx - mX, emy - mY);
+                    this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
+                    this.command.updateGrid([this.active]);
+                    this.command.moveGrid([this.active]);
                     break;
                 case 4:
                     this.active.reval(emx, emy);
@@ -167,7 +172,19 @@ export default class Input{
         });
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
-            if(this.moveState == 3){//position had been confirmed
+            if(this.moveState == 3){//position has been confirmed
+                command.vectorMode = 1;
+                this.command.toggleVectors();
+                this.moveState = 0;
+                this.command.drawGrid();
+                this.command.spawnExtremes([this.selected]);
+            }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
+                //
+            }else{//movement
+                //
+            }
+            this.moveState = 0;
+            /*if(this.moveState == 3){//position had been confirmed
                 command.vectorMode = 1;
                 command.updateVectors();
                 this.moveState = 0;
@@ -186,7 +203,7 @@ export default class Input{
                 }
                 this.moveState = 0;
                 //console.log(this.command.selObs);
-            }
+            }*/
         });
         //
         this.timeline.svg.on("mousedown", function(){
@@ -267,7 +284,6 @@ export default class Input{
             }
             input.active = obj;
             input.selected = obj;
-            obj.command.retime(0);
             if(input.shifting){//shift key is pressed
                 //console.log("Shifting");
                 input.command.shiftSelect(obj);

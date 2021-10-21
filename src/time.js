@@ -50,7 +50,7 @@ export default class Timeline{
     }
     //
     /**
-     * reformat canvas on resize event
+     * Reformat canvas on resize event
      */
     resize(){
         this.calcSize();
@@ -58,13 +58,21 @@ export default class Timeline{
         this.canvas.height = this.scrH;
     }
     //
-    repos(px){//reposition field
+    /**
+     * shift the view position of the timeline
+     * @param {Number} px 
+     */
+    shiftPos(px){//reposition field
         this.cx -= this.conX(px);
         //
         this.calcSize();
-        //this.drawField();
     }
     //
+    /**
+     * zoom timeline view around mouse position
+     * @param {Number} c  amount to change by (multiplier)
+     * @param {Number} px x position to zoom around in pixels
+     */
     zoom(c, px){
         this.scale *= c;
         //
@@ -82,10 +90,17 @@ export default class Timeline{
         //
         this.calcSize();
     }
+    /**
+     * find the distance between grid units of res
+     * @returns distance between grid lines in pixels
+     */
     getGridRes(){
         return this.scrW / (this.scale / this.res);
     }
     //
+    /**
+     * update cursor position
+     */
     move(){
         let x = this.timeX(this.command.time);
         let x1 = x - (this.triSize / 2);
@@ -115,8 +130,13 @@ export default class Timeline{
         });
     }
     //
-    repoint(){
-        this.command.objects.forEach((obj, idx) => {
+    /**
+     * respawn extremes of given points in timeline
+     * @param {Array<Number} objIds ids of all objects to respawn extremes for
+     */
+    spawnExtremes(objIds){
+        objIds.forEach(idx => {
+            let obj = this.command.objects[idx];
             if(idx < this.timePoints.length){//object has already been pointed
                 var n;
                 for(n = 0; n < this.timePoints[idx].length && n < obj.extremes.length; n++){//set position for every point that already exists

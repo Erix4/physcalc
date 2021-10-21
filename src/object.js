@@ -227,6 +227,10 @@ export default class Object{
         this.profile.setValues(power, xPos, yPos);
     }
     //
+    shiftCompValue(power, idx, xShift, yShift){
+        //DO THIS
+    }
+    //
     /**
      * lock the object so it slide in time
      */
@@ -476,13 +480,8 @@ class netArrow{
     }
     //
     reval(px, py){
-        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
-        let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
-        //
-        this.profile.setValues(this.depth, x, y);
-        //this.command.draw();
-        //this.obj.update();
-        this.command.objUpdate(this.obj);
+        this.obj.shiftValue(this.depth, px, py);
+        this.funcChange([this.obj]);
     }
 }
 
@@ -547,6 +546,12 @@ class compArrow{
         this.profile.setCompVal(this.depth, this.idx, x, y);
         this.command.objUpdate(this.obj);
         this.obj.update();
+    }
+    //
+    reval(px, py){
+        this.obj.shiftValue(this.depth, px, py);
+        //
+        this.funcChange([this.obj]);
     }
     //
     show(){

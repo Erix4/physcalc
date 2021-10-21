@@ -27,6 +27,9 @@ export default class Grid{
         this.draw(ctx);
     }
     //
+    /**
+     * Recalculate grid scale (scaleX, scaleY)
+     */
     calcSize(){
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
@@ -46,6 +49,9 @@ export default class Grid{
         this.conY = d3.scaleLinear().domain([0, this.scrH]).range([0, -this.scale]);
     }
     //
+    /**
+     * Resize canvas on resize event
+     */
     resize(){
         this.calcSize();
         this.command.canvas.width = this.scrW;
@@ -65,6 +71,12 @@ export default class Grid{
         this.calcSize();
     }
     //
+    /**
+     * Change scale of field
+     * @param {Number} c  change amount (multiplier)
+     * @param {Number} px zoom center x in pixels
+     * @param {Number} py zoom center y in pixels
+     */
     zoom(c, px, py){
         let pScale = this.scale
         this.scale *= c;
@@ -85,6 +97,10 @@ export default class Grid{
         //
         this.calcSize();
     }
+    /**
+     * find size of displayed grid units (in pixels) 
+     * @returns pixels in between each grid line
+     */
     getGridRes(){
         return this.scrH / (this.scale / this.res);
     }
