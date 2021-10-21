@@ -97,13 +97,12 @@ export default class Input{
                 case "v":
                     switch(command.vectorMode){
                         case 2:
-                            command.vectorMode = 0;
+                            this.command.toggleVectors(0);
                             break;
                         default:
-                            command.vectorMode++;
+                            this.command.toggleVectors(command.vectorMode++);
                             break;
                     }
-                    command.updateVectors();
                     break;
                 case "Enter":
                     break;
@@ -134,7 +133,7 @@ export default class Input{
             //
             switch(this.moveState){
                 case 1:
-                    command.shiftView(emx - mX, emy - mY);
+                    this.command.shiftView(emx - mX, emy - mY);
                     break;
                 case 2:
                     this.selected.shiftValue(0, emx - mX, emy - mY);
@@ -173,8 +172,7 @@ export default class Input{
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
-                command.vectorMode = 1;
-                this.command.toggleVectors();
+                this.command.toggleVectors(1);
                 this.moveState = 0;
                 this.command.drawGrid();
                 this.command.spawnExtremes([this.selected]);

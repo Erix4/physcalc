@@ -73,6 +73,8 @@ export default class Command{
         this.grid.shiftPos(cx, cy);
         this.drawGrid();
         this.moveGrid();
+        this.moveSelects();
+        this.movePoints()//add function to object to shift extreme point positions
     }
     //
     /**
@@ -192,7 +194,7 @@ export default class Command{
      * @param {Array<Object>} [objs] list of objects to toggle
      * @param {Number} [mode]        vector mode to set objects to
      */
-    toggleVectors(objs, mode){
+    toggleVectors(mode, objs){
         if(!objs){
             objs = this.objects;
         }
