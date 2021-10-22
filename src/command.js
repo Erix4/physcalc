@@ -54,6 +54,8 @@ export default class Command{
         this.sels = [];
         this.selObs = [];
         //
+        this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
+        //
         //this.func = new Func(1000, [1, 1]);
         //this.func.resolve([[31, 0, -2], [-1, 0, 0], [14, 1, 1], [38, 2, -2]]);
         //this.func.draw(this, -10, 10);
@@ -171,6 +173,7 @@ export default class Command{
             objs = this.objects;
         }
         //
+        this.objects = this.objects.filter(obj => !obj.toBeDeleted);
         objs.forEach(obj => {
             obj.update();
         });
@@ -255,6 +258,10 @@ export default class Command{
         });
     }
     //
+    deleteExtreme(obj){
+        this.timeline.deleteExtreme(this.findIdxs([obj])[0]);
+    }
+    //
     /**
      * Find indexs of objects
      * @param {Array<Object>} objs list of objects to find the index of
@@ -293,7 +300,7 @@ export default class Command{
      * @param {Object} obj   object to set position of
      */
     setPos(power, px, py, obj){
-        obj.setPos(power, px, py);
+        obj.setValue(power, px, py);
     }
     //
     /**
@@ -344,6 +351,7 @@ export default class Command{
                 sell.remove();
             });
             this.sels = [];
+            this.selObs = [];
         }else if(!this.input.shifting){
             this.sels.forEach(sell => {
                 sell.remove();
@@ -407,8 +415,26 @@ export default class Command{
      * @param {Number} nx new mouse x value in pixels
      * @param {Number} ny new mouse y value in pixels
      */
-    dragSelect(sx, sy, lx, ly, nx, ny){
+    dragSelect(sx, sy, nx, ny){
+        this.select();
+        if(nx > sx){
+            this.dragBox.attr("x", sx).attr("width", nx - sx);
+        }else{
+            this.dragBox.attr("x", nx).attr("width", sx - nx);
+        }
         //
+        if(ny > sy){
+            this.dragBox.attr("y", sy).attr("height", ny - sy);
+        }else{
+            this.dragBox.attr("y", ny).attr("height", sy - ny);
+        }
+        this.dragBox.style("visibility", "visible");
+        //
+        this.objects.forEach(obj => {
+            if(inBounds(obj.self.attr("cx"), obj.self.attr("cy"), sx, sy, nx, ny)){
+                this.shiftSelect(obj);
+            }
+        });
     }
     //
     /**
@@ -528,4 +554,11 @@ export default class Command{
         this.select(this.selected);
         this.selected.self.raise();
     }*/
+}
+
+function inBounds(x, y, x1, y1, x2, y2){
+    return (((x1 < x && x < x2) ||
+            (x1 > x && x > x2)) &&
+             ((y1 < y && y < y2) ||
+             (y1 > y && y > y2)));
 }

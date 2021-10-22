@@ -188,6 +188,14 @@ export default class Timeline{
         });
     }
     //
+    deleteExtreme(objIdx){
+        console.log(`idx: ${objIdx}`);
+        this.timePoints[objIdx].forEach(point => {
+            point.remove();
+        });
+        this.timePoints.splice(objIdx, 1);
+    }
+    //
     /**
      * draw the grid lines on the timeline
      */

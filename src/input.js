@@ -3,7 +3,6 @@ export default class Input{
         this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
         var adding = false;//track when add button is pressed
         this.shifting = false;
-        this.dragging = false;//track is mouse is being dragged
         //
         this.overState = 0;//track what the mouse is over, 0 = field, 1 = header, 2 = left column, 3= timeline
         //
@@ -74,6 +73,7 @@ export default class Input{
                 case "Backspace":
                     if(!this.propsState){
                         this.command.selObs.forEach(obj => {
+                            console.log("Deleting object");
                             obj.delete();
                         });
                         this.command.select();
@@ -139,15 +139,18 @@ export default class Input{
             //
             switch(this.moveState){
                 case 1:
-                    this.command.shiftView(emx - mX, emy - mY);
+                    if(this.shifting){
+                        this.command.dragSelect(stX, stY, emx, emy);
+                    }else{
+                        this.command.shiftView(emx - mX, emy - mY);
+                    }
                     break;
                 case 2:
-                    this.selected.shiftValue(0, emx - mX, emy - mY);
+                    this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);
                     this.command.updateGrid(this.command.selObs);
                     this.command.moveGrid(this.command.selObs);
                     this.command.drawGrid();
                     this.command.spawnExtremes(this.command.selObs);
-                    //this.command.shiftObj(emx - mX, emy - mY);
                     break;
                 case 3: 
                     this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
@@ -187,11 +190,17 @@ export default class Input{
                 switch(this.moveState){
                     case 1:
                         this.command.select();
+                        this.active = null;
+                        this.selected = null;
                         break;
+                    case 2:
+                        this.command.select(this.selected);
+                        this.selected.self.raise();
                 }
             }else{//movement
                 //
             }
+            this.command.dragBox.style("visibility", "hidden");
             this.moveState = 0;
             /*if(this.moveState == 3){//position had been confirmed
                 command.vectorMode = 1;
@@ -255,7 +264,6 @@ export default class Input{
     newPoint(point){
         var input = this;
         point.on("mousedown", function(){
-            input.command.setTime(parseFloat(point.attr("val")));
             input.moveState = 6;
             let id = parseInt(point.attr("ob"))
             console.log(id);
@@ -263,6 +271,7 @@ export default class Input{
             console.log(`idx: ${idx}`);
             input.selected = input.command.objects[idx];
             console.log("Going to time");
+            input.command.select(input.command.objects[idx]);
         });
         //
         point.on("mouseenter", function(){
@@ -306,14 +315,14 @@ export default class Input{
             input.active = obj;
             input.selected = obj;
             if(input.shifting){//shift key is pressed
-                //console.log("Shifting");
+                console.log("Shifting");
                 input.command.shiftSelect(obj);
-            }else if(input.command.selObs.length == 1){//only one object selected
+            }else if(input.command.selObs.length <= 1){//only one object selected
+                console.log("Raising");
                 input.command.select(obj);
-                //console.log("Raising");
             }else{//multiple objects selected
+                console.log("Remaining");
                 input.command.mainSelect(obj);
-                //console.log("Remaining");
             }
         });
     }

@@ -121,6 +121,7 @@ export default class Object{
     update(){
         if(this.lock){
             this.setValue(0, this.px, this.py);//resolve function to shift the time
+            this.command.retimeExtremes([this]);
         }
         this.px = this.profile.calc(0, this.command.time)[0];
         this.py = this.profile.calc(0, this.command.time)[1];
@@ -351,7 +352,14 @@ export default class Object{
             });
         });
         //
-        this.command.update();
+        this.points.forEach(point => {
+            point.remove();
+        });
+        //
+        this.command.deleteExtreme(this);
+        this.command.updateGrid();
+        this.command.drawGrid();
+        this.command.drawTimeline();
         this.command.select();
     }
     //
