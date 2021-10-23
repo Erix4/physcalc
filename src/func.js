@@ -58,6 +58,12 @@ export default class Profile{
         }
     }
     //
+    setValTime(power, t, x, y){
+        this.paras[power].setOff(t, x, y);
+        this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());
+        this.propagate(power);
+    }
+    //
     setValues(power, x, y){
         //console.log(arguments);
         //console.log(`Setting values at power ${power} to (${x.toFixed(2)}, ${y.toFixed(2)})`);
@@ -155,14 +161,14 @@ export default class Profile{
         });
     }
     //
-    setOrigin(power){
-        if(arguments.length > 0){
-            this.paras[power].xFunc.origin = this.command.time;
-            this.paras[power].yFunc.origin = this.command.time;
+    setOrigin(time, power){
+        if(power || power == 0){
+            this.paras[power].xFunc.origin = time;
+            this.paras[power].yFunc.origin = time;
         }else{
             this.paras.forEach(para => {
-                para.xFunc.origin = this.command.time;
-                para.yFunc.origin = this.command.time;
+                para.xFunc.origin = time;
+                para.yFunc.origin = time;
             });
         }
     }

@@ -118,16 +118,25 @@ export default class Input{
             }
         })
         //
+        document.addEventListener("mousedown", function(){
+            var emx = event.clientX;
+            var emy = event.clientY;
+            emx -= parseInt(d3.select("#leftcolumn").style("width"));
+            emy -= parseInt(d3.select("#header").style("height"));
+            //
+            stX = emx;
+            stY = emy;
+            //
+            mX = emx;
+            mY = emy;
+        });
+        //
         command.svg.on("mousedown", function(){
-            let mouse = d3.mouse(this);
             input.propsState = false;
             //
             if(input.moveState == 0){
                 input.moveState = 1;
             }
-            //
-            stX = mouse[0];
-            stY = mouse[1];
         });
         //
         document.addEventListener("mousemove", event => {
@@ -164,8 +173,9 @@ export default class Input{
                     command.setTime(command.timeline.timeX.invert(event.clientX));
                     break;
                 case 6:
-                    command.time = command.timeline.timeX.invert(event.clientX);
-                    this.selected.setValue(0, this.selected.px, this.selected.py);
+                    //command.time = command.timeline.timeX.invert(event.clientX);
+                    console.log(command.timeline.timeX.invert(event.clientX));
+                    this.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.selected.px, this.selected.py);
                     command.timeline.move();
                     command.updateGrid();
                     command.moveGrid();
@@ -175,18 +185,19 @@ export default class Input{
                     break;
             }
             //
-            //console.log(emy);
             mX = emx;
             mY = emy;
         });
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
+            console.log(`End at ${this.moveState}`);
             if(this.moveState == 3){//position has been confirmed
                 this.command.toggleVectors(1);
                 this.moveState = 0;
                 this.command.drawGrid();
                 this.command.spawnExtremes([this.selected]);
             }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
+                console.log("Cursor still");
                 switch(this.moveState){
                     case 1:
                         this.command.select();
@@ -196,6 +207,15 @@ export default class Input{
                     case 2:
                         this.command.select(this.selected);
                         this.selected.self.raise();
+                        break;
+                    case 6:
+                        console.log("Going to time");
+                        this.command.time = (parseFloat(this.active.attr("val")));
+                        command.timeline.move();
+                        command.updateGrid();
+                        command.moveGrid();
+                        command.timeline.movePoints();
+                        break;
                 }
             }else{//movement
                 //
@@ -270,7 +290,7 @@ export default class Input{
             let idx = input.command.objects.findIndex(obj => obj.id == id);
             console.log(`idx: ${idx}`);
             input.selected = input.command.objects[idx];
-            console.log("Going to time");
+            input.active = point;
             input.command.select(input.command.objects[idx]);
         });
         //

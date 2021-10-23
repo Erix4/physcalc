@@ -131,7 +131,7 @@ export default class Object{
         }
         //
         this.updateVectors();
-        this.profile.setOrigin();
+        this.profile.setOrigin(this.command.time);
     }
     //
     /**
@@ -259,6 +259,11 @@ export default class Object{
      */
     setValue(power, xPos, yPos){
         this.profile.setValues(power, xPos, yPos);
+    }
+    //
+    setValueTime(power, time, xPos, yPos){
+        this.profile.setValTime(power, time, xPos, yPos);
+        this.profile.setOrigin(time, power);
     }
     //
     /**
