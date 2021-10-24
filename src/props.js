@@ -15,9 +15,7 @@ export default class Props{
         this.accelx = d3.select("#accelx");
         this.accely = d3.select("#accely");
         //
-        this.t.on("input", function(){
-            command.setTime(this.value, true);
-        });
+        this.t.property("value", this.command.time.toFixed(3));
         //
         var self = this;
         //

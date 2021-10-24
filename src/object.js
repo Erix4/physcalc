@@ -131,7 +131,6 @@ export default class Object{
         }
         //
         this.updateVectors();
-        this.profile.setOrigin(this.command.time);
     }
     //
     /**
@@ -198,13 +197,13 @@ export default class Object{
     draw(input){
         if((input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
-            this.profile.draw(0, 500);
+            this.profile.draw(0, 200);
             //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.command.ctx.globalAlpha = 1.0;
             this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
         }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
-            this.profile.draw(0, 500);
+            this.profile.draw(0, 300);
             //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
@@ -259,11 +258,19 @@ export default class Object{
      */
     setValue(power, xPos, yPos){
         this.profile.setValues(power, xPos, yPos);
+        this.profile.setOrigin(this.command.time);
     }
     //
+    /**
+     * Set the value and reset the origin to a specific time
+     * @param {power} power power of value to set
+     * @param {time} time   time to set new value at
+     * @param {xPos} xPos   x position to set value to in pixels
+     * @param {yPos} yPos   y position to set value to in pixels
+     */
     setValueTime(power, time, xPos, yPos){
         this.profile.setValTime(power, time, xPos, yPos);
-        this.profile.setOrigin(time, power);
+        this.profile.setOrigin(time);
     }
     //
     /**
@@ -562,6 +569,7 @@ class netArrow{
         let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         this.obj.setValue(this.depth, x, y);
+        this.command.updateGrid([this.obj]);
         this.command.funcChange([this.obj]);
         this.obj.updateVectors(this.depth);
         this.obj.moveVectors(this.depth);
@@ -577,10 +585,7 @@ class compArrow{
         //
         this.profile = obj.profile;
         //
-        console.log(this.obj.comps);
         this.pos = this.profile.comps[depth][idx].calc(command.time);
-        console.log(this.pos);
-        console.log(`depth: ${depth}, idx: ${idx}, length: ${this.profile.comps[depth].length}`);
         if(this.idx == this.profile.comps[depth].length - 1){
             this.ex = obj.px + this.pos[0] * obj.arrStr;
             this.ey = obj.py + this.pos[1] * obj.arrStr;
@@ -627,6 +632,7 @@ class compArrow{
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         //
         this.obj.setCompValue(this.depth, this.idx, x, y);
+        this.command.updateGrid([this.obj]);
         this.command.funcChange([this.obj]);
         this.obj.updateVectors(this.depth);
         this.obj.moveVectors(this.depth);

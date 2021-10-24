@@ -168,7 +168,7 @@ export default class Command{
      * update the values of all or some objects
      * @param {Array<Object>} [objs] list of objects to update
      */
-    updateGrid(objs){
+    updateGrid(objs, noProps){
         if(!objs){
             objs = this.objects;
         }
@@ -178,6 +178,9 @@ export default class Command{
             obj.update();
         });
         this.moveSelects();
+        if(!noProps){
+            this.props.update(this.selected);
+        }
     }
     //
     /**
@@ -190,6 +193,7 @@ export default class Command{
         }
         //
         this.timeline.move();
+        this.props.retime();
     }
     //
     /**
@@ -197,6 +201,13 @@ export default class Command{
      * @param {Array<Object>} objs list of objects to update the functions for
      */
     funcChange(objs){
+        this.drawGrid();
+        this.spawnExtremes(objs);
+    }
+    //
+    objPosChange(objs, noProps=false){
+        this.updateGrid(objs, noProps);
+        this.moveGrid(objs);
         this.drawGrid();
         this.spawnExtremes(objs);
     }
@@ -319,7 +330,7 @@ export default class Command{
         this.time = t;
         this.updateGrid();
         this.moveGrid();
-        this.timeline.move();
+        this.moveTimeline();
     }
     //
     /**
@@ -361,6 +372,8 @@ export default class Command{
                     .attr("cx", this.scaleX(obj.px))
                     .attr("cy", this.scaleY(obj.py))];
             this.selObs = [obj];
+            this.selected = obj;
+            this.props.update(this.selected);
             obj.self.raise();
         }
     }

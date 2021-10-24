@@ -41,7 +41,20 @@ h1{
     margin: 0;
     background-color: #bec5ad;
     border-bottom: #254441;
+    padding-right: 4px;
 }
+
+/*#leftcolumn::after {
+    content: '';
+    background-color: #ccc;
+    right: 4px;
+    width: 4px;
+    height: 100%;
+    cursor: ew-resize;
+    position: absolute;
+    top: 0;
+    display: inline-block;
+}*/
 
 p{
     margin: 0;

@@ -12,8 +12,6 @@ export default class Input{
         this.command = command;
         this.timeline = command.timeline;
         //
-        this.selected = command.selected;
-        //
         this.active = null;
         //
         this.test = 1;
@@ -23,6 +21,9 @@ export default class Input{
         var stY = 0;
         var mX = 0;
         var mY = 0;
+        //
+        this.tX = 0;
+        this.tY = 0;
         //
         let canox = parseInt(d3.select("#leftcolumn").style("width"));
         let canoy = parseInt(d3.select("#header").style("height"));
@@ -144,7 +145,7 @@ export default class Input{
             var emy = event.clientY;
             emx -= parseInt(d3.select("#leftcolumn").style("width"));
             emy -= parseInt(d3.select("#header").style("height"));
-            console.log(this.moveState);
+            //console.log(this.moveState);
             //
             switch(this.moveState){
                 case 1:
@@ -156,10 +157,7 @@ export default class Input{
                     break;
                 case 2:
                     this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);
-                    this.command.updateGrid(this.command.selObs);
-                    this.command.moveGrid(this.command.selObs);
-                    this.command.drawGrid();
-                    this.command.spawnExtremes(this.command.selObs);
+                    this.command.objPosChange(this.selObs);
                     break;
                 case 3: 
                     this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
@@ -173,10 +171,7 @@ export default class Input{
                     command.setTime(command.timeline.timeX.invert(event.clientX));
                     break;
                 case 6:
-                    //command.time = command.timeline.timeX.invert(event.clientX);
-                    console.log(command.timeline.timeX.invert(event.clientX));
-                    this.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.selected.px, this.selected.py);
-                    command.timeline.move();
+                    this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
                     command.updateGrid();
                     command.moveGrid();
                     command.timeline.movePoints();
@@ -190,26 +185,23 @@ export default class Input{
         });
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
-            console.log(`End at ${this.moveState}`);
             if(this.moveState == 3){//position has been confirmed
                 this.command.toggleVectors(1);
                 this.moveState = 0;
                 this.command.drawGrid();
-                this.command.spawnExtremes([this.selected]);
+                this.command.spawnExtremes([this.command.selected]);
             }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
-                console.log("Cursor still");
                 switch(this.moveState){
                     case 1:
                         this.command.select();
                         this.active = null;
-                        this.selected = null;
+                        this.command.selected = null;
                         break;
                     case 2:
-                        this.command.select(this.selected);
-                        this.selected.self.raise();
+                        this.command.select(this.command.selected);
+                        this.command.selected.self.raise();
                         break;
                     case 6:
-                        console.log("Going to time");
                         this.command.time = (parseFloat(this.active.attr("val")));
                         command.timeline.move();
                         command.updateGrid();
@@ -222,26 +214,6 @@ export default class Input{
             }
             this.command.dragBox.style("visibility", "hidden");
             this.moveState = 0;
-            /*if(this.moveState == 3){//position had been confirmed
-                command.vectorMode = 1;
-                command.updateVectors();
-                this.moveState = 0;
-                command.update();
-            }else{
-                if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState == 1){//click on grid, no movement (y start has to be rounded for some reason)
-                    console.log("trying to hide");
-                    command.select();//deselect all
-                    this.active = null;
-                    this.selected = null;
-                }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0) && input.moveState == 2 && !this.shifting){//click on object no movement
-                    input.command.select(this.selected);
-                    this.selected.self.raise();
-                }else if(input.moveState == 2){
-                    this.selected.self.raise();
-                }
-                this.moveState = 0;
-                //console.log(this.command.selObs);
-            }*/
         });
         //
         this.timeline.svg.on("mousedown", function(){
@@ -289,9 +261,14 @@ export default class Input{
             console.log(id);
             let idx = input.command.objects.findIndex(obj => obj.id == id);
             console.log(`idx: ${idx}`);
-            input.selected = input.command.objects[idx];
+            input.command.selected = input.command.objects[idx];
             input.active = point;
             input.command.select(input.command.objects[idx]);
+            //
+            input.tX = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[0];
+            input.tY = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[1];
+            input.command.selected.profile.setOrigin(parseFloat(point.attr("val")));
+            console.log(`X: ${input.tX}, Y: ${input.tY} @ t=${point.attr("val")}`);
         });
         //
         point.on("mouseenter", function(){
@@ -329,19 +306,20 @@ export default class Input{
         var input = this;
         //console.log("object clicked");
         obj.self.on("mousedown", function(){//when object clicked
+            input.active = obj;
+            input.command.selected = obj;
             if(input.moveState == 0){//this is here for a reason, idiot
+                input.command.selected.profile.setOrigin(input.command.time);
                 input.moveState = 2;
             }
-            input.active = obj;
-            input.selected = obj;
             if(input.shifting){//shift key is pressed
-                console.log("Shifting");
+                //console.log("Shifting");
                 input.command.shiftSelect(obj);
             }else if(input.command.selObs.length <= 1){//only one object selected
-                console.log("Raising");
+                //console.log("Raising");
                 input.command.select(obj);
             }else{//multiple objects selected
-                console.log("Remaining");
+                //console.log("Remaining");
                 input.command.mainSelect(obj);
             }
         });
@@ -352,6 +330,7 @@ export default class Input{
         arrow.self.head.on("mousedown", function(){
             if(input.moveState == 0){
                 input.active = arrow;
+                input.command.select(arrow.obj);
                 input.moveState = 4;
             }
         });
@@ -359,8 +338,13 @@ export default class Input{
     //
     props(command, self){
         var input = this;
+        self.t.on("click", function(){
+            this.select();//selects values in field
+            input.propsState = true;
+            input.propActive = this;
+        });
         self.posx.on("click", function(){
-            this.select();
+            this.select();//selects values in field
             input.propsState = true;
             input.propActive = this;
         });
@@ -392,43 +376,61 @@ export default class Input{
         //
         self.posx.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(0, parseFloat(this.value), command.selected.py);
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(0, parseFloat(this.value), command.selected.py);
+                command.objPosChange([command.selected], true);
+            }
+        });
+        //
+        self.t.on("input", function(){
+            if(isNumeric(this.value)){
+                command.setTime(parseFloat(this.value));
             }
         });
         //
         self.posy.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(0, command.selected.px, parseFloat(this.value));
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(0, command.selected.px, parseFloat(this.value));
+                command.objPosChange([command.selected], true);
             }
         });
         //
         self.velx.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(1, parseFloat(this.value), parseFloat(self.vely.property("value")));
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(1, parseFloat(this.value), parseFloat(self.vely.property("value")));
+                command.updateGrid([command.selected], true);
+                command.funcChange([command.selected]);
+                command.selected.updateVectors(1);
+                command.selected.moveVectors(1);
             }
         });
         //
         self.vely.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(1, parseFloat(self.velx.property("value")), parseFloat(this.value));
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(1, parseFloat(self.velx.property("value")), parseFloat(this.value));
+                command.updateGrid([command.selected], true);
+                command.funcChange([command.selected]);
+                command.selected.updateVectors(1);
+                command.selected.moveVectors(1);
             }
         });
         //
         self.accelx.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(2, parseFloat(this.value), parseFloat(self.accely.property("value")));
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(2, parseFloat(this.value), parseFloat(self.accely.property("value")));
+                command.updateGrid([command.selected], true);
+                command.funcChange([command.selected]);
+                command.selected.updateVectors(2);
+                command.selected.moveVectors(2);
             }
         });
         //
         self.accely.on("input", function(){
             if(isNumeric(this.value)){
-                command.selected.profile.setValues(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
-                command.objUpdate(command.selected, true);
+                command.selected.setValue(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
+                command.updateGrid([command.selected], true);
+                command.funcChange([command.selected]);
+                command.selected.updateVectors(2);
+                command.selected.moveVectors(2);
             }
         });
     }

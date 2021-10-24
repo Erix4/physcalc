@@ -41,14 +41,52 @@ export default class Profile{
     //
     draw(power, steps){
         let para = this.paras[power];//get para by power
-        let dom = para.calcDomain(this.command);
-        //console.log(`Domain: ${dom}`);
-        //console.log(`Range from ${this.paras[power].calc(dom[0])} to ${this.paras[power].calc(dom[1])}`);
+        let dom = this.calcDomain();
         //
-        //console.log(`Origin at ${this.paras[power].calc(this.command.time)}`);
-        //console.log(`X is at ${this.paras[power].xFunc.calc(this.command.time)}`);
-        para.steps = steps;
-        para.draw(this.command, dom[0], dom[1]);//draw the para wherever it's on screen
+        dom.forEach(domain => {
+            para.draw(this.command, domain[0], domain[1], steps / dom.length);//draw the para wherever it's on screen
+        });
+    }
+    //
+    calcDomain(){
+        var vals = [];
+        this.paras[0].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
+            vals.push([val, 0])
+        })
+        this.paras[0].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
+            vals.push([val, 1]);//put them all in a list
+            //console.log(val);
+        });
+        //
+        vals.sort((a,b)=>a[0]-b[0]);//sort domain values numerically by first element
+        //
+        var ranges = [];
+        var x = false;
+        var y = false;
+        var visible = false;
+        vals.forEach(val => {
+            if(val[1] == 0){
+                if(this.paras[1].xFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                    return;
+                }
+                x = !x;
+            }else{
+                if(this.paras[1].yFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                    return;
+                }
+                y = !y;
+            }
+            //
+            if(x && y){
+                ranges.push([val[0]]);
+                visible = true;
+            }else if((!x || !y) && visible && ranges.length > 0){
+                ranges[ranges.length - 1].push(val[0]);
+                visible = false;
+            }
+        });
+        //
+        return ranges;//return ranges where function is visible
     }
     //
     fullSet(x, y){
@@ -65,21 +103,9 @@ export default class Profile{
     }
     //
     setValues(power, x, y){
-        //console.log(arguments);
-        //console.log(`Setting values at power ${power} to (${x.toFixed(2)}, ${y.toFixed(2)})`);
-        //console.log(`--1. Set offset at t=${this.command.time} to (${x}, ${y})`);
         this.paras[power].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
-        //console.log(`Complete, with x:[${this.paras[power].xFunc.getCoefs()}], y:[${this.paras[power].yFunc.getCoefs()}]`);
-        //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
-        //console.log(`Current vel: (${this.paras[1].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[1].yFunc.calc(this.command.time.toFixed(2))})`);
-        //console.log(`--2. Setting power`);
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());//update components
-        //console.log(`Complete, with comp 0 x:[${this.comps[power][0].xFunc.getCoefs()}], y:[${this.comps[power][0].yFunc.getCoefs()}]`);
-        //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
-        //console.log(`--3. Propagating at power ${power}`);
         this.propagate(power);//propagate new para to other powers
-        //console.log(`Complete, with x:[${this.paras[0].xFunc.getCoefs()}], y:[${this.paras[0].yFunc.getCoefs()}]`);
-        //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
     }
     //
     setPower(power, xCoefs, yCoefs, xOff, yOff){//set the net functions for a given power and changes top component so sum matches
@@ -298,20 +324,6 @@ export class Para{
         return [this.xFunc.calc(t), this.yFunc.calc(t)];
     }
     //
-    calcDomain(command){
-        //console.log(`Find y roots for ${command.scaleY.domain()[0]} and ${command.scaleY.domain()[1]}`);
-        var vals = this.xFunc.calcDomain(command.scaleX.domain()[0], command.scaleX.domain()[1]);//get x time domains
-        //console.log(vals);
-        //console.log(`Gives ${this.calc(vals[0])[0]} and ${this.calc(vals[1])[0]}`);
-        this.yFunc.calcDomain(command.scaleY.domain()[0], command.scaleY.domain()[1]).forEach(val => {//get y time domains
-            vals.push(val);//put them all in a list
-            //console.log(val);
-        });
-        //
-        vals.sort((a,b)=>a-b);//sort domain values numerically
-        return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
-    }
-    //
     setOff(t, x, y){
         if(arguments.length > 1){
             this.xFunc.setOff(t, x);
@@ -380,10 +392,14 @@ export class Para{
         }
     }
     //
-    draw(command, start, end){
+    draw(command, start, end, steps){
+        if(!steps){
+            steps = this.steps;
+        }
+        //
         var lp = this.calc(start);
         var np;
-        let loop = (end- start) / this.steps;
+        let loop = (end- start) / steps;
         var t = start;
         //
         //console.log(end + " but " + loop + " from " + start);
@@ -391,7 +407,7 @@ export class Para{
         ctx.strokeStyle = this.color;
         ctx.lineWidth = 5; 
         //
-        for(var n = 0; n < this.steps; n++){
+        for(var n = 0; n < steps; n++){
             np = this.calc(t + loop);
             //
             ctx.beginPath();
