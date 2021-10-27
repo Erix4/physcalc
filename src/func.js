@@ -120,6 +120,11 @@ export default class Profile{
         }else{
             //let idx = this.paras.length - power - 1;
             var sum;
+            //
+            while(xCoefs.length < this.paras[power].xFunc.terms.length){//if there are fewer coefficients given then already exist:
+                xCoefs.push(0);//set every higher coefficient to 0
+            }
+            //
             for(var n = xCoefs.length - 1; n >= 0; n--){//for every x coefficient of the x net
                 sum = 0;
                 for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
@@ -132,9 +137,13 @@ export default class Profile{
                 this.comps[power][0].setTermX(n, xCoefs[n] - sum);//set the current x coefficient of default component to value necessary to reach net goal
                 this.paras[power].setTermX(n, xCoefs[n]);//also flips the order (arguments are passed backwards for some reason)
             }
+            //
+            while(yCoefs.length < this.paras[power].yFunc.terms.length){//if there are fewer coefficients given then already exist:
+                yCoefs.push(0);//set every higher coefficient to 0
+            }
+            //
             for(var n = yCoefs.length - 1; n >= 0; n--){//for every y coefficient of the y net
                 sum = 0;
-                //console.log(`Setting terms at power ${n}`);
                 for(var a = 1; a < this.comps[power].length; a++){//for each component except the first, at the current derivative power
                     let comp = this.comps[power][a];
                     if(comp.yFunc.terms.length - 1 >= n){//check if coefficient exists in component
@@ -260,7 +269,6 @@ export default class Profile{
                 //console.log(current.yFunc.terms[a].coef / p);
                 newY.push(current.yFunc.terms[a].coef / p);
             }
-            //console.log(newY);
             this.setPower(n, newX, newY, timeOff[0], timeOff[1]);//change function
             //
             current = this.paras[n];//get new function to be integrated
@@ -322,6 +330,11 @@ export class Para{
     //
     calc(t){
         return [this.xFunc.calc(t), this.yFunc.calc(t)];
+    }
+    //
+    reset(){
+        this.xFunc.terms = [];
+        this.yFunc.terms = [];
     }
     //
     setOff(t, x, y){
@@ -474,8 +487,14 @@ export class Func{
         }
     }
     //
+    removeArbs(){
+        while(this.terms.length > 1 && this.terms[0].coef == 0){
+            this.terms.splice(0, 1);
+        }
+    }
+    //
     calcRoots(val = 0){//faulty, assuming term powers are in descending order: 2, 1, 0
-        //console.log(`Find roots for value ${val} in case ${this.terms.length}`);
+        this.removeArbs();
         switch(this.terms.length){
             case 1:
                 return [];//because value is constant, there are either no roots or infinite roots
@@ -555,7 +574,6 @@ export class Func{
         this.terms[this.terms.length - 1].coef += Yoffset;// - this.calc(Xoffset);
         //console.log(`Term changed to ${this.terms[this.terms.length - 1].coef} by ${Yoffset}`);
         this.origin = orxo;
-        //console.log(`Function set to ${this.getCoefs()}`);
         //console.log(`New origin is ${this.origin}`);
     }
     //

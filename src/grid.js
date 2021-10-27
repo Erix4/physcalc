@@ -78,8 +78,9 @@ export default class Grid{
      * @param {Number} py zoom center y in pixels
      */
     zoom(c, px, py){
-        let pScale = this.scale
-        this.scale *= c;
+        if(-Math.log10(this.scale) < 12 || c > 1){
+            this.scale *= c;
+        }
         //
         if(this.getGridRes() < this.gridMin){
             this.res *= 4;
@@ -145,8 +146,12 @@ export default class Grid{
     //
     colorLine(ctx, pos){
         let ctx2 = ctx;
-        let strength = 4 - Math.ceil(Math.abs((pos % this.superRes) / this.superRes)) - 2* Math.ceil(Math.abs(pos / 100000));//for every super res line, make more bold
+        if(pos == 0){
+            return 8;
+        }else{
+            let strength = 2 - Math.ceil(Math.abs((pos % this.superRes) / this.superRes));// - (1 + (Math.abs(pos) / pos));//for every super res line, make more bold
         return 2 * (strength - 1) + 1;
+        }
         console.log(strength);
         switch(strength){
             case 1:

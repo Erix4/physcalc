@@ -55,9 +55,19 @@ export default class Timeline{
     resize(){
         this.calcSize();
         this.canvas.width = this.scrW;
-        this.canvas.height = this.scrH;
         this.move();
         this.movePoints();
+        //
+        let fullH = d3.select("#scroll-i").style("height");
+        console.log(fullH);
+        if(this.command.objects.length * 12 > fullH){
+            console.log("Changing height");
+            this.canvas.height = this.command.objects.length * 12;
+            this.svg.style("height", this.command.objects.length * 12);
+        }else{
+            this.svg.style("height", fullH);
+            this.canvas.height = this.scrH;
+        }
     }
     //
     /**

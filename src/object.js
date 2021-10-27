@@ -129,6 +129,7 @@ export default class Object{
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
             this.yS[n] = this.profile.calc(n, this.command.time)[1];
         }
+        this.profile.setOrigin(this.command.time);
         //
         this.updateVectors();
     }
@@ -305,6 +306,7 @@ export default class Object{
         this.lock = !this.lock;
         if(this.lock){
             this.self.style("fill", "gray");
+            this.profile.setOrigin(this.command.time);
         }else{
             this.self.style("fill", this.color);
         }

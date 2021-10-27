@@ -88,6 +88,7 @@ export default class Input{
                 case "Enter":
                     if(this.propsState){
                         this.propActive.blur();
+                        this.command.props.update(this.command.selected);
                         this.propsState = false;
                     }
                     break;
@@ -186,6 +187,7 @@ export default class Input{
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
+                console.log(this.command.selected.profile.paras[0].xFunc);
                 this.command.toggleVectors(1);
                 this.moveState = 0;
                 this.command.drawGrid();
@@ -212,7 +214,17 @@ export default class Input{
             }else{//movement
                 //
             }
+            //
+            console.log(`State: ${input.moveState}, props: ${input.propsState}`);
+            if(input.moveState != 7 && input.propsState){
+                input.command.props.update(input.command.selected);
+                input.propsState = false;
+            }else if(input.propsState){
+                input.propActive.select();
+            }
+            //
             this.command.dragBox.style("visibility", "hidden");
+            this.command.props.renderEqs();
             this.moveState = 0;
         });
         //
@@ -339,46 +351,25 @@ export default class Input{
     props(command, self){
         var input = this;
         self.t.on("click", function(){
-            this.select();//selects values in field
-            input.propsState = true;
-            input.propActive = this;
+            input.fieldClick(this);
         });
-        self.posx.on("click", function(){
-            this.select();//selects values in field
-            input.propsState = true;
-            input.propActive = this;
+        self.posx.on("mousedown", function(){
+            input.fieldClick(this);
         });
-        self.posy.on("click", function(){
-            this.select();
-            input.propsState = true;
-            input.propActive = this;
+        self.posy.on("mousedown", function(){
+            input.fieldClick(this);
         });
-        self.velx.on("click", function(){
-            this.select();
-            input.propsState = true;
-            input.propActive = this;
+        self.velx.on("mousedown", function(){
+            input.fieldClick(this);
         });
-        self.vely.on("click", function(){
-            this.select();
-            input.propsState = true;
-            input.propActive = this;
+        self.vely.on("mousedown", function(){
+            input.fieldClick(this);
         });
-        self.accelx.on("click", function(){
-            this.select();
-            input.propsState = true;
-            input.propActive = this;
+        self.accelx.on("mousedown", function(){
+            input.fieldClick(this);
         });
-        self.accely.on("click", function(){
-            this.select();
-            input.propsState = true;
-            input.propActive = this;
-        });
-        //
-        self.posx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(0, parseFloat(this.value), command.selected.py);
-                command.objPosChange([command.selected], true);
-            }
+        self.accely.on("mousedown", function(){
+            input.fieldClick(this);
         });
         //
         self.t.on("input", function(){
@@ -387,52 +378,63 @@ export default class Input{
             }
         });
         //
+        self.posx.on("input", function(){
+            if(isNumeric(this.value)){
+                command.selected.setValue(0, parseFloat(this.value), command.selected.py);
+                command.objPosChange([command.selected], true);
+                input.command.props.renderEqs();
+            }
+        });
+        //
         self.posy.on("input", function(){
             if(isNumeric(this.value)){
                 command.selected.setValue(0, command.selected.px, parseFloat(this.value));
                 command.objPosChange([command.selected], true);
+                input.command.props.renderEqs();
             }
         });
         //
         self.velx.on("input", function(){
             if(isNumeric(this.value)){
                 command.selected.setValue(1, parseFloat(this.value), parseFloat(self.vely.property("value")));
-                command.updateGrid([command.selected], true);
-                command.funcChange([command.selected]);
-                command.selected.updateVectors(1);
-                command.selected.moveVectors(1);
+                input.valueUpdate(1);
             }
         });
         //
         self.vely.on("input", function(){
             if(isNumeric(this.value)){
                 command.selected.setValue(1, parseFloat(self.velx.property("value")), parseFloat(this.value));
-                command.updateGrid([command.selected], true);
-                command.funcChange([command.selected]);
-                command.selected.updateVectors(1);
-                command.selected.moveVectors(1);
+                input.valueUpdate(1);
             }
         });
         //
         self.accelx.on("input", function(){
             if(isNumeric(this.value)){
                 command.selected.setValue(2, parseFloat(this.value), parseFloat(self.accely.property("value")));
-                command.updateGrid([command.selected], true);
-                command.funcChange([command.selected]);
-                command.selected.updateVectors(2);
-                command.selected.moveVectors(2);
+                input.valueUpdate(2);
             }
         });
         //
         self.accely.on("input", function(){
             if(isNumeric(this.value)){
                 command.selected.setValue(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
-                command.updateGrid([command.selected], true);
-                command.funcChange([command.selected]);
-                command.selected.updateVectors(2);
-                command.selected.moveVectors(2);
+                input.valueUpdate(2);
             }
         });
+    }
+    //
+    fieldClick(elem){
+        this.propsState = true;
+        this.propActive = elem;
+        this.moveState = 7;
+    }
+    //
+    valueUpdate(power){
+        this.command.updateGrid([this.command.selected], true);
+        this.command.funcChange([this.command.selected]);
+        this.command.selected.updateVectors(power);
+        this.command.selected.moveVectors(power);
+        this.command.props.renderEqs();
     }
 }
 

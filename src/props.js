@@ -15,6 +15,7 @@ export default class Props{
         this.accelx = d3.select("#accelx");
         this.accely = d3.select("#accely");
         //
+        //
         this.t.property("value", this.command.time.toFixed(3));
         //
         var self = this;
@@ -37,9 +38,71 @@ export default class Props{
             this.accelx.property("value", this.selected.xS[2].toFixed(3));
             this.accely.property("value", this.selected.yS[2].toFixed(3));
             //
-            var x1Str = "\\(x(t) = " + (this.selected.xS[2] / 2).toFixed(3) + "t^2" + "\\)";
-            d3.select("#testeq").text(x1Str);
-            //MathJax.Hub.Queue(["Typeset", MathJax.Hub, 'demo']);
+        }
+    }
+    //
+    renderEqs(){
+        if(this.selected){
+            var str = `x(t)=`;
+            let len = this.selected.profile.paras[0].xFunc.terms.length - 1;
+            let num = 0;
+            for(var n = len; n > 0; n--){
+                num = this.selected.profile.paras[0].getTermX(n);
+                if(num >= 0 && n < len){
+                    str += "+";
+                }
+                if(Math.abs(num) != 1){
+                    str += `${round(num, 3)}`;
+                }else if(num < 0){
+                    str += "-";
+                }
+                str += `t`;
+                if(n > 1){
+                    str += `^${n}`;
+                }
+            }
+            num = this.selected.profile.paras[0].getTermX(0);
+            if(num >= 0){
+                str += "+";
+            }
+            str += `${round(num, 3)}`;
+            //
+            var math = MathJax.Hub.getAllJax("math")[0];
+            MathJax.Hub.Queue(["Text", math, str]);
+            //
+            MathJax.Hub.Queue(function(){
+                d3.select("#xeq").html(d3.select("#math").html());
+            });
+            //
+            str = `y(t)=`;
+            len = this.selected.profile.paras[0].yFunc.terms.length - 1;
+            for(var n = len; n > 0; n--){
+                num = this.selected.profile.paras[0].getTermY(n);
+                if(num >= 0 && n < len){
+                    str += "+";
+                }
+                if(Math.abs(num) != 1){
+                    str += `${round(num, 3)}`;
+                }else if(num < 0){
+                    str += "-";
+                }
+                str += `t`;
+                if(n > 1){
+                    str += `^${n}`;
+                }
+            }
+            num = this.selected.profile.paras[0].getTermY(0);
+            if(num >= 0){
+                str += "+";
+            }
+            str += `${round(num, 3)}`;
+            //
+            math = MathJax.Hub.getAllJax("math")[0];
+            MathJax.Hub.Queue(["Text", math, str]);
+            //
+            MathJax.Hub.Queue(function(){
+                d3.select("#yeq").html(d3.select("#math").html());
+            });
         }
     }
     //
@@ -50,4 +113,8 @@ export default class Props{
     newObj(){
         this.column.append("p", "hope");
     }
+}
+
+function round(number, places){
+    return Math.round(Math.pow(10, places) * number) / Math.pow(10, places);
 }

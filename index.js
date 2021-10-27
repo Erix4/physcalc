@@ -5,7 +5,16 @@ let svg = d3.select("#svg");
 
 import Command from "./src/command";
 
-let comm = new Command(loopStart, canvas, svg);
+let fullH = parseInt(d3.select("#scroll-i").style("height"));
+d3.select("#tsvg").style("height", fullH);
+d3.select("#tcan").style("height", fullH);
+document.getElementById("tcan").height = fullH;
+
+MathJax.Hub.Config({
+    messageStyle: "none"
+});  
+
+let comm = new Command(loopStart, canvas, svg);//start the website
 
 let lastTime = 0;
 
