@@ -343,7 +343,8 @@ export default class Command{
         this.input.active = new Object(this, this.idCount, px, py);
         this.objects.push(this.input.active);
         this.idCount++;
-        this.select(this.selected);
+        this.select(this.input.active);
+        console.log(this.selected);
         this.selected.self.raise();
         this.drawTimeline();
     }
@@ -353,15 +354,22 @@ export default class Command{
         this.objects.forEach(obj => {
             let comps = obj.profile.comps;
             comps.forEach(level => {
-                //
+                level.forEach(comp => {
+                    str += `${comp.xFunc.getCoefs()}y${comp.yFunc.getCoefs()}v`;
+                });
+                str = str.slice(0, -1);
+                str += `/`;
             });
-            str += `${obj.profile.paras[0].xFunc.getCoefs()}//${obj.profile.paras[0].yFunc.getCoefs()}\n`;
+            str = str.slice(0, -2);
+            str += `\n`;
         });
         console.log(str);
         download("filename.txt", str);
     }
     //
     openState(file){
+        var comm = this;
+        //
         console.log(file);
         const reader = new FileReader();
         reader.addEventListener('load', function() {//file reading is asynchronous, so this actually executes after the readAsText
@@ -369,16 +377,38 @@ export default class Command{
             objs.pop();
             console.log(objs);
             //
-            this.objects.forEach(obj => {
+            comm.objects.forEach(obj => {
                 obj.delete();
             });
-            this.select();
+            comm.select();
             //
             objs.forEach(obj => {
+                let yComps = [];
+                let xComps = [];
                 //
+                let levels = obj.split("/");
+                levels.forEach(level => {
+                    let yLevelComps = [];
+                    let xLevelComps = [];
+                    let comps = level.split("v");
+                    comps.forEach(comp => {
+                        let compS = comp.split("y");
+                        xLevelComps.push(compS[0].split(","));
+                        yLevelComps.push(compS[1].split(","));
+                    });
+                    console.log(xLevelComps);
+                    console.log(yLevelComps);
+                    xComps.push(xLevelComps);
+                    yComps.push(yLevelComps);
+                });
+                console.log(xComps);
+                console.log(yComps);
+                //
+                //make new object
             })
           });
-        reader.readAsText(file)
+        reader.readAsText(file);
+        d3.select("#getFile").style("pointer-events", "none");
     }
     //#endregion
     //

@@ -275,15 +275,20 @@ export default class Input{
             }
         });
         //
-        var dropbox = document.getElementById("getFile");
-        dropbox.addEventListener("dragenter", e => {
+        var dropbox = daocument.getElementById("getFile");
+        document.addEventListener("dragenter", e => {
+            console.log("drag entered");
+            d3.select("#getFile").style("pointer-events", "all");
             e.stopPropagation();
             e.preventDefault();
+        }, false);
+        dropbox.addEventListener("dragleave", e => {
+            console.log("drag left");
+            d3.select("#getFile").style("pointer-events", "none");
         }, false);
         dropbox.addEventListener("dragover", e => {
             e.stopPropagation();
             e.preventDefault();
-            console.log("Detecting drag");
         }, false);
         //
         dropbox.addEventListener("drop", e => {
