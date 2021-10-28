@@ -89,6 +89,10 @@ export default class Profile{
         return ranges;//return ranges where function is visible
     }
     //
+    setPos(xCoefs, yCoefs){
+        //this.setPower(0, )
+    }
+    //
     fullSet(x, y){
         console.log("Full set");
         for(var n = this.paras.length - 1; n >= 0; n--){

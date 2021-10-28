@@ -56,9 +56,9 @@ export default class Command{
         //
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
-        //this.func = new Func(1000, [1, 1]);
-        //this.func.resolve([[31, 0, -2], [-1, 0, 0], [14, 1, 1], [38, 2, -2]]);
-        //this.func.draw(this, -10, 10);
+        this.func = new Func(1000, [1, 1]);
+        this.func.resolve([[1, 0, 0], [10, 0, 1], [39, 0, 2]]);
+        this.func.draw(this, -10, 10);
         this.moveGrid()
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
@@ -341,13 +341,44 @@ export default class Command{
     newObject(px, py){
         this.input.moveState = 3;
         this.input.active = new Object(this, this.idCount, px, py);
-        this.selected = this.input.active;
-        this.selObs.push(this.input.active);
         this.objects.push(this.input.active);
         this.idCount++;
         this.select(this.selected);
         this.selected.self.raise();
         this.drawTimeline();
+    }
+    //
+    saveState(){
+        var str = "";
+        this.objects.forEach(obj => {
+            let comps = obj.profile.comps;
+            comps.forEach(level => {
+                //
+            });
+            str += `${obj.profile.paras[0].xFunc.getCoefs()}//${obj.profile.paras[0].yFunc.getCoefs()}\n`;
+        });
+        console.log(str);
+        download("filename.txt", str);
+    }
+    //
+    openState(file){
+        console.log(file);
+        const reader = new FileReader();
+        reader.addEventListener('load', function() {//file reading is asynchronous, so this actually executes after the readAsText
+            let objs = this.result.split("\n");
+            objs.pop();
+            console.log(objs);
+            //
+            this.objects.forEach(obj => {
+                obj.delete();
+            });
+            this.select();
+            //
+            objs.forEach(obj => {
+                //
+            })
+          });
+        reader.readAsText(file)
     }
     //#endregion
     //
@@ -463,110 +494,6 @@ export default class Command{
         this.sels[1].style("stroke", "#47d7ff");
     }
     //#endregion
-    //
-    /*update(){//update entire field and redraw canvas
-        this.objects = this.objects.filter(obj => !obj.toBeDeleted);
-        this.draw();
-        this.move();
-    }
-    //
-    move(){
-        this.selected = this.input.selected;
-        this.objects.forEach(obj => {
-            obj.update();
-        });
-        this.sels.forEach((sel, idx) => {
-            sel.attr("cx", this.scaleX(this.selObs[idx].px));
-            sel.attr("cy", this.scaleY(this.selObs[idx].py));
-        });
-        this.timeline.move();
-    }
-    //
-    draw(){//redraw canvas
-        this.grid.draw(this.ctx);
-        this.objects.forEach(obj => {
-            obj.draw(this.input);
-        });
-        this.timeline.draw();
-        this.timeline.move();
-    }
-    //
-    objUpdate(obj, inputMode){
-        obj.update();
-        this.draw();
-        this.timeline.repoint();
-        if(arguments.length < 2 || !inputMode){
-            this.props.update(obj);
-            this.props.retime();
-        }
-        this.select(obj);
-        this.sels[0].attr("cx", this.scaleX(this.selObs[0].px)).attr("cy", this.scaleY(this.selObs[0].py));
-    }
-    //
-    updateVectors(object, mode){
-        if(arguments.length == 0){
-            this.objects.forEach(obj => {
-                obj.updateVectors(this.vectorMode);
-            });
-        }else{
-            object.updateVectors(mode);
-        }
-    }
-    //
-    zoom(c, px , py){
-        this.grid.zoom(c, px, py);
-        this.update();
-    }
-    //
-    repos(px, py){
-        this.grid.repos(px, py);
-        this.update();
-        this.props.update(this.selected);
-    }
-    //
-    shiftObj(cx, cy){
-        var n = 0;
-        this.selObs.forEach(obj => {
-            //console.log("Calling repos");
-            obj.rekey({power: 0, xShift: cx, yShift: cy});
-            if(n == 0){
-                //this.sel.attr("cx", )
-            }
-        });
-        this.update();
-        this.timeline.draw();
-        this.timeline.repoint();
-        this.props.update(this.selected);
-    }
-    //
-    retime(dt, inputMode){
-        this.time += dt;
-        this.update();
-        this.props.update(this.selected);
-        if(arguments.length < 2 || !inputMode){//time directly set
-            this.props.retime();
-        }
-    }
-    setTime(time, inputMode = false){//same thing, just set instead of shift
-        this.retime(time - this.time, inputMode);
-    }
-    //
-    resize(){
-        this.grid.resize();
-        this.timeline.resize();
-        this.update();
-    }
-    //
-    newObject(px, py){
-        this.input.moveState = 3;
-        this.input.active = new Object(this, this.idCount, px, py);
-        this.selected = this.input.active;
-        this.selObs.push(this.input.active);
-        this.objects.push(this.input.active);
-        this.idCount++;
-        this.select(this.selected);
-        this.selected.self.raise();
-    }*/
 }
 
 function inBounds(x, y, x1, y1, x2, y2){
@@ -574,4 +501,17 @@ function inBounds(x, y, x1, y1, x2, y2){
             (x1 > x && x > x2)) &&
              ((y1 < y && y < y2) ||
              (y1 > y && y > y2)));
+}
+
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+  
+    element.style.display = 'none';
+    document.body.appendChild(element);
+  
+    element.click();
+  
+    document.body.removeChild(element);
 }

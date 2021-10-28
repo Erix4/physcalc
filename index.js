@@ -5,10 +5,10 @@ let svg = d3.select("#svg");
 
 import Command from "./src/command";
 
-let fullH = parseInt(d3.select("#scroll-i").style("height"));
-d3.select("#tsvg").style("height", fullH);
-d3.select("#tcan").style("height", fullH);
-document.getElementById("tcan").height = fullH;
+//let fullH = parseInt(d3.select("#scroll-i").style("height"));
+//d3.select("#tsvg").style("height", fullH);
+//d3.select("#tcan").style("height", fullH);
+//document.getElementById("tcan").height = fullH;
 
 MathJax.Hub.Config({
     messageStyle: "none"

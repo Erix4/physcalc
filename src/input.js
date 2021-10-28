@@ -3,6 +3,7 @@ export default class Input{
         this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
         var adding = false;//track when add button is pressed
         this.shifting = false;
+        this.controlling = false;
         //
         this.overState = 0;//track what the mouse is over, 0 = field, 1 = header, 2 = left column, 3= timeline
         //
@@ -95,6 +96,12 @@ export default class Input{
                 case "Shift":
                     this.shifting = true;
                     break;
+                case "Control":
+                    this.controlling = true;
+                    break;
+                case "s":
+                    this.command.saveState();
+                    break;
             }
         });
         document.addEventListener("keyup", event => {
@@ -116,6 +123,10 @@ export default class Input{
                     break;
                 case "Shift":
                     this.shifting = false;
+                    this.command.dragBox.style("visibility", "hidden");
+                    break;
+                case "Control":
+                    this.controlling = false;
                     break;
             }
         })
@@ -263,6 +274,28 @@ export default class Input{
                 d3.select("#backpl").attr("class", "fas fa-play");
             }
         });
+        //
+        var dropbox = document.getElementById("getFile");
+        dropbox.addEventListener("dragenter", e => {
+            e.stopPropagation();
+            e.preventDefault();
+        }, false);
+        dropbox.addEventListener("dragover", e => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log("Detecting drag");
+        }, false);
+        //
+        dropbox.addEventListener("drop", e => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log("Drop detected");
+            //
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            //
+            this.command.openState(files[0]);
+        }, false);
     }
     //
     newPoint(point){
@@ -327,6 +360,9 @@ export default class Input{
             if(input.shifting){//shift key is pressed
                 //console.log("Shifting");
                 input.command.shiftSelect(obj);
+                if(!input.command.selObs.includes(obj)){
+                    input.moveState = 0;
+                }
             }else if(input.command.selObs.length <= 1){//only one object selected
                 //console.log("Raising");
                 input.command.select(obj);
@@ -334,6 +370,9 @@ export default class Input{
                 //console.log("Remaining");
                 input.command.mainSelect(obj);
             }
+            input.command.selObs.forEach(obj => {
+                obj.profile.setOrigin(input.command.time);
+            });
         });
     }
     //

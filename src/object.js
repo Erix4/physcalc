@@ -114,6 +114,10 @@ export default class Object{
         command.drawTimeline();
     }
     //
+    setPosCoefs(coefs){
+        //
+    }
+    //
     //#region Illustration
     /**
      * Update all internal values by function
@@ -122,6 +126,7 @@ export default class Object{
         if(this.lock){
             this.setValue(0, this.px, this.py);//resolve function to shift the time
             this.command.retimeExtremes([this]);
+            //this.profile.setOrigin(this.command.time);
         }
         this.px = this.profile.calc(0, this.command.time)[0];
         this.py = this.profile.calc(0, this.command.time)[1];
@@ -129,7 +134,6 @@ export default class Object{
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
             this.yS[n] = this.profile.calc(n, this.command.time)[1];
         }
-        this.profile.setOrigin(this.command.time);
         //
         this.updateVectors();
     }
