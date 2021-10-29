@@ -89,8 +89,28 @@ export default class Profile{
         return ranges;//return ranges where function is visible
     }
     //
-    setPos(xCoefs, yCoefs){
-        //this.setPower(0, )
+    setAllComps(comps){//format: level>list>xy>terms
+        this.comps = [];//delete all
+        comps.forEach((level, power) => {
+            let levelComps = [];
+            var xMax = 0;
+            var yMax = 0;
+            level.forEach(comp => {
+                levelComps.push(new Para(0, 1, comp[0].map(Number), comp[1].map(Number)));
+                console.log(comp[0].map(Number));
+                if(comp[0].length > xMax){
+                    xMax = comp[0].length;
+                }
+                if(comp[1].length > yMax){
+                yMax = comp[1].length;
+                }
+            });
+            //
+            this.comps.push(levelComps);
+            //
+            this.sumComps(power, xMax, yMax, false);
+            this.setValues(power, this.paras[power].calc(this.command.time)[0], this.paras[power].calc(this.command.time)[1], false);
+        });
     }
     //
     fullSet(x, y){
@@ -106,10 +126,12 @@ export default class Profile{
         this.propagate(power);
     }
     //
-    setValues(power, x, y){
+    setValues(power, x, y, propogator = true){
         this.paras[power].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());//update components
-        this.propagate(power);//propagate new para to other powers
+        if(propogator){
+            this.propagate(power);//propagate new para to other powers
+        }
     }
     //
     setPower(power, xCoefs, yCoefs, xOff, yOff){//set the net functions for a given power and changes top component so sum matches
@@ -227,7 +249,7 @@ export default class Profile{
         this.sumComps(power, this.comps[power][idx].xFunc.terms.length, this.comps[power][idx].yFunc.terms.length);
     }
     //
-    sumComps(power, xL, yL){
+    sumComps(power, xL, yL, propogator = true){
         var sum;
         for(var n = 0; n < xL; n++){//for every x coefficient of the new component
             sum = 0;
@@ -250,7 +272,9 @@ export default class Profile{
             this.paras[power].setTermY(n, sum);
         }
         //
-        this.propagate(power);
+        if(propogator){
+            this.propagate(power);
+        }
     }
     //
     propagate(power){//para powers ascend (0,1,2,3,4)

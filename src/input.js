@@ -275,7 +275,7 @@ export default class Input{
             }
         });
         //
-        var dropbox = daocument.getElementById("getFile");
+        var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
             console.log("drag entered");
             d3.select("#getFile").style("pointer-events", "all");

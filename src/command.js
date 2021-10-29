@@ -360,11 +360,13 @@ export default class Command{
                 str = str.slice(0, -1);
                 str += `/`;
             });
-            str = str.slice(0, -2);
+            str = str.slice(0, -1);
             str += `\n`;
         });
         console.log(str);
-        download("filename.txt", str);
+        var today = new Date();
+        var time = today.getHours() + ":" + today.getMinutes();
+        download(`phsycalc[${time}].csv`, str);
     }
     //
     openState(file){
@@ -383,29 +385,35 @@ export default class Command{
             comm.select();
             //
             objs.forEach(obj => {
-                let yComps = [];
-                let xComps = [];
+                let newComps = [];//all new comps for this object
+                //format: level>compList>xy>terms
                 //
                 let levels = obj.split("/");
                 levels.forEach(level => {
-                    let yLevelComps = [];
-                    let xLevelComps = [];
+                    let newLevelComps = [];//list of comps at this power level
                     let comps = level.split("v");
                     comps.forEach(comp => {
-                        let compS = comp.split("y");
-                        xLevelComps.push(compS[0].split(","));
-                        yLevelComps.push(compS[1].split(","));
+                        let compS = comp.split("y");//a and y functions for this comp
+                        newLevelComps.push([compS[0].split(","), compS[1].split(",")]);//split the commas
                     });
-                    console.log(xLevelComps);
-                    console.log(yLevelComps);
-                    xComps.push(xLevelComps);
-                    yComps.push(yLevelComps);
+                    //console.log(newLevelComps);
+                    newComps.push(newLevelComps);
                 });
-                console.log(xComps);
-                console.log(yComps);
+                console.log(`Object comps:`);
+                console.log(newComps);
                 //
-                //make new object
-            })
+                let idx = comm.objects.length;
+                comm.objects.push(new Object(comm, idx, 0, 0));
+                comm.objects[idx].profile.setAllComps(newComps);
+            });
+            //
+            comm.updateGrid();
+            comm.drawGrid();
+            comm.moveGrid();
+            comm.moveTimeline();
+            comm.drawTimeline();
+            comm.spawnExtremes();
+            comm.toggleVectors(1);
           });
         reader.readAsText(file);
         d3.select("#getFile").style("pointer-events", "none");
