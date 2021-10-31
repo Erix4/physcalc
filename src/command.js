@@ -18,9 +18,6 @@ export default class Command{
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
         //
-        this.grid = new Grid(this, this.ctx, this.svg, 0, 0.1, 15);
-        this.grid.calcSize();//get scales and things
-        //
         this.lastTime = 0;
         //
         this.gravity = -9.81;
@@ -31,12 +28,16 @@ export default class Command{
         this.loopStart = loopStart;
         //
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
+        this.viewType = 0;//type of grid view, 0 = x and y, 1 = x, 2 = y
         //
         this.idCount = 0;
         //
         this.selected = null;
         this.objects = [];
         this.selectedIdxs = [];
+        //
+        this.grid = new Grid(this, this.ctx, this.svg, 0, 0.1, 15);
+        this.grid.calcSize();//get scales and things
         //
         this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
         console.log(this.time.scrH);
@@ -57,9 +58,10 @@ export default class Command{
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
         this.func = new Func(1000, [1, 1]);
-        this.func.resolve([[1, 0, 0], [10, 0, 1], [39, 0, 2]]);
+        this.func.resolve([[0, 0, 0], [0, 1, 0], [110, 0, 5.21]]);
         this.func.draw(this, -10, 10);
-        this.moveGrid()
+        this.moveGrid();
+        console.log(`accel: ${this.func.terms[0].coef * 2}`);
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);
@@ -132,6 +134,36 @@ export default class Command{
     //#endregion
     //
     //#region Illustration
+    changeViewType(type){
+        this.viewType = type;
+        if(type == 0){
+            this.objects.forEach(obj => {
+                obj.self.attr("r", 20);
+            });
+        }else{
+            this.objects.forEach(obj => {
+                obj.self.attr("r", 15);
+            });
+        }
+        this.sels.forEach((sel, idx) => {
+            sel.attr("r", parseInt(this.selObs[idx].self.attr("r")) + 5);
+        });
+        this.fullReset();
+    }
+    //
+    /**
+     * Update and Redraw all elements on the site
+     */
+    fullReset(){
+        this.updateGrid();
+        this.drawGrid();
+        this.moveGrid();
+        this.drawTimeline();
+        this.moveTimeline();
+        this.spawnExtremes();
+        this.toggleVectors();
+        this.props.update(this.selected);
+    }
     //
     /**
      * redraw grid (canvas)
@@ -168,7 +200,7 @@ export default class Command{
      * update the values of all or some objects
      * @param {Array<Object>} [objs] list of objects to update
      */
-    updateGrid(objs, noProps){
+    updateGrid(objs, noProps=false){
         if(!objs){
             objs = this.objects;
         }
@@ -187,13 +219,15 @@ export default class Command{
      * move all or some svg elements in timelin
      * @param {Array<Object>} [objs] list of objects to move
      */
-    moveTimeline(objs){
+    moveTimeline(objs, noProps = false){
         if(!objs){
             objs = this.objects;
         }
         //
         this.timeline.move();
-        this.props.retime();
+        if(!noProps){
+            this.props.retime();
+        }
     }
     //
     /**
@@ -296,11 +330,33 @@ export default class Command{
      * @param {Array<Object} objs list of objects to shift
      */
     shiftPos(power, cx, cy, objs){
-        objs.forEach(obj => {
-            let x = this.scaleX.invert(this.scaleX(obj.xS[power]) + cx);
-            let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
-            this.setPos(power, x, y, obj);
-        });
+        switch(this.viewType){
+            case 0:
+                objs.forEach(obj => {
+                    let x = this.scaleX.invert(this.scaleX(obj.xS[power]) + cx);
+                    let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
+                    this.setPos(power, x, y, obj);
+                });
+                break;
+            case 1:
+                var t = this.scaleX.invert(this.scaleX(this.time) + cx);
+                objs.forEach(obj => {
+                    let x = this.scaleY.invert(this.scaleY(obj.xS[power]) + cy);
+                    let y = obj.yS[power];
+                    obj.setValueTime(power, t, x, y);
+                });
+                this.setTime(t);
+                break;
+            case 2:
+                var t = this.scaleX.invert(this.scaleX(this.time) + cx);
+                objs.forEach(obj => {
+                    let x = obj.xS[power];
+                    let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
+                    obj.setValueTime(power, t, x, y);
+                });
+                this.setTime(t);
+                break;
+        }
     }
     //
     /**
@@ -326,11 +382,11 @@ export default class Command{
      * set the current time
      * @param {Number} t new time in seconds
      */
-    setTime(t){
+    setTime(t, noProps = false){
         this.time = t;
         this.updateGrid();
         this.moveGrid();
-        this.moveTimeline();
+        this.moveTimeline(this.objects, noProps);
     }
     //
     /**
@@ -436,8 +492,9 @@ export default class Command{
             this.sels.forEach(sell => {
                 sell.remove();
             });
+            console.log(obj.self.attr("r"));
             this.sels = [this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", 4).style("stroke-opacity", .6)
-                    .attr("r", 25)
+                    .attr("r", parseInt(obj.self.attr("r")) + 5)
                     .attr("cx", this.scaleX(obj.px))
                     .attr("cy", this.scaleY(obj.py))];
             this.selObs = [obj];
@@ -480,7 +537,7 @@ export default class Command{
             }
         }else{//object had not been selected
             this.sels.push(this.svg.append("circle").style("stroke", "#47d7ff").style("stroke-width", 4).style("fill", "transparent").style("stroke-opacity", .6)
-                            .attr("r", 25)
+                            .attr("r", parseInt(obj.self.attr("r")) + 5)
                             .attr("cx", this.scaleX(obj.px))
                             .attr("cy", this.scaleY(obj.py)));
             this.selObs.push(obj);

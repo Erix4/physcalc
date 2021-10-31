@@ -185,6 +185,8 @@ export default class Input{
                 case 6:
                     this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
                     command.updateGrid();
+                    command.drawGrid();
+                    command.spawnExtremes();
                     command.moveGrid();
                     command.timeline.movePoints();
                     break;
@@ -199,7 +201,9 @@ export default class Input{
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
                 console.log(this.command.selected.profile.paras[0].xFunc);
-                this.command.toggleVectors(1);
+                if(this.command.viewType == 0){
+                    this.command.toggleVectors(1);
+                }
                 this.moveState = 0;
                 this.command.drawGrid();
                 this.command.spawnExtremes([this.command.selected]);
@@ -220,6 +224,7 @@ export default class Input{
                         command.updateGrid();
                         command.moveGrid();
                         command.timeline.movePoints();
+                        command.props.retime();
                         break;
                 }
             }else{//movement
@@ -301,6 +306,28 @@ export default class Input{
             //
             this.command.openState(files[0]);
         }, false);
+        //
+        d3.select("#vt0").on("mousedown", function(){
+            document.getElementById("vt0").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt1").style = "background-color: #254441";
+            document.getElementById("vt2").style = "background-color: #254441";
+            //
+            input.command.changeViewType(0);
+        });
+        d3.select("#vt1").on("mousedown", function(){
+            document.getElementById("vt1").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt0").style = "background-color: #254441";
+            document.getElementById("vt2").style = "background-color: #254441";
+            //
+            input.command.changeViewType(1);
+        });
+        d3.select("#vt2").on("mousedown", function(){
+            document.getElementById("vt2").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt0").style = "background-color: #254441";
+            document.getElementById("vt1").style = "background-color: #254441";
+            //
+            input.command.changeViewType(2);
+        });
     }
     //
     newPoint(point){
@@ -349,7 +376,7 @@ export default class Input{
             }
             input.moveState = 2;
             input.timeline.colorPoints(input.command.findIdxs([obj]));
-        })
+        });
     }
     //
     newObject(obj){
@@ -394,7 +421,7 @@ export default class Input{
     //
     props(command, self){
         var input = this;
-        self.t.on("click", function(){
+        self.t.on("mousedown", function(){
             input.fieldClick(this);
         });
         self.posx.on("mousedown", function(){
@@ -418,7 +445,7 @@ export default class Input{
         //
         self.t.on("input", function(){
             if(isNumeric(this.value)){
-                command.setTime(parseFloat(this.value));
+                command.setTime(parseFloat(this.value), true);
             }
         });
         //

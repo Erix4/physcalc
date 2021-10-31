@@ -2,6 +2,10 @@
     font-family: 'heavitas';/*not licensed for professional use ($15 fee)*/
     src: url('/fonts/Heavitas.ttf');
 }
+@font-face {
+    font-family: 'LatinM';
+    src: url('/fonts/lm-regular.woff') format('woff');
+}
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
 
 body{
@@ -20,6 +24,7 @@ div{
     display: flex;
     align-items: center; 
     background-color: #ff6f59;
+    cursor: default;
 }
 
 h1{
@@ -28,6 +33,47 @@ h1{
     font-size: 2.3rem;
     color: #254441;
 }
+
+#addB{
+    margin-left: 15px;
+    border-radius: 10px;
+    background-color: #ffa294;
+    transition: .3s;
+}
+
+#addB:hover{
+    background-color: #ff6f59;
+    cursor: pointer;
+}
+
+#addB:hover #addText{
+    color: #ffa294;
+}
+
+#addB:active{
+    background-color: #ff472b;
+    transition: 0s;
+}
+
+#addText{
+    font-family: 'Heavitas';
+    font-size: 1.5rem;
+    padding: 0px;
+    padding-left: 6px;
+    padding-right: 4px;
+    color: #ff6f59;
+    transition: .3s;
+}
+
+.dropdown-submenu {
+    position: relative;
+  }
+  
+  .dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+  }
 
 #getFile{
     position: absolute;
@@ -132,7 +178,7 @@ input {
     -webkit-transition: box-shadow 0.3s;
     transition: box-shadow 0.3s;
     background-color: transparent;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'LatinM';
     font-weight: 800;
     font-size: 18px;
     padding-left: 8px;
@@ -204,6 +250,7 @@ button{
     /*align-items: center;*/
     text-align: center;
     transition: all .3s;
+    cursor: pointer;
 }
 
 button:hover{
@@ -227,6 +274,35 @@ button:active{
 img{
     width: (25*1.2)px;
     height: (11*1.2)px;
+}
+
+#viewType{
+    width: 150px;
+    height: 30px;
+    bottom: 10%;
+    left: 25%;
+    position: absolute;
+}
+
+.canButtons{
+    z-index: 5;
+    margin: 8px;
+    border-radius: 15px;
+    overflow: hidden;
+    display: inline-flex;
+    font-family: 'LatinM';
+    font-weight: 900;
+    font-size: 18px;
+    background-color: #254441;
+}
+
+.viewButton{
+    width: 33.33% !important;
+    background-color: #254441 !important;
+}
+
+.viewButton:hover{
+    background-color: #76cab8 !important;
 }
 /*#endregion*/
 
@@ -288,6 +364,7 @@ img{
     display: inline-block;
     text-align: center;
     transition: .2s;
+    cursor: pointer;
 }
 
 .button:hover{

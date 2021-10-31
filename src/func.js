@@ -7,8 +7,8 @@ export default class Profile{
         //
         this.color = color;
         //
-        this.paras = [new Para(command.time, 1, xCoefs, yCoefs, this.color)];
-        this.comps = [[new Para(command.time, 1, xCoefs, yCoefs)]];
+        this.paras = [new Para(command.time, 300, xCoefs, yCoefs, this.color)];
+        this.comps = [[new Para(command.time, 300, xCoefs, yCoefs)]];
         for(var n = 0; n < depth; n++){//generate derivatives
             xCoefs = [];
             let xTerms = this.paras[n].xFunc.terms;//get terms of x function of last parametric function
@@ -28,8 +28,8 @@ export default class Profile{
             if(yCoefs.length == 0){
                 yCoefs.push(0);
             }
-            this.paras.push(new Para(0, 1, xCoefs, yCoefs, this.color));
-            this.comps.push([new Para(0, 1, xCoefs, yCoefs)]);//add current net function as top component
+            this.paras.push(new Para(0, 300, xCoefs, yCoefs, this.color));
+            this.comps.push([new Para(0, 300, xCoefs, yCoefs)]);//add current net function as top component
         }
         console.log(`Initialzing complete, with x:[${this.paras[0].xFunc.getCoefs()}] and y:[${this.paras[0].yFunc.getCoefs()}]`);
         console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
@@ -208,10 +208,26 @@ export default class Profile{
     getExtremes(){
         var exts = [];
         //
-        this.paras.forEach(para => {
-            exts.push(...para.xFunc.calcRoots());
-            exts.push(...para.yFunc.calcRoots());
-        });
+        switch(this.command.viewType){
+            case 0:
+                this.paras.forEach(para => {
+                    exts.push(...para.xFunc.calcRoots());
+                    exts.push(...para.yFunc.calcRoots());
+                });
+                break;
+            case 1:
+                this.paras.forEach(para => {
+                    exts.push(...para.xFunc.calcRoots());
+                });
+                exts.push(0);
+                break;
+            case 2:
+                this.paras.forEach(para => {
+                    exts.push(...para.yFunc.calcRoots());
+                });
+                exts.push(0);
+                break;
+        }
         //
         return exts;
     }
@@ -624,7 +640,6 @@ export class Func{
         var nextV;
         let loop = (end - start) / this.steps;
         //
-        //console.log(end + " but " + loop + " from " + start);
         let ctx = command.ctx;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = 5; 

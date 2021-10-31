@@ -56,6 +56,12 @@ export default class Grid{
         this.calcSize();
         this.command.canvas.width = this.scrW;
         this.command.canvas.height = this.scrH;
+        /*if (!ratio) { ratio = PIXEL_RATIO; }
+        this.command.canvas.width = this.scrW * ratio;
+        this.command.canvas.height = this.scrH * ratio;
+        this.command.canvas.style.width = this.scrW + "px";
+        this.command.canvas.style.height = this.scrH + "px";
+        this.command.canvas.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);*/
         //fix_dpi(this.command.canvas);
     }
     //
@@ -122,9 +128,17 @@ export default class Grid{
         //
         ctx.lineCap = "round";
         ctx.strokeStyle = "gray";
+        ctx.font = "20px LatinM";
+        ctx.fillStyle = "gray";
         var curX = Math.ceil(xLeft / res) * res;//get first x line position
         for(var n = 0; n < ((xRight - xLeft) / res); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
             ctx.lineWidth = this.colorLine(ctx, curX) * .5;
+            if(ctx.lineWidth == 1.5 || ctx.lineWidth == 4){
+                ctx.fillText(curX, this.command.scaleX(curX) + 5, this.command.scaleY(0) + 20);
+            }
+            if(this.command.viewType != 0 && curX != 0 && ctx.lineWidth == 1.5){
+                ctx.lineWidth = .9;
+            }
             ctx.beginPath();
             ctx.moveTo(this.command.scaleX(curX), this.command.scaleY(yBot));//draw line from bottom to top at current x
             ctx.lineTo(this.command.scaleX(curX), this.command.scaleY(yTop));
@@ -136,12 +150,17 @@ export default class Grid{
         for (var n = 0; n < (this.scale / res); n++){
             //this.colorLine(ctx, curY);
             ctx.lineWidth = this.colorLine(ctx, curY) * .5;
+            if(ctx.lineWidth == 1.5){
+                ctx.fillText(curY, this.command.scaleX(0) + 5, this.command.scaleY(curY) + 20);
+            }
             ctx.beginPath();
             ctx.moveTo(Math.floor(this.command.scaleX(xLeft)), Math.floor(this.command.scaleY(curY)));//draw line from left to right at current y
             ctx.lineTo(Math.floor(this.command.scaleX(xRight)), Math.floor(this.command.scaleY(curY)));
             ctx.stroke();
             curY += res;//increment by grid line resolution
         }
+        //
+        //
     }
     //
     colorLine(ctx, pos){
@@ -178,4 +197,20 @@ function fix_dpi(canvas) {
     //scale the canvas
     canvas.setAttribute('height', style_height * dpi);
     canvas.setAttribute('width', style_width * dpi);
+}
+
+var PIXEL_RATIO = (function () {
+    var ctx = document.createElement("canvas").getContext("2d"),
+        dpr = window.devicePixelRatio || 1,
+        bsr = ctx.webkitBackingStorePixelRatio ||
+              ctx.mozBackingStorePixelRatio ||
+              ctx.msBackingStorePixelRatio ||
+              ctx.oBackingStorePixelRatio ||
+              ctx.backingStorePixelRatio || 1;
+
+    return dpr / bsr;
+})();
+
+function toPlaces(number, places){
+    return Math.round(Math.pow(10, places) * number) / Math.pow(10, places);
 }

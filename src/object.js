@@ -37,12 +37,13 @@ Object capabilities:
 import Profile from "./func";
 
 export default class Object{
-    constructor(command, id, px, py){
+    constructor(command, id, px, py, type=0){
         this.command = command;
         this.field = command.field;
         //
         this.id = id;
         this.toBeDeleted = false;
+        this.type = type;//0 = as projectile, 1 = in free fall, 2 = at rest, 3 = at position/default after changes
         //
         this.hue = 35 * this.id;//0 = red
         this.color = `hsl(${this.hue}, 100%, 50%`;
@@ -123,19 +124,30 @@ export default class Object{
      * Update all internal values by function
      */
     update(){
-        if(this.lock){
-            this.setValue(0, this.px, this.py);//resolve function to shift the time
-            this.command.retimeExtremes([this]);
-            //this.profile.setOrigin(this.command.time);
-        }
-        this.px = this.profile.calc(0, this.command.time)[0];
-        this.py = this.profile.calc(0, this.command.time)[1];
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
             this.yS[n] = this.profile.calc(n, this.command.time)[1];
         }
+        if(this.lock){
+            this.setValue(0, this.px, this.py);//resolve function to shift the time
+            this.command.retimeExtremes([this]);
+        }
         //
-        this.updateVectors();
+        switch(this.command.viewType){
+            case 0:
+                this.px = this.profile.calc(0, this.command.time)[0];
+                this.py = this.profile.calc(0, this.command.time)[1];
+                this.updateVectors();
+                break;
+            case 1:
+                this.px = this.command.time;
+                this.py = this.profile.calc(0, this.command.time)[0];
+                break;
+            case 2:
+                this.px = this.command.time;
+                this.py = this.profile.calc(0, this.command.time)[1];
+                break;
+        }
     }
     //
     /**
@@ -200,9 +212,28 @@ export default class Object{
      * @param {Class} input input handler
      */
     draw(input){
-        if((input.moveState == 3) && input.active != this){//new object is being created
+        switch(this.command.viewType){
+            case 0:
+                this.profile.draw(0, 300);
+                break;
+            case 1:
+                for(var n = 0; n <= this.depth; n++){
+                    if(!this.isStaticX(n)){//check if function is just zero
+                        this.profile.paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                    }
+                }
+                break;
+            case 2:
+                for(var n = 0; n <= this.depth; n++){
+                    if(!this.isStaticY(n)){//check if function is just zero
+                        this.profile.paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                    }
+                }
+                break;
+        }
+        /*if((input.moveState == 3) && input.active != this){//new object is being created
             this.command.ctx.globalAlpha = 0.2;
-            this.profile.draw(0, 200);
+            this.profile.draw(0, 300);
             //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.command.ctx.globalAlpha = 1.0;
@@ -212,7 +243,15 @@ export default class Object{
             //this.movePoints();
             //this.profile.drawPoints(this.extremes);
             this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
-        }
+        }*/
+    }
+    //
+    isStaticX(depth){
+        return (this.profile.paras[depth].xFunc.terms.length == 1 && this.profile.paras[depth].xFunc.terms[0].coef == 0);
+    }
+    //
+    isStaticY(depth){
+        return (this.profile.paras[depth].yFunc.terms.length == 1 && this.profile.paras[depth].yFunc.terms[0].coef == 0);
     }
     //
     /**
@@ -320,25 +359,73 @@ export default class Object{
      * remove and respawn extreme points
      */
     spawnExtremes(){
-        this.extremes = this.profile.getExtremes();
-        var n;
-        for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
-            this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
-                .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
-        }
-        while(this.points.length < this.extremes.length){//add points until there are the same name number
-            this.points.push(this.svg.append("circle").style("fill", this.color)
-                .attr("r", 6)
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
-                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
-            this.points[n].lower();
-            this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
-            n++;
-        }
-        while(this.points.length > this.extremes.length){
-            this.points[this.points.length - 1].remove();
-            this.points.pop();
+        switch(this.command.viewType){
+            case 0:
+                this.extremes = this.profile.getExtremes();
+                var n;
+                for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
+                        .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                        .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
+                }
+                while(this.points.length < this.extremes.length){//add points until there are the same name number
+                    this.points.push(this.svg.append("circle").style("fill", this.color)
+                        .attr("r", 6)
+                        .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
+                    this.points[n].lower();
+                    this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
+                    n++;
+                }
+                while(this.points.length > this.extremes.length){
+                    this.points[this.points.length - 1].remove();
+                    this.points.pop();
+                }
+                break;
+            case 1:
+                this.extremes = this.profile.getExtremes();
+                var n;
+                for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
+                        .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
+                        .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[0])));//
+                }
+                while(this.points.length < this.extremes.length){//add points until there are the same name number
+                    this.points.push(this.svg.append("circle").style("fill", this.color)
+                        .attr("r", 6)
+                        .attr("cx", this.command.scaleX(this.extremes[n]))
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[0])));
+                    this.points[n].lower();
+                    this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
+                    n++;
+                }
+                while(this.points.length > this.extremes.length){
+                    this.points[this.points.length - 1].remove();
+                    this.points.pop();
+                }
+                break;
+            case 2:
+                this.extremes = this.profile.getExtremes();
+                var n;
+                for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
+                        .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
+                        .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
+                }
+                while(this.points.length < this.extremes.length){//add points until there are the same name number
+                    this.points.push(this.svg.append("circle").style("fill", this.color)
+                        .attr("r", 6)
+                        .attr("cx", this.command.scaleX(this.extremes[n]))
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
+                    this.points[n].lower();
+                    this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
+                    n++;
+                }
+                while(this.points.length > this.extremes.length){
+                    this.points[this.points.length - 1].remove();
+                    this.points.pop();
+                }
+                break;
         }
     }
     //
@@ -346,10 +433,28 @@ export default class Object{
      * move all extreme points (when grid is shifted)
      */
     movePoints(){
-        for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
-            this.points[n].attr("val", this.extremes[n])
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
-                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+        switch(this.command.viewType){
+            case 0:
+                for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n])
+                        .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                }
+                break;
+            case 1:
+                for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n])
+                        .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[0]));//
+                }
+                break;
+            case 2:
+                for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
+                    this.points[n].attr("val", this.extremes[n])
+                        .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
+                        .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                }
+                break;
         }
     }
     //
@@ -381,166 +486,6 @@ export default class Object{
         this.command.select();
     }
     //
-    /*update(){
-        if(!this.lock){
-            this.px = this.profile.calc(0, this.command.time)[0];
-            this.py = this.profile.calc(0, this.command.time)[1];
-            for(var n = 0; n <= this.depth; n++){
-                this.xS[n] = this.profile.calc(n, this.command.time)[0];
-                this.yS[n] = this.profile.calc(n, this.command.time)[1];
-            }
-            //
-            this.nets.forEach(net => {
-                net.update();
-            });
-            this.comps.forEach(comp => {
-                comp.forEach(arrow => {
-                    arrow.update();
-                });
-            });
-            this.comps.forEach(comp => {
-                comp.forEach(arrow => {
-                    arrow.update();
-                });
-            });
-        }else{
-            this.slideTime();
-        }
-        this.profile.setOrigin();
-        this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
-        //this.pFunc.setOff(this.px, this.py);
-        //this.movePoints();
-        this.reposPoints();
-        //
-        //this.pxfunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-        //
-    }
-    //
-    slideTime(){
-        this.profile.setValues(0, this.px, this.py);
-        this.nets.forEach(net => {
-            net.self.update();
-        });
-        this.comps.forEach(comp => {
-            comp.forEach(arrow => {
-                arrow.self.update();
-            });
-        });
-    }
-    //
-    repos(px, py){
-        this.px = this.command.scaleX.invert(px);
-        this.py = this.command.scaleY.invert(py);
-        this.profile.setValues(0, this.px, this.py);
-        //
-        this.command.objUpdate(this);
-    }
-    //
-    rekey({power, xShift, yShift, xPos, yPos}={}){
-        //console.log(xShift);
-        if(xShift != undefined || yShift != undefined){
-            if(xShift == undefined){
-                xShift = 0;
-            }
-            if(yShift == undefined){
-                yShift = 0;
-            }
-            xPos = this.command.scaleX(this.px) + xShift;
-            yPos = this.command.scaleY(this.py) + yShift
-        }else{
-            if(xPos == undefined){
-                xPos = this.command.scaleX(this.px);
-            }
-            if(yPos == undefined){
-                yPos = this.command.scaleY(this.py);
-            }
-        }
-        //
-        this.movePoints();
-        //
-        this.px = this.command.scaleX.invert(xPos);
-        this.py = this.command.scaleY.invert(yPos);
-        this.profile.setValues(power, this.px, this.py);
-    }
-    //
-    retime(){
-        this.px = this.profile.paras[0].calc(this.command.time)[0];
-        this.py = this.profile.paras[0].calc(this.command.time)[1];
-        //
-        this.command.objUpdate(this);
-    }
-    //
-    reval(px, py){
-        //console.log("Reveling");
-        this.nets[this.vectorMode - 1].reval(px, py);
-    }
-    //
-    toggleLock(){
-        console.log("attempting to lock");
-        this.lock = !this.lock;
-        if(this.lock){
-            this.self.style("fill", "gray");
-        }else{
-            this.self.style("fill", this.color);
-        }
-    }
-    //
-    movePoints(){
-        //let idx = this.command.objects.indexOf(this);
-        var n;
-        for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
-            console.log("repos point " + n + " bc " + this.extremes.length);
-            console.log(this.extremes[n] + " to " + this.profile.calc(0, this.extremes[n])[1]);
-            this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
-                .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
-        }
-        while(this.points.length < this.extremes.length){//add points until there are the same name number
-            console.log("Adding points");
-            this.points.push(this.svg.append("circle").style("fill", this.color)
-                .attr("r", 6)
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
-                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
-            this.points[n].lower();
-            n++;
-            this.command.input.newObjPoint(this.points[this.points.length - 1]);
-            //this.command.input.newPoint(this.points[this.points.length - 1]);
-        }
-        while(this.points.length > this.extremes.length){
-            this.points[this.points.length - 1].remove();
-            //this.command.input.removePoint(this.points[idx][this.points[idx].length - 1]);
-            this.points.pop();
-            console.log("Removing circle");
-        }
-    }
-    //
-    reposPoints(){
-        for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
-            this.points[n].attr("val", this.extremes[n])
-                .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
-                .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
-        }
-    }
-    //
-    updateVectors(mode){
-        this.vectorMode = mode;
-        this.comps.forEach(comp => {
-            comp.forEach(arrow => {
-                arrow.self.hide();
-            });
-        });
-        this.nets.forEach(net => {
-            net.self.hide();
-        });
-        //
-        if(this.vectorMode > 0){
-            this.nets[this.vectorMode - 1].self.show();
-            this.comps[this.vectorMode - 1].forEach(arrow => {
-                arrow.show();
-            });
-        }
-    }
-    */
 }
 
 class netArrow{
@@ -611,13 +556,11 @@ class compArrow{
     //
     update(){
         //console.log("updating");
-        this.pos = this.profile.comps[this.depth][this.idx].calc(this.command.time);
+        this.pos = this.profile.comps[this.depth][this.idx].calc(this.command.time);//find comp values at current depth and time
         //
-        if(this.idx == this.profile.comps[this.depth].length - 1){
-            this.self.sx = this.obj.px;
+        if(this.idx == this.profile.comps[this.depth].length - 1){//if last comp...
+            this.self.sx = this.obj.px;//set start to object position
             this.self.sy = this.obj.py;
-            this.ex = this.obj.px + this.pos[0] * this.obj.arrStr;
-            this.ey = this.obj.py + this.pos[1] * this.obj.arrStr;
         }else{
             this.self.sx = this.obj.comps[this.depth - 1][this.idx + 1].ex;//set start of vector to end of last one
             this.self.sy = this.obj.comps[this.depth - 1][this.idx + 1].ey;

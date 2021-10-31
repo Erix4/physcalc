@@ -10,6 +10,16 @@ import Command from "./src/command";
 //d3.select("#tcan").style("height", fullH);
 //document.getElementById("tcan").height = fullH;
 
+d3.select(".dropdown-submenu a.test").on("click", function(e){
+    $(this).next('ul').toggle();
+    e.stopPropagation();
+    e.preventDefault();
+});
+
+document.getElementById("vt0").style = "background-color: #a5cbc3 !important";
+document.getElementById("vt1").style = "background-color: #254441";
+document.getElementById("vt2").style = "background-color: #254441";
+
 MathJax.Hub.Config({
     messageStyle: "none"
 });  
