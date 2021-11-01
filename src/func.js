@@ -361,13 +361,12 @@ export class Para{
     constructor(time, steps, xCoefs, yCoefs, color = "white"){
         this.steps = steps;
         //
-        this.color = "red";
-        if(arguments.length > 4){
-            this.color = color;
-        }
+        this.color = color;
         //
         this.xFunc = (new Func(this.steps, xCoefs));
         this.yFunc = (new Func(this.steps, yCoefs));
+        this.xFunc.color = color;
+        this.yFunc.color = color;
         this.xFunc.setOff(time);
         this.yFunc.setOff(time);
     }

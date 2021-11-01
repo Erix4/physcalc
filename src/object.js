@@ -137,7 +137,6 @@ export default class Object{
             case 0:
                 this.px = this.profile.calc(0, this.command.time)[0];
                 this.py = this.profile.calc(0, this.command.time)[1];
-                this.updateVectors();
                 break;
             case 1:
                 this.px = this.command.time;
@@ -148,6 +147,7 @@ export default class Object{
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
         }
+        this.updateVectors();
     }
     //
     /**
@@ -503,13 +503,31 @@ class netArrow{
     }
     //
     update(){
-        //console.log("updating");
         this.pos = this.profile.paras[this.depth].calc(this.command.time);
         //
         this.self.sx = this.obj.px;
         this.self.sy = this.obj.py;
-        this.self.ex = this.pos[0] * this.obj.arrStr;
-        this.self.ey = this.pos[1] * this.obj.arrStr;
+        //
+        switch(this.viewType){
+            case 0:
+                this.self.ex = this.pos[0] * this.obj.arrStr;
+                this.self.ey = this.pos[1] * this.obj.arrStr;
+                break;
+            case 1:
+                var s = this.profile.paras[this.depth].calc(this.command.time)[0];
+                var x1 = Math.sqrt(Math.pow(this.obj.arrStr, 2) / (1 + Math.pow(s, 2)));
+                //
+                this.self.ex = x1;
+                this.self.ey = x1 * s;
+                break;
+            case 2:
+                var s = this.profile.paras[this.depth].calc(this.command.time)[1];
+                var x1 = Math.sqrt(Math.pow(this.obj.arrStr, 2) / (1 + Math.pow(s, 2)));
+                //
+                this.self.ex = x1;
+                this.self.ey = x1 * s;
+                break;
+        }
     }
     //
     move(){

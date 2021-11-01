@@ -16,12 +16,22 @@
 <input id="getFile"></input>
     <div id="header">
         <h1>Physics Calculator</h1>
-        <div id="addB">
-            <p id="addText">ADD</p>
+        <div id="addList">
+            <div id="addB">
+                <p id="addText">ADD</p>
+            </div>
+            <!--<div id="addDrop">
+                <p>Object</p>
+                <p>Force</p>
+            </div>-->
+            <!--<select id="addDrop" class="propdrop">
+                <option class="addChoice">Object</option>
+                <option class="addChoice">Force</option>
+            </select>-->
         </div>
-        <div id="addB">
+        <!--<div id="addB">
             <p id="addText">SAVE</p>
-        </div>
+        </div>-->
         <!--<div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Tutorials
             <span class="caret"></span></button>
@@ -57,7 +67,7 @@
                         <p>, </p>
                         <input type="number" placeholder="pos y" id="posy"/>
                         <p>&gt;</p>
-                        <select class="units">
+                        <select class="units propdrop">
                             <option>mm</option>
                             <option>cm</option>
                             <option selected="selected">m</option>
@@ -70,7 +80,7 @@
                         <p>, </p>
                         <input type="number" placeholder="vel y" id="vely"/>
                         <p>&gt;</p>
-                        <select class="units">
+                        <select class="units propdrop">
                             <option>mm</option>
                             <option>cm</option>
                             <option selected="selected">m</option>
@@ -84,7 +94,7 @@
                         <p>, </p>
                         <input type="number" placeholder="accel y" id="accely"/>
                         <p>&gt;</p>
-                        <select class="units">
+                        <select class="units propdrop">
                             <option>mm</option>
                             <option>cm</option>
                             <option selected="selected">m</option>
@@ -104,7 +114,7 @@
                     <!--<h3>Calculator</h3>-->
                     <div style="margin-top:7px" class="container">
                         <div class="container">
-                            <select>
+                            <select class="propdrop">
                                 <option>p</option>
                                 <option>v</option>
                                 <option>a</option>
@@ -117,7 +127,7 @@
                             <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
                         <div class="container">
-                            <select>
+                            <select class="propdrop">
                                 <option>p</option>
                                 <option>v</option>
                                 <option>a</option>
@@ -130,7 +140,7 @@
                             <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
                         <div class="container">
-                            <select>
+                            <select class="propdrop">
                                 <option>p</option>
                                 <option>v</option>
                                 <option>a</option>
@@ -142,7 +152,7 @@
                             <p>&gt;, t = </p>
                             <input class="timeMark" type="number" placeholder="time" id="t1"/>
                         </div>
-                        <button>Calc!</button>
+                        <button id="calcB">Calc!</button>
                     </div>
                 </div>
             </div>

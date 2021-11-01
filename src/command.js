@@ -59,7 +59,7 @@ export default class Command{
         //
         this.func = new Func(1000, [1, 1]);
         this.func.resolve([[0, 0, 0], [0, 1, 0], [110, 0, 5.21]]);
-        this.func.draw(this, -10, 10);
+        //this.func.draw(this, -10, 10);
         this.moveGrid();
         console.log(`accel: ${this.func.terms[0].coef * 2}`);
         //

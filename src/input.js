@@ -186,7 +186,7 @@ export default class Input{
                     this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
                     command.updateGrid();
                     command.drawGrid();
-                    command.spawnExtremes();
+                    //command.spawnExtremes();
                     command.moveGrid();
                     command.timeline.movePoints();
                     break;
@@ -308,21 +308,21 @@ export default class Input{
         }, false);
         //
         d3.select("#vt0").on("mousedown", function(){
-            document.getElementById("vt0").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
             document.getElementById("vt1").style = "background-color: #254441";
             document.getElementById("vt2").style = "background-color: #254441";
             //
             input.command.changeViewType(0);
         });
         d3.select("#vt1").on("mousedown", function(){
-            document.getElementById("vt1").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt1").style = "background-color: #a5cbc3 !important; color: black;";
             document.getElementById("vt0").style = "background-color: #254441";
             document.getElementById("vt2").style = "background-color: #254441";
             //
             input.command.changeViewType(1);
         });
         d3.select("#vt2").on("mousedown", function(){
-            document.getElementById("vt2").style = "background-color: #a5cbc3 !important";
+            document.getElementById("vt2").style = "background-color: #a5cbc3 !important; color: black;";
             document.getElementById("vt0").style = "background-color: #254441";
             document.getElementById("vt1").style = "background-color: #254441";
             //
@@ -491,6 +491,10 @@ export default class Input{
                 command.selected.setValue(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
                 input.valueUpdate(2);
             }
+        });
+        //
+        self.calcB.on("mousedown", function(){
+            console.log("Hello!");
         });
     }
     //

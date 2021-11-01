@@ -16,7 +16,7 @@ d3.select(".dropdown-submenu a.test").on("click", function(e){
     e.preventDefault();
 });
 
-document.getElementById("vt0").style = "background-color: #a5cbc3 !important";
+document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
 document.getElementById("vt1").style = "background-color: #254441";
 document.getElementById("vt2").style = "background-color: #254441";
 

@@ -35,10 +35,10 @@ h1{
 }
 
 #addB{
-    margin-left: 15px;
     border-radius: 10px;
     background-color: #ffa294;
     transition: .3s;
+    overflow: hidden;
 }
 
 #addB:hover{
@@ -55,6 +55,36 @@ h1{
     transition: 0s;
 }
 
+#addDrop{
+    position: absolute;
+    font-family: "nunito", "sans-serif";
+    font-weight: bolder;
+    font-size: 1.3rem;
+    border: none;
+}
+
+#addList{
+    background-color: transparent;
+    margin-left: 15px;
+    z-index: 7;
+}
+
+#addDrop p{
+    float: none;
+    display: block;
+    text-align: left;
+    background-color: #ffa294;
+    color: black;
+    padding: 5px;
+}
+
+#addDrop p:hover{
+    float: none;
+    display: block;
+    text-align: left;
+    background-color: #ff6f59;
+}
+
 #addText{
     font-family: 'Heavitas';
     font-size: 1.5rem;
@@ -63,6 +93,13 @@ h1{
     padding-right: 4px;
     color: #ff6f59;
     transition: .3s;
+}
+
+.addChoice{
+    font-family: "nunito", "sans-serif";
+    font-size: 1.3rem;
+    border: none;
+    outline: none;
 }
 
 .dropdown-submenu {
@@ -224,7 +261,7 @@ input[type=number] {
     position: absolute;
 }
 
-select{
+.propdrop{
     height: 30px;
     border-radius: 2px;
     font-family: "nunito", "sans-serif";
@@ -299,6 +336,7 @@ img{
 .viewButton{
     width: 33.33% !important;
     background-color: #254441 !important;
+    color: white;
 }
 
 .viewButton:hover{
