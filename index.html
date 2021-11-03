@@ -17,8 +17,8 @@
     <div id="header">
         <h1>Physics Calculator</h1>
         <div id="addList">
-            <div id="addB">
-                <p id="addText">ADD</p>
+            <div class="headerB" id="addB">
+                <p class="headerBText" id="addText">ADD</p>
             </div>
             <!--<div id="addDrop">
                 <p>Object</p>
@@ -29,9 +29,12 @@
                 <option class="addChoice">Force</option>
             </select>-->
         </div>
-        <!--<div id="addB">
-            <p id="addText">SAVE</p>
-        </div>-->
+        <div id="saveB" class="headerB">
+            <p class="headerBText">SAVE</p>
+        </div>
+        <div id="settingsB" class="headerB">
+            <i class="fas fa-cog"></i>
+        </div>
         <!--<div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Tutorials
             <span class="caret"></span></button>
@@ -61,8 +64,10 @@
                 <div id="head"><h2>Object ?</h2></div>
                 <div class="section" id="values">
                     <input type="number" placeholder="time" style="" id="t"/>s
+                    <br/>
+                    <p>Position:</p>
                     <div class="container">
-                        <p>p = &lt;</p>
+                        <p>&lt;</p>
                         <input type="number" step=".5" placeholder="pos x" id="posx"/>
                         <p>, </p>
                         <input type="number" placeholder="pos y" id="posy"/>
@@ -74,8 +79,9 @@
                             <option>km</option>
                         </select>
                     </div>
+                    <p>Velocity:</p>
                     <div class="container">
-                        <p>v = &lt;</p>
+                        <p>&lt;</p>
                         <input type="number" placeholder="vel x" id="velx"/>
                         <p>, </p>
                         <input type="number" placeholder="vel y" id="vely"/>
@@ -88,8 +94,9 @@
                         </select>
                         <p>/s</p>
                     </div>
+                    <p>Acceleration:</p>
                     <div class="container">
-                        <p>a = &lt;</p>
+                        <p>&lt;</p>
                         <input type="number" placeholder="accel x" id="accelx"/>
                         <p>, </p>
                         <input type="number" placeholder="accel y" id="accely"/>

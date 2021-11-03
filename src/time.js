@@ -97,11 +97,12 @@ export default class Timeline{
             this.superRes /= 4;
         }
         //
-        let mx = this.command.timeX.invert(px);
+        let mx = this.timeX.invert(px);
         //
         this.cx = mx - ((mx - this.cx) * c);
         //
         this.calcSize();
+        console.log("Zooming");
     }
     /**
      * find the distance between grid units of res

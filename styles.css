@@ -34,25 +34,35 @@ h1{
     color: #254441;
 }
 
-#addB{
+.headerB{
     border-radius: 10px;
     background-color: #ffa294;
     transition: .3s;
     overflow: hidden;
 }
 
-#addB:hover{
+.headerB:hover{
     background-color: #ff6f59;
     cursor: pointer;
 }
 
-#addB:hover #addText{
+.headerB:hover .headerBText{
     color: #ffa294;
 }
 
-#addB:active{
+.headerB:active{
     background-color: #ff472b;
     transition: 0s;
+}
+
+#saveB{
+    margin-left: 15px;
+}
+
+#settingsB{
+    position: absolute;
+    right: 0;
+    margin-right: 15px;
 }
 
 #addDrop{
@@ -85,7 +95,7 @@ h1{
     background-color: #ff6f59;
 }
 
-#addText{
+.headerBText{
     font-family: 'Heavitas';
     font-size: 1.5rem;
     padding: 0px;

@@ -78,7 +78,7 @@ export default class Command{
         this.drawGrid();
         this.moveGrid();
         this.moveSelects();
-        this.moveExtremes()//add function to object to shift extreme point positions
+        this.moveExtremes();
     }
     //
     /**
@@ -117,6 +117,21 @@ export default class Command{
         this.moveGrid();
         this.moveExtremes();
         this.moveSelects();
+    }
+    //
+    zoomX(c, px, py){
+        this.grid.zoomX(c, px, py);
+        this.drawGrid();
+        this.moveGrid();
+        this.moveExtremes();
+        this.moveSelects();
+    }
+    //
+    zoomTimeline(c, px, py){
+        this.timeline.zoom(c, px, py);
+        this.drawTimeline();
+        this.moveTimeline();
+        this.retimeExtremes();
     }
     //
     /**

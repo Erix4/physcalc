@@ -34,7 +34,15 @@ export default class Input{
         });
         //
         document.addEventListener("wheel", event => {
-            command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+            if(mY < this.command.scrH){
+                if(event.shiftKey){
+                    command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                }else{
+                    command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                }
+            }else{
+                command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
+            }
         })
         //
         document.addEventListener("keydown", event => {
@@ -96,11 +104,12 @@ export default class Input{
                 case "Shift":
                     this.shifting = true;
                     break;
-                case "Control":
-                    this.controlling = true;
-                    break;
                 case "s":
-                    this.command.saveState();
+                    if(event.ctrlKey){
+                        event.preventDefault();
+                        this.command.saveState();
+                        return false;
+                    }
                     break;
             }
         });
@@ -327,6 +336,10 @@ export default class Input{
             document.getElementById("vt1").style = "background-color: #254441";
             //
             input.command.changeViewType(2);
+        });
+        //
+        d3.select("#saveB").on("mousedown", function(){
+            input.command.saveState();
         });
     }
     //

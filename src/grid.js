@@ -88,13 +88,25 @@ export default class Grid{
             this.scale *= c;
         }
         //
+        let fd = firstDigit(this.superRes);
         if(this.getGridRes() < this.gridMin){
-            this.res *= 4;
-            this.superRes *= 4;
+            if(fd == 1 || fd == 5){//if the first digit is 1 or 5
+                this.res *= 2;//multiply res by 2
+                this.superRes *= 2;//turns superres into 2 or 10
+            }else{//first digit is 2
+                this.res *= 2.5;//multiply res by 5/2
+                this.superRes *= 2.5;//turns superres into 5
+            }
         }else if(this.getGridRes() > this.gridMax){
-            this.res /= 4;
-            this.superRes /= 4;
+            if(fd == 1 || fd == 2){//if the first digit is 1 or 2
+                this.res /= 2;//divide res by 2
+                this.superRes /= 2;//turns superres into 5 or 1
+            }else{//first digit is five
+                this.res *= 2/5;//multiply res by 2/5
+                this.superRes *= 2/5;//turns superres into 2
+            }
         }
+        console.log(this.superRes);
         //
         let mx = this.command.scaleX.invert(px);
         let my = this.command.scaleY.invert(py);
@@ -110,6 +122,17 @@ export default class Grid{
      */
     getGridRes(){
         return this.scrH / (this.scale / this.res);
+    }
+    //
+    zoomX(c, px, py){
+        this.strX *= c;
+        //
+        let mx = this.command.scaleX.invert(px);
+        let my = this.command.scaleY.invert(py);
+        //
+        this.cx = mx - ((mx - this.cx) * c);
+        //
+        this.calcSize();
     }
     //
     /**
@@ -213,4 +236,8 @@ var PIXEL_RATIO = (function () {
 
 function toPlaces(number, places){
     return Math.round(Math.pow(10, places) * number) / Math.pow(10, places);
+}
+
+function firstDigit(num){
+    return Math.floor(num / Math.pow(10, Math.floor(Math.log10(num))));
 }

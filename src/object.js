@@ -508,21 +508,21 @@ class netArrow{
         this.self.sx = this.obj.px;
         this.self.sy = this.obj.py;
         //
-        switch(this.viewType){
+        switch(this.command.viewType){
             case 0:
                 this.self.ex = this.pos[0] * this.obj.arrStr;
                 this.self.ey = this.pos[1] * this.obj.arrStr;
                 break;
             case 1:
                 var s = this.profile.paras[this.depth].calc(this.command.time)[0];
-                var x1 = Math.sqrt(Math.pow(this.obj.arrStr, 2) / (1 + Math.pow(s, 2)));
+                var x1 = Math.sqrt(Math.pow(this.obj.arrStr * 2, 2) / (1 + Math.pow(s, 2)));
                 //
                 this.self.ex = x1;
                 this.self.ey = x1 * s;
                 break;
             case 2:
                 var s = this.profile.paras[this.depth].calc(this.command.time)[1];
-                var x1 = Math.sqrt(Math.pow(this.obj.arrStr, 2) / (1 + Math.pow(s, 2)));
+                var x1 = Math.sqrt(Math.pow(this.command.scaleX.invert(this.obj.arrStr), 2) / (1 + Math.pow(s, 2)));
                 //
                 this.self.ex = x1;
                 this.self.ey = x1 * s;
