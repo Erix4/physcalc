@@ -1,4 +1,277 @@
 export default class Profile{
+    constructor(command, depth, xCoefs, yCoefs, color){
+        this.command = command;
+        this.color = color;
+        this.depth = depth;
+        //
+        this.pieces = [new Piece(command, depth, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
+        //
+        this.bounds = [[-Infinity, Infinity]];//list of bounds for each piece
+        this.junctions = [];//list of junctions between each piece (always one less than the number of peices), 0 = continous, 1 = discontinuous, 2 = incomplete
+    }
+    //
+    /**
+     * Push a new piece to the profile
+     * @param {Array<Number>} xCoefs x coefficients of lowest power of piece
+     * @param {Array<Number>} yCoefs y coefficients of lowest power of piece
+     * @param {Number}        time   time at which piece is added
+     */
+    newPiece(xCoefs, yCoefs, time){
+        let curIdx = this.getCurIdx(time);
+        //
+        if(curIdx == -1){//if there is no piece at the current time
+            let nextIdx = this.getRightIdx(time);
+            if(nextIdx == -1){//if time is after every piece
+                if(this.pieces.length == 0){//if there are no other pieces
+                    this.bounds.push([-Infinity, Infinity]);
+                }else{//if there are other pieces (before the current)
+                    this.bounds.push([this.bounds[this.bounds.length - 1][1], Infinity]);//add a new bound
+                }
+                this.pieces.push(new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
+                this.junctions.push(0);
+            }else{
+                if(nextIdx == 0){//if time is before every piece
+                    this.bounds.push([-Infinity, this.bounds[nextIdx][0]]);//set new bound from -Infinity to the start of the next piece
+                }else{
+                    this.bounds.push([this.bounds[nextIdx - 1][1], this.bounds[nextIdx][0]]);//set new bound from the end of the previous piece to the start of the next piece
+                }
+                this.pieces.splice(nextIdx, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
+                this.junctions.splice(nextIdx, 0, 0);
+            }
+        }else{
+            this.pieces.splice(curIdx + 1, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));//add a new piece after the current piece
+            //
+            let curEnd = this.bounds[curIdx][1];//find the end of the current piece
+            this.bounds[curIdx][1] = time;//set the current piece to end at the current time
+            this.bounds.splice(curIdx + 1, 0, [time, curEnd]);//a a new bound starting at the current time and ending at the next time
+            //
+            this.junctions.splice(curIdx, 0, 0);//add a new junction at the current time
+        }
+    }
+    //
+    /**
+     * Set the bounds of a given piece and compress or expand neighbors
+     * @param {Number} idx index of piece to set bounds
+     * @param {Number} t1  time of start
+     * @param {Number} t2  time of end
+     */
+    reBoundPiece(idx, t1, t2){//rebounding does not affect the piece or the junction type
+        if(idx != 0){//if not the first piece
+            if(t1 < this.bounds[idx][0]){//if the new piece starts before the current piece (push)
+                let stIdx = this.getCurIdx(t1);//get the index of the piece that contains the new time
+                //
+                this.bounds[stIdx][1] = t1;//rebound the leftmost piece
+                for(var n = stIdx + 1; n < idx; n++){//compress every piece between the leftmost and the current piece
+                    this.bounds[n] = [t1, t1];
+                }
+            }else if(this.junctions[idx - 1] != 2){//if the new piece starts after the current piece and the left juction is complete (pull)
+                this.bounds[idx][1] = t1;//rebound the left neighbor to end at the current start
+            }
+        }
+        this.bounds[idx][0] = t1;//rebound the current piece to start at the new start
+        //
+        if(idx != this.bounds.length - 1){//if not the last piece
+            if(t2 > this.bounds[idx][1]){//if the new piece end after the current piece (push)
+                let endIdx = this.getCurIdx(t2);//get the index of the piece that contains the new time
+                //
+                this.bounds[endIdx][0] = t2;//rebound the rightmost piece
+                for(var n = endIdx - 1; n > idx; n--){//compress every piece between the rightmost and the current piece
+                    this.bounds[n] = [t2, t2];
+                }
+            }else if(this.junctions[idx] != 2){//if the new piece starts after the current piece and the right juction is complete (pull)
+                this.bounds[idx][0] = t2;//rebound the right neighbor to end at the current start
+            }
+        }
+        this.bounds[idx][1] = t2;//rebound the current piece to end at the new end
+    }
+    //
+    reorderPeice(idx, newIdx){//this will be very complicated
+        this.pieces.splice(newIdx, 0, this.pieces.splice(idx, 1)[0]);
+        this.bounds.splice(newIdx, 0, this.bounds.splice(idx, 1)[0]);
+        //new junction here
+    }
+    //
+    draw(power, steps){
+        //
+    }
+    //
+    /**
+     * Find the domain (time periods on screen) of a given piece
+     * @param {Number} pIdx    index of piece
+     * @param {Number} [power] power of function (0 by default)
+     */
+    calcDomain(pIdx, power = 0){
+        let doms = this.pieces[pIdx].calcDomain(power);
+        //
+        while(doms[0][1] < this.bounds[pIdx][0]){//while right domain is less than left bound of piece
+            doms.splice(0, 1);//remove this domain
+        }
+        if(doms[0][0] < this.bounds[pIdx][0]){//if left domain is less than the left bound
+            doms[0][0] = this.bounds[pIdx][0];//set the left domain to the left bound
+        }
+        //
+        let len = doms.length - 1;
+        while(doms[len][0] > this.bounds[pIdx][1]){//while left domain is more than right bound of piece
+            doms.pop();//remove this domain
+        }
+        if(doms[len][1] > this.bounds[pIdx][1]){//if right domain is more than the right bound
+            doms[len][1] = this.bounds[pIdx][1];//set the right domain to the right bound
+        }
+        //
+        return doms;
+    }
+    //
+    setAllComps(comps, pIdx){
+        //
+    }
+    //
+    /**
+     * Set the values at the given time and power
+     * @param {Number} power       depth of the value to set
+     * @param {Number} t           time  at which to set the value
+     * @param {Number} x           x value to set
+     * @param {Number} y           y value to set
+     * @param {Boolean} propogator whether to propagate the set values to other depths
+     */
+    setValTime(power, t, x, y, propagator = true){
+        let curIdx = this.getLeftIdx(t);
+        if(curIdx == -1){//time is left of every piece
+            curIdx = 0;//set calc index to the last one
+        }
+        //
+        let curPiece = this.pieces[curIdx];
+        let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
+        //
+        //this loop sets moves each function so that they intersect with the given point given a point in time
+        this.pieces.forEach(piece => {
+            piece.setOrigin(curOrigin, power);//set origin to the origin of the current piece
+            piece.setValTime(power, t, x, y, propagator);//set the value at the given time to the offset
+        });
+    }
+    //
+    /**
+     * Set values at the current time and given power
+     * @param {Number} power       depth of the values to set
+     * @param {Number} x           x values to set
+     * @param {Number} y           y values to set
+     * @param {Boolean} propagator whether to propagate the new function to the rest of the depths
+     */
+    setValues(power, x, y, propagator = true){
+        this.setValTime(power, this.command.time, x, y, propagator);
+    }
+    //
+    /**
+     * find the extreme values of the profile
+     * @returns {Array<Number>} all extremes of the piecewise function
+     */
+    getExtremes(){
+        extrs = [];
+        //
+        this.pieces.forEach((piece, idx) => {
+            extrs.push(...piece.getExtremes().filter(extr => {//get extremes for the piece
+                if(this.bounds[idx][0] < extr && extr < this.bounds[idx][1]){//only get extremes that are within the bounds of the piece
+                    return true;
+                }
+            }));
+            extrs.push(...this.bounds[idx]);//push bounds of piece as extremes
+        });
+        //
+        return extrs;
+    }
+    //
+    /**
+     * set the shifting origin of one or all powers to a given time
+     * @param {Number} time    time to set the origin to
+     * @param {Number} [power] the power of which to set the origins
+     */
+    setOrigin(time, power){
+        if(power || power == 0){//if power is specified
+            this.pieces.forEach(piece => {//set the origin at the given power for every piece
+                piece.paras[power].xFunc.origin = time;
+                piece.paras[power].yFunc.origin = time;
+            });
+        }else{
+            this.pieces.forEach(piece => {
+                piece.paras.forEach(para => {
+                    para.xFunc.origin = time;//set the origin for every power for every piece
+                    para.yFunc.origin = time;
+                });
+            });
+        }
+    }
+    //
+    /**
+     * get the piece which the given time is in, if any
+     * @param {Number} time the time to check
+     * @returns {Number} the index of the piece, or -1 if the time is not in any piece
+     */
+    getCurIdx(time){
+        let idx = 0;
+        this.bounds.forEach(bound => {
+            if(time > bound[0] && time < bound[1]){
+                return idx;
+            }
+            idx++;
+        });
+        return -1;//there is no piece for the current time
+    }
+    //
+    //the following function is useful for inferring bounds for new pieces
+    /**
+     * get the piece which contains the given time or is to the right of it
+     * @param {Number} time the time to check
+     * @returns the index of the piece, or -1 if the time is to the right of every piece
+     */
+    getRightIdx(time){
+        let idx = 0;
+        this.bounds.forEach(bound => {
+            if(time > bound[1] && idx != this.bounds.length - 1){//if time is after right bound and this bound isn't the last
+                return idx + 1;
+            }
+            idx++;
+        });
+        return -1;//the current time is past every piece
+    }
+    //
+    //the following function is useful for calculating values
+    /**
+     * get the piece which contains the given time or is to the left of it
+     * @param {Number} time the time to check
+     * @returns the index of the piece, or -1 if the time is to the left of every piece
+     */
+    getLeftIdx(time){
+        let idx = 0;
+        for(var n = 1; n < this.bounds.length; n++){
+            if(time < this.bounds[n][0]){//if time is before left bound
+                return idx;
+            }
+            idx++;
+        }
+        return -1;//the current time is before every piece
+    }
+    //
+    /**
+     * calculate the x and y values at the given time and power
+     * @param {Number} power the power at which to calculate
+     * @param {Number} time  the time at which to calculate
+     * @returns the calculated values at the given time and power in the appropriate piece
+     */
+    calc(power, time){
+        let curIdx = this.getCurIdx(time);
+        if(curIdx == -1){//time is not directly in a piece
+            let leftIdx = this.getLeftIdx(t);
+            if(leftIdx == -1){//time is left of every piece
+                return this.pieces[leftIdx].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
+            }else{
+                return this.pieces[leftIdx].paras[power].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+            }
+        }
+        //
+        return this.pieces[curIdx].paras[power].calc(time);//return the value of the applicable piece
+    }
+}
+
+export class Piece{
     constructor(command, depth, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
         this.obj = command.objects[command.objects.length - 1];
@@ -41,19 +314,19 @@ export default class Profile{
     //
     draw(power, steps){
         let para = this.paras[power];//get para by power
-        let dom = this.calcDomain();
+        let dom = this.calcDomain(power);
         //
         dom.forEach(domain => {
             para.draw(this.command, domain[0], domain[1], steps / dom.length);//draw the para wherever it's on screen
         });
     }
     //
-    calcDomain(){
+    calcDomain(power = 0){
         var vals = [];
-        this.paras[0].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
+        this.paras[power].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
             vals.push([val, 0])
         })
-        this.paras[0].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
+        this.paras[power].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push([val, 1]);//put them all in a list
             //console.log(val);
         });
@@ -64,27 +337,45 @@ export default class Profile{
         var x = false;
         var y = false;
         var visible = false;
-        vals.forEach(val => {
-            if(val[1] == 0){
-                if(this.paras[1].xFunc.calc(val[0]) == 0){//discard value if derivative is 0
-                    return;
+        if(this.paras.length > power + 1){//if there are more derivatives
+            vals.forEach(val => {
+                if(val[1] == 0){
+                    if(this.paras[power + 1].xFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                        return;
+                    }
+                    x = !x;
+                }else{
+                    if(this.paras[power + 1].yFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                        return;
+                    }
+                    y = !y;
                 }
-                x = !x;
-            }else{
-                if(this.paras[1].yFunc.calc(val[0]) == 0){//discard value if derivative is 0
-                    return;
+                //
+                if(x && y){
+                    ranges.push([val[0]]);
+                    visible = true;
+                }else if((!x || !y) && visible && ranges.length > 0){
+                    ranges[ranges.length - 1].push(val[0]);
+                    visible = false;
                 }
-                y = !y;
-            }
-            //
-            if(x && y){
-                ranges.push([val[0]]);
-                visible = true;
-            }else if((!x || !y) && visible && ranges.length > 0){
-                ranges[ranges.length - 1].push(val[0]);
-                visible = false;
-            }
-        });
+            });
+        }else{//no derivative available
+            vals.forEach(val => {
+                if(val[1] == 0){
+                    x = !x;
+                }else{
+                    y = !y;
+                }
+                //
+                if(x && y){
+                    ranges.push([val[0]]);
+                    visible = true;
+                }else if((!x || !y) && visible && ranges.length > 0){
+                    ranges[ranges.length - 1].push(val[0]);
+                    visible = false;
+                }
+            });
+        }
         //
         return ranges;//return ranges where function is visible
     }
@@ -120,10 +411,12 @@ export default class Profile{
         }
     }
     //
-    setValTime(power, t, x, y){
+    setValTime(power, t, x, y, propogator = true){
         this.paras[power].setOff(t, x, y);
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());
-        this.propagate(power);
+        if(propogator){
+            this.propagate(power);
+        }
     }
     //
     setValues(power, x, y, propogator = true){
@@ -239,7 +532,7 @@ export default class Profile{
     }
     //
     setOrigin(time, power){
-        if(power || power == 0){
+        if(power || power == 0){//if power is specified
             this.paras[power].xFunc.origin = time;
             this.paras[power].yFunc.origin = time;
         }else{
@@ -599,25 +892,20 @@ export class Func{
                 coefs.push(term.coef);
             });
             this.terms[n].coef = 0;
-            //console.log(coefs);
-            //console.log(`Starting with term ${l}, expanding to ${pascal}`);
+            //
             for(var a = 0; a <= l; a++){//for every term of power less than or equal to current 
                 this.terms[n + a].coef += (coefs[n] * pascal[a] * Math.pow(-Xoffset, a));
-                //console.log(`Changing term ${l - a} by ${coefs[n] * pascal[a] * Math.pow(-Xoffset, a)} to ${this.terms[n + a].coef} from ${coefs[n]}*${pascal[a]}*${Math.pow(-Xoffset, a)}`);
             }
             //
             let tempPasc = [1,1];
             for(var a = 0; a < l; a++){//generate next layer in pascal's triangle
                 tempPasc.splice(a + 1, 0, pascal[a] + pascal[a + 1]);//adjust term based on polynomial generated from application of x offset
-                //tempPasc[a] = pascal[a] + pascal[a + 1];
             }
             pascal = [...tempPasc];
         }
         //
         this.terms[this.terms.length - 1].coef += Yoffset;// - this.calc(Xoffset);
-        //console.log(`Term changed to ${this.terms[this.terms.length - 1].coef} by ${Yoffset}`);
         this.origin = orxo;
-        //console.log(`New origin is ${this.origin}`);
     }
     //
     setColor(color){
