@@ -209,7 +209,6 @@ export default class Input{
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
-                console.log(this.command.selected.profile.paras[0].xFunc);
                 if(this.command.viewType == 0){
                     this.command.toggleVectors(1);
                 }

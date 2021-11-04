@@ -431,6 +431,9 @@ export default class Command{
         this.drawTimeline();
     }
     //
+    /**
+     * save the current state of the objects
+     */
     saveState(){
         var str = "";
         this.objects.forEach(obj => {
@@ -451,6 +454,10 @@ export default class Command{
         download(`phsycalc[${time}].csv`, str);
     }
     //
+    /**
+     * open a given file and overwrite the current state
+     * @param {File} file file as received from the file input
+     */
     openState(file){
         var comm = this;
         //

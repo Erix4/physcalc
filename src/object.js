@@ -61,13 +61,13 @@ export default class Object{
         this.py = this.command.scaleY.invert(py);
         this.xS = [];//refactor for expandable values, power ascends (0, 1, 2...)
         this.yS = [];
-        this.vx = 5;//starting values, not used later
-        this.vy = 5;
-        this.ax = 0;
-        this.ay = 0;
+        const vx = 5;//starting values, not used later
+        const vy = 5;
+        const ax = 0;
+        const ay = 0;
         //
-        this.profile = new Profile(this.command, this.depth, [this.ax / 2, this.vx, this.px], [this.ay / 2, this.vy, this.py], this.color);
-        this.profile.addComp(2, [0], [this.gravity]);
+        this.profile = new Profile(this.command, this.depth, [ax / 2, vx, this.px], [ay / 2, vy, this.py], this.color);
+        this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
         this.extremes = [];
         this.points = [];//svg points that illustrate extremes
@@ -79,17 +79,20 @@ export default class Object{
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
         this.nets = [];
-        this.comps = [];
-        for(var n = 1; n < this.profile.paras.length; n++){//make an arrow for every para except position
+        this.comps = [];//redo comp listing for better illustration
+        for(var n = 1; n <= this.depth; n++){//make an arrow for every para except position
             this.nets.push(new netArrow(command, this, n));
-            this.profile.comps[n].forEach(comp => {
-                this.comps.push([]);
-            });
-            console.log(this.comps);
-            for(var a = 0; a < this.profile.comps[n].length; a++){
-                this.comps[n - 1][this.profile.comps[n].length - a - 1] = new compArrow(command, this, n, this.profile.comps[n].length - a - 1);
+            var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
+            //
+            let compPower = [];
+            for(var a in curPiece.comps[n]){
+                compPower.splice(0, 0, new compArrow(command, this, n, a));//insert new comp arrow at beginning of power list
             }
+            this.comps.push(compPower);
+            //
+            console.log(this.comps.slice());
         }
+        this.updateVectors();
         this.comps.forEach(comp => {
             comp.forEach(arrow => {
                 arrow.self.head.raise();
@@ -100,7 +103,7 @@ export default class Object{
             net.self.tailA.raise();
             net.self.tailB.raise();
             net.self.head.raise();
-        })
+        });
         //
         this.svg = command.svg;
         //
@@ -209,9 +212,8 @@ export default class Object{
     //
     /**
      * Draw the function of the object
-     * @param {Class} input input handler
      */
-    draw(input){
+    draw(){
         switch(this.command.viewType){
             case 0:
                 this.profile.draw(0, 300);
@@ -231,19 +233,6 @@ export default class Object{
                 }
                 break;
         }
-        /*if((input.moveState == 3) && input.active != this){//new object is being created
-            this.command.ctx.globalAlpha = 0.2;
-            this.profile.draw(0, 300);
-            //this.movePoints();
-            //this.profile.drawPoints(this.extremes);
-            this.command.ctx.globalAlpha = 1.0;
-            this.self.style("fill-opacity", 0.2).style("stoke-opacity", 0.2);
-        }else if (!(input.moveState == 3 && input.active == this)){//if not being position confirmed
-            this.profile.draw(0, 300);
-            //this.movePoints();
-            //this.profile.drawPoints(this.extremes);
-            this.self.style("fill-opacity", 1).style("stoke-opacity", 1.0);
-        }*/
     }
     //
     isStaticX(depth){
@@ -279,68 +268,15 @@ export default class Object{
             });
         }
     }
-    //#endregion
     //
-    //#region Setting Values
-    /**
-     * shift the net value at a given power with pixels
-     * @param {Number} power  power of value to shift (2=x^2)
-     * @param {Number} xShift x shift in pixels
-     * @param {Number} yShift y shift in pixels
-     */
-    shiftValue(power, xShift, yShift){
-        let xPos = this.command.scaleX.invert(this.command.scaleX(this.px) + xShift);
-        let yPos = this.command.scaleY.invert(this.command.scaleY(this.py) + yShift);
-        this.setValue(power, xPos, yPos);
+    respawnArrows(){
+        let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
+        //
+        while(this.nets.length < curPiece.paras.length){
+            this.nets.push(new netArrow(command, this, this.nets.length));
+            //
+        }
     }
-    //
-    /**
-     * set the net value at a given power with units
-     * @param {Number} power power of value to set
-     * @param {Number} xPos  x value in units
-     * @param {Number} yPos  y value in units
-     */
-    setValue(power, xPos, yPos){
-        this.profile.setValues(power, xPos, yPos);
-        this.profile.setOrigin(this.command.time);
-    }
-    //
-    /**
-     * Set the value and reset the origin to a specific time
-     * @param {power} power power of value to set
-     * @param {time} time   time to set new value at
-     * @param {xPos} xPos   x position to set value to in pixels
-     * @param {yPos} yPos   y position to set value to in pixels
-     */
-    setValueTime(power, time, xPos, yPos){
-        this.profile.setValTime(power, time, xPos, yPos);
-        this.profile.setOrigin(time);
-    }
-    //
-    /**
-     * shift the value of a component (in pixels)
-     * @param {Number} power  power of component
-     * @param {Number} idx    index of component
-     * @param {Number} xShift x shift amount in pixels
-     * @param {Number} yShift y shift amount in pixels
-     */
-    shiftCompValue(power, idx, xShift, yShift){
-        let xPos = this.command.scaleX.invert(this.command.scaleX(this.profile.comps[power][idx].getTermX(0)) + xShift);
-        let yPos = this.command.scaleY.invert(this.command.scaleY(this.profile.comps[power][idx].getTermY(0)) + yShift);
-        this.setCompValue(power, idx, xPos, yPos);
-    }
-    //
-    /**
-     * set the value of a component (in units)
-     * @param {Number} power power of component
-     * @param {Number} idx   index of component
-     * @param {Number} xPos  new x position in units
-     * @param {Number} yPos  new y position in units
-     */
-    setCompValue(power, idx, xPos, yPos){
-        this.profile.setCompVal(power, idx, xPos, yPos);
-    }
-    //#endregion
     //
     /**
      * lock the object so it slide in time
@@ -457,6 +393,68 @@ export default class Object{
                 break;
         }
     }
+    //#endregion
+    //
+    //#region Setting Values
+    /**
+     * shift the net value at a given power with pixels
+     * @param {Number} power  power of value to shift (2=x^2)
+     * @param {Number} xShift x shift in pixels
+     * @param {Number} yShift y shift in pixels
+     */
+    shiftValue(power, xShift, yShift){
+        let xPos = this.command.scaleX.invert(this.command.scaleX(this.px) + xShift);
+        let yPos = this.command.scaleY.invert(this.command.scaleY(this.py) + yShift);
+        this.setValue(power, xPos, yPos);
+    }
+    //
+    /**
+     * set the net value at a given power with units
+     * @param {Number} power power of value to set
+     * @param {Number} xPos  x value in units
+     * @param {Number} yPos  y value in units
+     */
+    setValue(power, xPos, yPos){
+        this.profile.setValues(power, xPos, yPos);
+        this.profile.setOrigin(this.command.time);
+    }
+    //
+    /**
+     * Set the value and reset the origin to a specific time
+     * @param {power} power power of value to set
+     * @param {time} time   time to set new value at
+     * @param {xPos} xPos   x position to set value to in pixels
+     * @param {yPos} yPos   y position to set value to in pixels
+     */
+    setValueTime(power, time, xPos, yPos){
+        this.profile.setValTime(power, time, xPos, yPos);
+        this.profile.setOrigin(time);
+    }
+    //
+    /**
+     * shift the value of a component (in pixels)
+     * @param {Number} power  power of component
+     * @param {Number} idx    index of component
+     * @param {Number} xShift x shift amount in pixels
+     * @param {Number} yShift y shift amount in pixels
+     */
+    shiftCompValue(power, idx, xShift, yShift){
+        let xPos = this.command.scaleX.invert(this.command.scaleX(this.profile.comps[power][idx].getTermX(0)) + xShift);
+        let yPos = this.command.scaleY.invert(this.command.scaleY(this.profile.comps[power][idx].getTermY(0)) + yShift);
+        this.setCompValue(power, idx, xPos, yPos);
+    }
+    //
+    /**
+     * set the value of a component (in units)
+     * @param {Number} power power of component
+     * @param {Number} idx   index of component
+     * @param {Number} xPos  new x position in units
+     * @param {Number} yPos  new y position in units
+     */
+    setCompValue(power, idx, xPos, yPos){
+        this.profile.setCompVal(power, idx, xPos, yPos);
+    }
+    //#endregion
     //
     /**
      * Delete this object and its SVG elements
@@ -496,14 +494,14 @@ class netArrow{
         //
         this.profile = obj.profile;
         //
-        this.pos = this.profile.paras[depth].calc(command.time);
+        this.pos = this.profile.calc(depth, command.time);
         console.log(this.pos);
         this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(${240 - (depth * 20)}, 100%, 50%)`);
         this.command.input.newArrow(this);
     }
     //
     update(){
-        this.pos = this.profile.paras[this.depth].calc(this.command.time);
+        this.pos = this.profile.calc(this.depth, this.command.time);
         //
         this.self.sx = this.obj.px;
         this.self.sy = this.obj.py;
@@ -514,14 +512,14 @@ class netArrow{
                 this.self.ey = this.pos[1] * this.obj.arrStr;
                 break;
             case 1:
-                var s = this.profile.paras[this.depth].calc(this.command.time)[0];
+                var s = this.pos[0];
                 var x1 = Math.sqrt(Math.pow(this.obj.arrStr * 2, 2) / (1 + Math.pow(s, 2)));
                 //
                 this.self.ex = x1;
                 this.self.ey = x1 * s;
                 break;
             case 2:
-                var s = this.profile.paras[this.depth].calc(this.command.time)[1];
+                var s = this.pos[1];
                 var x1 = Math.sqrt(Math.pow(this.command.scaleX.invert(this.obj.arrStr), 2) / (1 + Math.pow(s, 2)));
                 //
                 this.self.ex = x1;
@@ -550,22 +548,17 @@ class compArrow{
         this.command = command;
         this.obj = obj;
         this.depth = depth;
-        this.idx = idx;
+        this.idx = idx;//index in profile
+        this.order = obj.profile.pieces[obj.profile.getValIdx(command.time)].comps[depth].length;
         //
         this.profile = obj.profile;
         //
-        this.pos = this.profile.comps[depth][idx].calc(command.time);
-        if(this.idx == this.profile.comps[depth].length - 1){
-            this.ex = obj.px + this.pos[0] * obj.arrStr;
-            this.ey = obj.py + this.pos[1] * obj.arrStr;
-            this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
-        }else{
-            console.log(this.obj.comps[depth - 2]);
-            this.self = new Arrow(command, this.obj.comps[this.depth - 2][0].ex, this.obj.comps[this.depth - 2][0].ey, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
-            this.ex = this.self.sx + this.self.ex;
-            this.ey = this.self.sy + this.self.ey;
-        }
+        this.pos = this.profile.calcComp(depth, command.time, idx);
+        this.self = new Arrow(command, 0, 0, 0, 0, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
         this.self.tailSize = 20;
+        //
+        this.ex = 0;
+        this.ey = 0;
         //
         if(this.idx > 0){
             this.command.input.newArrow(this);
@@ -574,14 +567,14 @@ class compArrow{
     //
     update(){
         //console.log("updating");
-        this.pos = this.profile.comps[this.depth][this.idx].calc(this.command.time);//find comp values at current depth and time
+        this.pos = this.profile.calcComp(this.depth, this.command.time, this.idx);//find comp values at current depth and time
         //
-        if(this.idx == this.profile.comps[this.depth].length - 1){//if last comp...
+        if(this.idx == this.obj.comps[this.depth - 1].length - 1){//if last comp...
             this.self.sx = this.obj.px;//set start to object position
             this.self.sy = this.obj.py;
         }else{
-            this.self.sx = this.obj.comps[this.depth - 1][this.idx + 1].ex;//set start of vector to end of last one
-            this.self.sy = this.obj.comps[this.depth - 1][this.idx + 1].ey;
+            this.self.sx = this.obj.comps[this.depth - 1][this.order - 1].ex;//set start of vector to end of last one
+            this.self.sy = this.obj.comps[this.depth - 1][this.order - 1].ey;
         }
         //
         this.self.ex = this.pos[0] * this.obj.arrStr;

@@ -148,6 +148,23 @@ export default class Profile{
     }
     //
     /**
+     * add a component at a given power to one or all pieces
+     * @param {Number} power  power to add the comp to
+     * @param {Number} xCoefs x coefficients of the comp
+     * @param {Number} yCoefs y coefficients of the comp
+     * @param {Number} [pIdx] index of piece to add comp to, all pieces by default
+     */
+    addComp(power, xCoefs, yCoefs, pIdx){
+        if(pIdx || pIdx == 0){
+            this.pieces[pIdx].addComp(power, xCoefs, yCoefs);
+        }else{
+            this.pieces.forEach(piece => {
+                piece.addComp(power, xCoefs, yCoefs);
+            });
+        }
+    }
+    //
+    /**
      * Set the values at the given time and power
      * @param {Number} power       depth of the value to set
      * @param {Number} t           time  at which to set the value
@@ -273,6 +290,19 @@ export default class Profile{
     }
     //
     /**
+     * return piece of the profile at the given time, accounting for incomplete pieces
+     * @param {Number} time the time to check
+     * @returns {Number} the index of the piece at the given time
+     */
+    getValIdx(time){
+        let leftIdx = this.getLeftIdx(time);
+        if(leftIdx == -1){
+            return 0;
+        }
+        return leftIdx;
+    }
+    //
+    /**
      * calculate the x and y values at the given time and power
      * @param {Number} power the power at which to calculate
      * @param {Number} time  the time at which to calculate
@@ -291,14 +321,26 @@ export default class Profile{
         //
         return this.pieces[curIdx].paras[power].calc(time);//return the value of the applicable piece
     }
+    //
+    calcComp(power, time, idx){
+        let curIdx = this.getCurIdx(time);
+        if(curIdx == -1){//time is not directly in a piece
+            let leftIdx = this.getLeftIdx(t);
+            if(leftIdx == -1){//time is left of every piece
+                return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[0][0]);//return the value at the left bound
+            }else{
+                return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+            }
+        }
+        //
+        return this.pieces[curIdx].comps[power][idx].calc(time);//return the value of the applicable piece
+    }
 }
 
 export class Piece{
     constructor(command, depth, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
         this.obj = command.objects[command.objects.length - 1];
-        //console.log(`--XX-- Making parametric function with x:[${xCoefs}] and y:[${yCoefs}]`);
-        //console.log(arguments);
         //
         this.color = color;
         //
@@ -326,12 +368,6 @@ export class Piece{
             this.paras.push(new Para(0, 300, xCoefs, yCoefs, this.color));
             this.comps.push([new Para(0, 300, xCoefs, yCoefs)]);//add current net function as top component
         }
-        //console.log(`Initialzing complete, with x:[${this.paras[0].xFunc.getCoefs()}] and y:[${this.paras[0].yFunc.getCoefs()}]`);
-        //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
-        //
-        //console.log("Current profile:");
-        //console.log(this.paras);
-        //console.log(this.comps);
     }
     //
     draw(power, steps){
