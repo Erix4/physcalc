@@ -32,6 +32,8 @@ h1{
     font-family: 'Heavitas';
     font-size: 2.3rem;
     color: #254441;
+    margin: 0;
+    align-self: center;
 }
 
 .headerB{

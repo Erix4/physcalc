@@ -204,7 +204,7 @@ export default class Profile{
      * @returns {Array<Number>} all extremes of the piecewise function
      */
     getExtremes(){
-        extrs = [];
+        var extrs = [];
         //
         this.pieces.forEach((piece, idx) => {
             extrs.push(...piece.getExtremes().filter(extr => {//get extremes for the piece
@@ -212,7 +212,7 @@ export default class Profile{
                     return true;
                 }
             }));
-            extrs.push(...this.bounds[idx]);//push bounds of piece as extremes
+            //extrs.push(...this.bounds[idx]);//push bounds of piece as extremes
         });
         //
         return extrs;
@@ -313,7 +313,7 @@ export default class Profile{
         if(curIdx == -1){//time is not directly in a piece
             let leftIdx = this.getLeftIdx(t);
             if(leftIdx == -1){//time is left of every piece
-                return this.pieces[leftIdx].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
+                return this.pieces[0].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
             }else{
                 return this.pieces[leftIdx].paras[power].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
             }

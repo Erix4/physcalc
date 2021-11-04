@@ -36,7 +36,7 @@ export default class Command{
         this.objects = [];
         this.selectedIdxs = [];
         //
-        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 10);
+        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 20);
         this.grid.calcSize();//get scales and things
         //
         this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);

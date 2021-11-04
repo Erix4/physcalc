@@ -44,11 +44,13 @@ export default class Props{
     //
     renderEqs(){
         if(this.selected){
+            let curPara = this.selected.profile.pieces[this.selected.profile.getValIdx(this.command.time)].paras[0]
+            //
             var str = `x(t)=`;
-            let len = this.selected.profile.paras[0].xFunc.terms.length - 1;
+            let len = curPara.xFunc.terms.length - 1;
             let num = 0;
             for(var n = len; n > 0; n--){
-                num = this.selected.profile.paras[0].getTermX(n);
+                num = curPara.getTermX(n);
                 if(num >= 0 && n < len){
                     str += "+";
                 }
@@ -62,7 +64,7 @@ export default class Props{
                     str += `^${n}`;
                 }
             }
-            num = this.selected.profile.paras[0].getTermX(0);
+            num = curPara.getTermX(0);
             if(num >= 0){
                 str += "+";
             }
@@ -76,9 +78,9 @@ export default class Props{
             });
             //
             str = `y(t)=`;
-            len = this.selected.profile.paras[0].yFunc.terms.length - 1;
+            len = curPara.yFunc.terms.length - 1;
             for(var n = len; n > 0; n--){
-                num = this.selected.profile.paras[0].getTermY(n);
+                num = curPara.getTermY(n);
                 if(num >= 0 && n < len){
                     str += "+";
                 }
@@ -92,7 +94,7 @@ export default class Props{
                     str += `^${n}`;
                 }
             }
-            num = this.selected.profile.paras[0].getTermY(0);
+            num = curPara.getTermY(0);
             if(num >= 0){
                 str += "+";
             }

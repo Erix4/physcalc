@@ -599,11 +599,12 @@ class compArrow{
     }
     //
     show(){
+        let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
         if(this.idx > 0){
             this.self.show();
-        }else if(this.profile.comps[this.depth].length > 1 && 
-                this.profile.paras[this.depth].xFunc.getCoefs() != this.profile.comps[this.depth][this.idx].xFunc.getCoefs() &&
-                this.profile.paras[this.depth].yFunc.getCoefs() != this.profile.comps[this.depth][this.idx].yFunc.getCoefs()){//head of default comp is never shown
+        }else if(curPiece.comps[this.depth].length > 1 && 
+                curPiece.paras[this.depth].xFunc.getCoefs() != curPiece.comps[this.depth][this.idx].xFunc.getCoefs() &&
+                curPiece.paras[this.depth].yFunc.getCoefs() != curPiece.comps[this.depth][this.idx].yFunc.getCoefs()){//head of default comp is never shown
             //
             this.self.neck.style("visibility", "visible");
             this.self.tailA.style("visibility", "visible");
