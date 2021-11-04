@@ -7,6 +7,7 @@ export default class Profile{
         this.pieces = [new Piece(command, depth, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
         //
         this.bounds = [[-Infinity, Infinity]];//list of bounds for each piece
+        console.log(this.bounds);
         this.junctions = [];//list of junctions between each piece (always one less than the number of peices), 0 = continous, 1 = discontinuous, 2 = incomplete
     }
     //
@@ -18,6 +19,7 @@ export default class Profile{
      */
     newPiece(xCoefs, yCoefs, time){
         let curIdx = this.getCurIdx(time);
+        console.log(`curIdx: ${curIdx}`);
         //
         if(curIdx == -1){//if there is no piece at the current time
             let nextIdx = this.getRightIdx(time);
@@ -91,31 +93,51 @@ export default class Profile{
         //new junction here
     }
     //
+    /**
+     * draw the profile at a given power in a given resolution, only what's visible
+     * @param {Number} power the power of the function to draw
+     * @param {Number} steps the number of steps (or resolution) of the illustration
+     */
     draw(power, steps){
+        let divy = steps / this.pieces.length;//number of steps for each piece
         //
+        this.pieces.forEach((piece, idx) => {
+            var doms = this.calcDomain(idx, power);//domains for this piece
+            var divier = divy / doms.length;//number of steps for each domain in the piece
+            //
+            doms.forEach(dom => {//for every domain
+                piece.paras[power].draw(this.command, dom[0], dom[1], divier);//draw the given power for this piece at this domain
+            });
+        });
     }
     //
     /**
      * Find the domain (time periods on screen) of a given piece
      * @param {Number} pIdx    index of piece
      * @param {Number} [power] power of function (0 by default)
+     * @returns {Array<Number>} domain of piece
      */
     calcDomain(pIdx, power = 0){
         let doms = this.pieces[pIdx].calcDomain(power);
         //
-        while(doms[0][1] < this.bounds[pIdx][0]){//while right domain is less than left bound of piece
+        while(doms.length > 0 && doms[0][1] < this.bounds[pIdx][0]){//while right domain is less than left bound of piece
             doms.splice(0, 1);//remove this domain
+        }
+        if(doms.length == 0){//no visible domains for this piece
+            return [];
         }
         if(doms[0][0] < this.bounds[pIdx][0]){//if left domain is less than the left bound
             doms[0][0] = this.bounds[pIdx][0];//set the left domain to the left bound
         }
         //
-        let len = doms.length - 1;
-        while(doms[len][0] > this.bounds[pIdx][1]){//while left domain is more than right bound of piece
+        while(doms.length > 0 && doms[doms.length - 1][0] > this.bounds[pIdx][1]){//while left domain is more than right bound of piece
             doms.pop();//remove this domain
         }
-        if(doms[len][1] > this.bounds[pIdx][1]){//if right domain is more than the right bound
-            doms[len][1] = this.bounds[pIdx][1];//set the right domain to the right bound
+        if(doms.length == 0){//no visible domains for this piece
+            return [];
+        }
+        if(doms[doms.length - 1][1] > this.bounds[pIdx][1]){//if right domain is more than the right bound
+            doms[doms.length - 1][1] = this.bounds[pIdx][1];//set the right domain to the right bound
         }
         //
         return doms;
@@ -207,12 +229,12 @@ export default class Profile{
      */
     getCurIdx(time){
         let idx = 0;
-        this.bounds.forEach(bound => {
+        for(var bound of this.bounds){
             if(time > bound[0] && time < bound[1]){
                 return idx;
             }
             idx++;
-        });
+        }
         return -1;//there is no piece for the current time
     }
     //
@@ -275,7 +297,7 @@ export class Piece{
     constructor(command, depth, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
         this.obj = command.objects[command.objects.length - 1];
-        console.log(`--XX-- Making parametric function with x:[${xCoefs}] and y:[${yCoefs}]`);
+        //console.log(`--XX-- Making parametric function with x:[${xCoefs}] and y:[${yCoefs}]`);
         //console.log(arguments);
         //
         this.color = color;
@@ -304,12 +326,12 @@ export class Piece{
             this.paras.push(new Para(0, 300, xCoefs, yCoefs, this.color));
             this.comps.push([new Para(0, 300, xCoefs, yCoefs)]);//add current net function as top component
         }
-        console.log(`Initialzing complete, with x:[${this.paras[0].xFunc.getCoefs()}] and y:[${this.paras[0].yFunc.getCoefs()}]`);
-        console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
+        //console.log(`Initialzing complete, with x:[${this.paras[0].xFunc.getCoefs()}] and y:[${this.paras[0].yFunc.getCoefs()}]`);
+        //console.log(`Current pos: (${this.paras[0].xFunc.calc(this.command.time.toFixed(2))}, ${this.paras[0].yFunc.calc(this.command.time.toFixed(2))})`);
         //
-        console.log("Current profile:");
-        console.log(this.paras);
-        console.log(this.comps);
+        //console.log("Current profile:");
+        //console.log(this.paras);
+        //console.log(this.comps);
     }
     //
     draw(power, steps){
@@ -321,10 +343,10 @@ export class Piece{
         });
     }
     //
-    calcDomain(power = 0){
+    calcDomain(power = 0){//fix to allow constants
         var vals = [];
         this.paras[power].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
-            vals.push([val, 0])
+            vals.push([val, 0]);
         })
         this.paras[power].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push([val, 1]);//put them all in a list
@@ -339,12 +361,12 @@ export class Piece{
         var visible = false;
         if(this.paras.length > power + 1){//if there are more derivatives
             vals.forEach(val => {
-                if(val[1] == 0){
+                if(val[1] == 0){//x domain
                     if(this.paras[power + 1].xFunc.calc(val[0]) == 0){//discard value if derivative is 0
                         return;
                     }
                     x = !x;
-                }else{
+                }else{//y domain
                     if(this.paras[power + 1].yFunc.calc(val[0]) == 0){//discard value if derivative is 0
                         return;
                     }
@@ -377,7 +399,7 @@ export class Piece{
             });
         }
         //
-        return ranges;//return ranges where function is visible
+        return ranges.slice();//return ranges where function is visible
     }
     //
     setAllComps(comps){//format: level>list>xy>terms

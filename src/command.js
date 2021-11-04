@@ -36,7 +36,7 @@ export default class Command{
         this.objects = [];
         this.selectedIdxs = [];
         //
-        this.grid = new Grid(this, this.ctx, this.svg, 0, 0.1, 15);
+        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 10);
         this.grid.calcSize();//get scales and things
         //
         this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
@@ -57,11 +57,20 @@ export default class Command{
         //
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
-        this.func = new Func(1000, [1, 1]);
-        this.func.resolve([[0, 0, 0], [0, 1, 0], [110, 0, 5.21]]);
+        //this.func = new Func(1000, [1, 1]);
+        //this.func.resolve([[0, 0, 0], [0, 1, 0], [110, 0, 5.21]]);
         //this.func.draw(this, -10, 10);
+        //
+        this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
+        this.prof.newPiece([1, 0], [3.5, 3], 0);
+        this.prof.newPiece([1, 0], [-1, 2, 4], .5);
+        this.prof.draw(0, 500);
+        //
+        this.prof2 = new Profile(this, 2, [1, 0], [-1, 4], 'blue');
+        this.prof2.draw(0, 500);
+        //
         this.moveGrid();
-        console.log(`accel: ${this.func.terms[0].coef * 2}`);
+        //console.log(`accel: ${this.func.terms[0].coef * 2}`);
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);
@@ -188,6 +197,8 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        this.prof.draw(0, 500);
+        this.prof2.draw(0, 500);
     }
     //
     /**
