@@ -44,6 +44,8 @@ export default class Props{
     //
     renderEqs(){
         if(this.selected){
+            let curPara = this.selected.profile.pieces[this.selected.profile.getValIdx(this.command.time)].paras[0]
+            //
             var str = `x(t)=`;
             let para = this.selected.profile.pieces[this.selected.piece].paras[0];
             let len = para.xFunc.terms.length - 1;
