@@ -56,6 +56,8 @@ export default class Object{
         this.vectorMode = 0;//0 is hidden, anything higher corresponds to power
         //
         this.depth = 2;
+        this.piece = 0;
+        this.undef = false;//position is undefined due to incomplete piecewise profile
         //
         this.px = this.command.scaleX.invert(px);//current values
         this.py = this.command.scaleY.invert(py);
@@ -81,12 +83,12 @@ export default class Object{
         this.nets = [];
         this.comps = [];//redo comp listing for better illustration
         for(var n = 1; n <= this.depth; n++){//make an arrow for every para except position
-            this.nets.push(new netArrow(command, this, n));
+            this.nets.push(new netArrow(command, this, n, 0));
             var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
             //
             let compPower = [];
             for(var a in curPiece.comps[n]){
-                compPower.splice(0, 0, new compArrow(command, this, n, a));//insert new comp arrow at beginning of power list
+                compPower.splice(0, 0, new compArrow(command, this, n, a, 0));//insert new comp arrow at beginning of power list
             }
             this.comps.push(compPower);
             //
@@ -127,6 +129,15 @@ export default class Object{
      * Update all internal values by function
      */
     update(){
+        if(this.command.time < this.profile.bounds[this.piece][0]){
+            this.piece--;
+            this.respawnArrows();
+        }else if(this.command.time > this.profile.bounds[this.piece][1]){
+            this.piece++;
+            this.respawnArrows();
+        }
+        console.log(this.piece);
+        //
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
             this.yS[n] = this.profile.calc(n, this.command.time)[1];
@@ -235,10 +246,20 @@ export default class Object{
         }
     }
     //
+    /**
+     * check if the x function is just zero
+     * @param {Number} depth depth to check static
+     * @returns true if the x function is just zero
+     */
     isStaticX(depth){
         return (this.profile.paras[depth].xFunc.terms.length == 1 && this.profile.paras[depth].xFunc.terms[0].coef == 0);
     }
     //
+    /**
+     * check if the y function is just zero
+     * @param {Number} depth depth to check static
+     * @returns true if the y function is just zero
+     */
     isStaticY(depth){
         return (this.profile.paras[depth].yFunc.terms.length == 1 && this.profile.paras[depth].yFunc.terms[0].coef == 0);
     }
@@ -269,12 +290,14 @@ export default class Object{
         }
     }
     //
+    /**
+     * remake the net and component vectors for this piece
+     */
     respawnArrows(){
         let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
         //
-        while(this.nets.length < curPiece.paras.length){
-            this.nets.push(new netArrow(command, this, this.nets.length));
-            //
+        while(this.nets.length < curPiece.paras.length){//while the current piece is deeper than the number of net vectors
+            this.nets.push(new netArrow(command, this, this.nets.length));//add a new net vector
         }
     }
     //
@@ -487,10 +510,11 @@ export default class Object{
 }
 
 class netArrow{
-    constructor(command, obj, depth){
+    constructor(command, obj, depth, pieceIdx){
         this.command = command;
         this.obj = obj;
         this.depth = depth;
+        this.pIdx = pieceIdx;
         //
         this.profile = obj.profile;
         //
@@ -501,7 +525,7 @@ class netArrow{
     }
     //
     update(){
-        this.pos = this.profile.calc(this.depth, this.command.time);
+        this.pos = this.profile.calc(this.depth, this.command.time, this.pIdx);
         //
         this.self.sx = this.obj.px;
         this.self.sy = this.obj.py;
@@ -544,11 +568,12 @@ class netArrow{
 }
 
 class compArrow{
-    constructor(command, obj, depth, idx){
+    constructor(command, obj, depth, idx, pieceIdx){
         this.command = command;
         this.obj = obj;
         this.depth = depth;
         this.idx = idx;//index in profile
+        this.pIdx = pieceIdx;
         this.order = obj.profile.pieces[obj.profile.getValIdx(command.time)].comps[depth].length;
         //
         this.profile = obj.profile;
@@ -566,8 +591,7 @@ class compArrow{
     }
     //
     update(){
-        //console.log("updating");
-        this.pos = this.profile.calcComp(this.depth, this.command.time, this.idx);//find comp values at current depth and time
+        this.pos = this.profile.calcComp(this.depth, this.command.time, this.idx, this.pieceIdx);//find comp values at current depth and time
         //
         if(this.idx == this.obj.comps[this.depth - 1].length - 1){//if last comp...
             this.self.sx = this.obj.px;//set start to object position
@@ -599,11 +623,10 @@ class compArrow{
     }
     //
     show(){
-        if(this.idx > 0){
+        if(this.idx > 0){//head of default comp is never shown
             this.self.show();
-        }else if(this.profile.comps[this.depth].length > 1 && 
-                this.profile.paras[this.depth].xFunc.getCoefs() != this.profile.comps[this.depth][this.idx].xFunc.getCoefs() &&
-                this.profile.paras[this.depth].yFunc.getCoefs() != this.profile.comps[this.depth][this.idx].yFunc.getCoefs()){//head of default comp is never shown
+        }else if(this.profile.pieces[this.pIdx].comps[this.depth].length > 1 && //there are more than one comps in this depth
+                !this.profile.checkCompMatch(this.depth, this.idx, this.pIdx)){
             //
             this.self.neck.style("visibility", "visible");
             this.self.tailA.style("visibility", "visible");
@@ -721,6 +744,17 @@ class Arrow{
         this.tailB.remove();
         this.head.remove();
     }
+}
+
+
+/**
+ * check whether a value is in a range
+ * @param {Number} val          value to check
+ * @param {Array<Number>} range start and end of range
+ * @returns if value falls within the range
+ */
+function within(val, range){
+    return val > range[0] && val < range[1];
 }
 
 function atan(y, x){

@@ -8,6 +8,7 @@
     "build": "parcel build index.html"
   },
   "dependencies": {
+    "bigdecimal": "^0.6.1",
     "chokidar": "^3.4.0",
     "core-js": "^3.6.5",
     "fontfaceobserver": "^2.1.0"

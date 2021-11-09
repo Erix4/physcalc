@@ -204,7 +204,7 @@ export default class Profile{
      * @returns {Array<Number>} all extremes of the piecewise function
      */
     getExtremes(){
-        extrs = [];
+        let extrs = [];
         //
         this.pieces.forEach((piece, idx) => {
             extrs.push(...piece.getExtremes().filter(extr => {//get extremes for the piece
@@ -212,7 +212,11 @@ export default class Profile{
                     return true;
                 }
             }));
-            extrs.push(...this.bounds[idx]);//push bounds of piece as extremes
+            this.bounds[idx].forEach(bound => {
+                if(Math.abs(bound) != Infinity){//only push piece bound if it exists (function doesn't go to infinity)
+                    extrs.push(bound);
+                }
+            });
         });
         //
         return extrs;
@@ -302,34 +306,59 @@ export default class Profile{
         return leftIdx;
     }
     //
+    checkCompMatch(power, idx, pIdx){
+        return this.pieces[pIdx].paras[power].xFunc.getCoefs() == this.pieces[pIdx].comps[power][idx].xFunc.getCoefs() &&
+                this.pieces[pIdx].paras[power].yFunc.getCoefs() == this.pieces[pIdx].comps[power][idx].yFunc.getCoefs();
+    }
+    //
     /**
      * calculate the x and y values at the given time and power
-     * @param {Number} power the power at which to calculate
-     * @param {Number} time  the time at which to calculate
+     * @param {Number} power  the power at which to calculate
+     * @param {Number} time   the time at which to calculate
+     * @param {Number} [pIdx] index of piece
      * @returns the calculated values at the given time and power in the appropriate piece
      */
-    calc(power, time){
-        let curIdx = this.getCurIdx(time);
-        if(curIdx == -1){//time is not directly in a piece
-            let leftIdx = this.getLeftIdx(t);
-            if(leftIdx == -1){//time is left of every piece
-                return this.pieces[leftIdx].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
-            }else{
-                return this.pieces[leftIdx].paras[power].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+    calc(power, time, pIdx){
+        let curIdx;
+        if(pIdx || pIdx == 0){//if piece is specified
+            curIdx = pIdx;
+        }else{
+            curIdx = this.getCurIdx(time);
+            if(curIdx == -1){//time is not directly in a piece
+                let leftIdx = this.getLeftIdx(t);
+                if(leftIdx == -1){//time is left of every piece
+                    console.log('time outside piece');
+                    return this.pieces[0].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
+                }else{
+                    return this.pieces[leftIdx].paras[power].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+                }
             }
         }
         //
         return this.pieces[curIdx].paras[power].calc(time);//return the value of the applicable piece
     }
     //
-    calcComp(power, time, idx){
-        let curIdx = this.getCurIdx(time);
-        if(curIdx == -1){//time is not directly in a piece
-            let leftIdx = this.getLeftIdx(t);
-            if(leftIdx == -1){//time is left of every piece
-                return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[0][0]);//return the value at the left bound
-            }else{
-                return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+    /**
+     * calculate the values of a component of the function at a given time (assumes the component exists for this piece)
+     * @param {Number} power power at which to calculate
+     * @param {Number} time  time to calculate at
+     * @param {Number} idx   index of the component
+     * @param {Number} [pIdx] index of piece
+     * @returns the calculated number
+     */
+    calcComp(power, time, idx, pIdx){
+        let curIdx;
+        if(pIdx || pIdx == 0){//if no piece is specified
+            curIdx = pIdx;
+        }else{
+            curIdx = this.getCurIdx(time);
+            if(curIdx == -1){//time is not directly in a piece
+                let leftIdx = this.getLeftIdx(t);
+                if(leftIdx == -1){//time is left of every piece
+                    return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[0][0]);//return the value at the left bound
+                }else{
+                    return this.pieces[leftIdx].comps[power][idx].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+                }
             }
         }
         //
@@ -344,8 +373,8 @@ export class Piece{
         //
         this.color = color;
         //
-        this.paras = [new Para(command.time, 300, xCoefs, yCoefs, this.color)];
-        this.comps = [[new Para(command.time, 300, xCoefs, yCoefs)]];
+        this.paras = [new Para(command.time, 500, xCoefs, yCoefs, this.color)];
+        this.comps = [[new Para(command.time, 500, xCoefs, yCoefs)]];
         for(var n = 0; n < depth; n++){//generate derivatives
             xCoefs = [];
             let xTerms = this.paras[n].xFunc.terms;//get terms of x function of last parametric function

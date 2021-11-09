@@ -45,10 +45,11 @@ export default class Props{
     renderEqs(){
         if(this.selected){
             var str = `x(t)=`;
-            let len = this.selected.profile.paras[0].xFunc.terms.length - 1;
+            let para = this.selected.profile.pieces[this.selected.piece].paras[0];
+            let len = para.xFunc.terms.length - 1;
             let num = 0;
             for(var n = len; n > 0; n--){
-                num = this.selected.profile.paras[0].getTermX(n);
+                num = para.getTermX(n);
                 if(num >= 0 && n < len){
                     str += "+";
                 }
@@ -62,7 +63,7 @@ export default class Props{
                     str += `^${n}`;
                 }
             }
-            num = this.selected.profile.paras[0].getTermX(0);
+            num = para.getTermX(0);
             if(num >= 0){
                 str += "+";
             }
@@ -76,9 +77,9 @@ export default class Props{
             });
             //
             str = `y(t)=`;
-            len = this.selected.profile.paras[0].yFunc.terms.length - 1;
+            len = para.yFunc.terms.length - 1;
             for(var n = len; n > 0; n--){
-                num = this.selected.profile.paras[0].getTermY(n);
+                num = para.getTermY(n);
                 if(num >= 0 && n < len){
                     str += "+";
                 }
@@ -92,7 +93,7 @@ export default class Props{
                     str += `^${n}`;
                 }
             }
-            num = this.selected.profile.paras[0].getTermY(0);
+            num = para.getTermY(0);
             if(num >= 0){
                 str += "+";
             }
