@@ -178,14 +178,35 @@ export default class Profile{
             curIdx = 0;//set calc index to the last one
         }
         //
+        this.setPieceValTime(power, t, curIdx, x, y, propagator);
+        var leftX = this.calc(power, this.bounds[curIdx][0], curIdx)[0];
+        var leftY = this.calc(power, this.bounds[curIdx][0], curIdx)[1];
+        for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
+            this.setPieceValTime(power, t, i, leftX, leftY, propagator);
+            leftX = this.calc(power, this.bounds[i][0], i)[0];
+            leftY = this.calc(power, this.bounds[i][0], i)[1];
+        }
+        //
+        var leftX = this.calc(power, this.bounds[curIdx][1], curIdx)[0];
+        var leftY = this.calc(power, this.bounds[curIdx][1], curIdx)[1];
+        for(var i = curIdx + 1; i < this.junctions.length && this.junctions[i] == 0; i++){//pieces are to the left and the left juction is continous
+            this.setPieceValTime(power, t, i, leftX, leftY, propagator);
+            leftX = this.calc(power, this.bounds[i][1], i)[0];
+            leftY = this.calc(power, this.bounds[i][1], i)[1];
+        }
+        //
         let curPiece = this.pieces[curIdx];
         let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
         //
         //this loop sets moves each function so that they intersect with the given point given a point in time
-        this.pieces.forEach(piece => {
+        /**this.pieces.forEach(piece => {
             piece.setOrigin(curOrigin, power);//set origin to the origin of the current piece
             piece.setValTime(power, t, x, y, propagator);//set the value at the given time to the offset
-        });
+        });**/
+    }
+    //
+    setPieceValTime(power, t, pIdx, x, y, propagator=true){
+        this.pieces[pIdx].setValTime(power, t, x, y, propagator);
     }
     //
     /**

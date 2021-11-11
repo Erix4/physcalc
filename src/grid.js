@@ -170,7 +170,7 @@ export default class Grid{
         var exactX = this.exactRes.multiply(new this.bd.BigDecimal(`${Math.ceil(xLeft / res)}`));//new bigdecimal.BigDecimal(`${Math.ceil(xLeft / res) * this.exactRes}`);
         //
         for(var n = 0; n < ((xRight - xLeft) / res); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
-            ctx.lineWidth = this.colorLine(ctx, parseFloat(exactX)) * .5;
+            ctx.lineWidth = this.colorLine(ctx, exactX) * .5;
             if(ctx.lineWidth == 1.5 || ctx.lineWidth == 4){
                 ctx.fillText(`${parseFloat(exactX)}`, this.command.scaleX(curX) + 5, this.command.scaleY(0) + 20);
             }
@@ -189,7 +189,7 @@ export default class Grid{
         var exactY = this.exactRes.multiply(new this.bd.BigDecimal(`${Math.ceil(yBot / res)}`));
         for (var n = 0; n < (this.scale / res); n++){
             //this.colorLine(ctx, curY);
-            ctx.lineWidth = this.colorLine(ctx, parseFloat(exactY)) * .5;
+            ctx.lineWidth = this.colorLine(ctx, exactY) * .5;
             if(ctx.lineWidth == 1.5){
                 ctx.fillText(`${parseFloat(exactY)}`, this.command.scaleX(0) + 5, this.command.scaleY(curY) + 20);
             }
@@ -206,11 +206,12 @@ export default class Grid{
     //
     colorLine(ctx, pos){
         let ctx2 = ctx;
-        if(pos == 0){
+        if(parseFloat(pos) == 0){
+            console.log('axis');
             return 8;
         }else{
-            var esuper = parseFloat(this.exactSuper);
-            let strength = 2 - Math.ceil(Math.abs((pos % esuper) / esuper));// - (1 + (Math.abs(pos) / pos));//for every super res line, make more bold
+            var rem = (pos.remainder(this.exactSuper)).divide(this.exactSuper);
+            let strength = 2 - Math.ceil(Math.abs(parseFloat(rem)));// - (1 + (Math.abs(pos) / pos));//for every super res line, make more bold
             return 2 * (strength - 1) + 1;
         }
         console.log(strength);

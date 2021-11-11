@@ -200,6 +200,8 @@ export default class Input{
                     command.timeline.movePoints();
                     break;
                 default:
+                    command.prof.setValues(0, command.scaleX.invert(emx), command.scaleY.invert(emy));
+                    command.drawGrid();
                     break;
             }
             //
