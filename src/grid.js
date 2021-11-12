@@ -207,7 +207,6 @@ export default class Grid{
     colorLine(ctx, pos){
         let ctx2 = ctx;
         if(parseFloat(pos) == 0){
-            console.log('axis');
             return 8;
         }else{
             var rem = (pos.remainder(this.exactSuper)).divide(this.exactSuper);

@@ -16,8 +16,9 @@ export default class Profile{
      * @param {Array<Number>} xCoefs x coefficients of lowest power of piece
      * @param {Array<Number>} yCoefs y coefficients of lowest power of piece
      * @param {Number}        time   time at which piece is added
+     * @param {Number}        j1     junction type (0ctn, 1com, 2inc) at time
      */
-    newPiece(xCoefs, yCoefs, time){
+    newPiece(xCoefs, yCoefs, time, j){
         let curIdx = this.getCurIdx(time);
         console.log(`curIdx: ${curIdx}`);
         //
@@ -30,7 +31,8 @@ export default class Profile{
                     this.bounds.push([this.bounds[this.bounds.length - 1][1], Infinity]);//add a new bound
                 }
                 this.pieces.push(new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
-                this.junctions.push(0);
+                this.junctions[this.junctions.length - 1] = j1;
+                this.junctions.push(j);
             }else{
                 if(nextIdx == 0){//if time is before every piece
                     this.bounds.push([-Infinity, this.bounds[nextIdx][0]]);//set new bound from -Infinity to the start of the next piece
@@ -38,7 +40,7 @@ export default class Profile{
                     this.bounds.push([this.bounds[nextIdx - 1][1], this.bounds[nextIdx][0]]);//set new bound from the end of the previous piece to the start of the next piece
                 }
                 this.pieces.splice(nextIdx, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
-                this.junctions.splice(nextIdx, 0, 0);
+                this.junctions.splice(nextIdx, 0, j);
             }
         }else{
             this.pieces.splice(curIdx + 1, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));//add a new piece after the current piece
@@ -47,7 +49,7 @@ export default class Profile{
             this.bounds[curIdx][1] = time;//set the current piece to end at the current time
             this.bounds.splice(curIdx + 1, 0, [time, curEnd]);//a a new bound starting at the current time and ending at the next time
             //
-            this.junctions.splice(curIdx, 0, 0);//add a new junction at the current time
+            this.junctions.splice(curIdx, 0, j);//add a new junction at the current time
         }
     }
     //
@@ -182,15 +184,15 @@ export default class Profile{
         var leftX = this.calc(power, this.bounds[curIdx][0], curIdx)[0];
         var leftY = this.calc(power, this.bounds[curIdx][0], curIdx)[1];
         for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
-            this.setPieceValTime(power, t, i, leftX, leftY, propagator);
+            this.setPieceValTime(power, this.bounds[i][1], i, leftX, leftY, propagator);
             leftX = this.calc(power, this.bounds[i][0], i)[0];
             leftY = this.calc(power, this.bounds[i][0], i)[1];
         }
         //
-        var leftX = this.calc(power, this.bounds[curIdx][1], curIdx)[0];
+        var leftX = this.calc(power, this.bounds[curIdx][1], curIdx)[0];//sort this out
         var leftY = this.calc(power, this.bounds[curIdx][1], curIdx)[1];
-        for(var i = curIdx + 1; i < this.junctions.length && this.junctions[i] == 0; i++){//pieces are to the left and the left juction is continous
-            this.setPieceValTime(power, t, i, leftX, leftY, propagator);
+        for(var i = curIdx + 1; i < this.pieces.length && this.junctions[i-1] == 0; i++){//pieces are to the left and the left juction is continous
+            this.setPieceValTime(power, this.bounds[i][0], i, leftX, leftY, propagator);
             leftX = this.calc(power, this.bounds[i][1], i)[0];
             leftY = this.calc(power, this.bounds[i][1], i)[1];
         }
