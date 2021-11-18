@@ -80,6 +80,7 @@ export default class Object{
         }
         //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
+        this.arrLen = 100 * this.command.unitPx;//arrow lengths in x or y only display
         this.nets = [];
         this.comps = [];//redo comp listing for better illustration
         for(var n = 1; n <= this.depth; n++){//make an arrow for every para except position
@@ -109,8 +110,8 @@ export default class Object{
         //
         this.svg = command.svg;
         //
-        this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7)
-        .attr("r", 20);
+        this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7 * this.command.unitPx)
+        .attr("r", 20 * this.command.unitPx);
         /*.style("visibility", "hidden")*/;
         //
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
@@ -136,7 +137,6 @@ export default class Object{
             this.piece++;
             this.respawnArrows();
         }
-        console.log(this.piece);
         //
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
@@ -196,6 +196,9 @@ export default class Object{
                 .attr("cy", this.command.scaleY(this.py))
                 .style("visibility", "visible");
         //
+        if(this.command.viewType != 0){
+            this.updateVectors();
+        }
         this.moveVectors();
     }
     //
@@ -232,14 +235,14 @@ export default class Object{
             case 1:
                 for(var n = 0; n <= this.depth; n++){
                     if(!this.isStaticX(n)){//check if function is just zero
-                        this.profile.paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                        this.profile.pieces[this.piece].paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
                 }
                 break;
             case 2:
                 for(var n = 0; n <= this.depth; n++){
                     if(!this.isStaticY(n)){//check if function is just zero
-                        this.profile.paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                        this.profile.pieces[this.piece].paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
                 }
                 break;
@@ -252,7 +255,8 @@ export default class Object{
      * @returns true if the x function is just zero
      */
     isStaticX(depth){
-        return (this.profile.paras[depth].xFunc.terms.length == 1 && this.profile.paras[depth].xFunc.terms[0].coef == 0);
+        let curFunc = this.profile.pieces[this.piece].paras[depth].xFunc;
+        return (curFunc.terms.length == 1 && curFunc.terms[0].coef == 0);
     }
     //
     /**
@@ -261,7 +265,8 @@ export default class Object{
      * @returns true if the y function is just zero
      */
     isStaticY(depth){
-        return (this.profile.paras[depth].yFunc.terms.length == 1 && this.profile.paras[depth].yFunc.terms[0].coef == 0);
+        let curFunc = this.profile.pieces[this.piece].paras[depth].yFunc;
+        return (curFunc.terms.length == 1 && curFunc.terms[0].coef == 0);
     }
     //
     /**
@@ -536,18 +541,16 @@ class netArrow{
                 this.self.ey = this.pos[1] * this.obj.arrStr;
                 break;
             case 1:
-                var s = this.pos[0];
-                var x1 = Math.sqrt(Math.pow(this.obj.arrStr * 2, 2) / (1 + Math.pow(s, 2)));
+                var theta = Math.atan(this.pos[0]);//angle of slope in radians, always pointing right
                 //
-                this.self.ex = x1;
-                this.self.ey = x1 * s;
+                this.self.ex = -this.command.grid.conY(this.obj.arrLen) * Math.cos(theta);
+                this.self.ey = -this.command.grid.conY(this.obj.arrLen) * Math.sin(theta);
                 break;
             case 2:
-                var s = this.pos[1];
-                var x1 = Math.sqrt(Math.pow(this.command.scaleX.invert(this.obj.arrStr), 2) / (1 + Math.pow(s, 2)));
+                var theta = Math.atan(this.pos[1]);//angle of slope in radians, always pointing right
                 //
-                this.self.ex = x1;
-                this.self.ey = x1 * s;
+                this.self.ex = -this.command.grid.conY(this.obj.arrLen) * Math.cos(theta);
+                this.self.ey = -this.command.grid.conY(this.obj.arrLen) * Math.sin(theta);
                 break;
         }
     }
@@ -557,9 +560,24 @@ class netArrow{
     }
     //
     reval(px, py){
-        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;
+        let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;//mouse pos - obj pos / arrow fudging
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
-        this.obj.setValue(this.depth, x, y);
+        if(x == 0){
+            x = y / 20;//prevent dividing by 0 errors
+        }
+        //
+        switch(this.command.viewType){
+            case 0:
+                this.obj.setValue(this.depth, x, y);
+                break;
+            case 1:
+                this.obj.setValue(this.depth, y/x, this.pos[1]);//set derivative to slope of line between object and cursor
+                break;
+            case 2:
+                this.obj.setValue(this.depth, this.pos[0], y/x);
+                break;
+        }
+        //
         this.command.updateGrid([this.obj]);
         this.command.funcChange([this.obj]);
         this.obj.updateVectors(this.depth);

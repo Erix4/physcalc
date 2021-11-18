@@ -7,6 +7,8 @@ import {Para} from "./func";
 import {Func} from "./func";
 import Timeline from "./time";
 
+var unitPx;
+
 export default class Command{
     constructor(loopStart, canvas, svg){
         this.darkMode = true;
@@ -17,6 +19,9 @@ export default class Command{
         //
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
+        //
+        unitPx = this.scrH / 900;//pixels for not unit based sizing (dependent on window height)
+        this.unitPx = unitPx;
         //
         this.lastTime = 0;
         //
@@ -57,18 +62,22 @@ export default class Command{
         //
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
-        //this.func = new Func(1000, [1, 1]);
-        //this.func.resolve([[0, 0, 0], [0, 1, 0], [110, 0, 5.21]]);
-        //this.func.draw(this, -10, 10);
+        this.func = new Func(1000, [1, 1]);
+        this.func.resolve([[0, 0, 0], [0, 1, 0], [444, 1, 1.83]]);
+        this.func.draw(this, -10, 10);
+        console.log(`------`)
+        console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
+        console.log(`Distance: ${this.func.calc(1.83)}`);
+        console.log(`------`)
         //
-        this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
-        this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
-        this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
-        this.prof.newPiece([1, 0], [2, 4], 1, 1);
-        this.prof.draw(0, 500);
+        //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
+        //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
+        //this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
+        //this.prof.newPiece([1, 0], [2, 4], 1, 1);
+        //this.prof.draw(0, 500);
         //
-        this.prof2 = new Profile(this, 2, [1, 0], [-1, 4], 'blue');
-        this.prof2.draw(0, 500);
+        //this.prof2 = new Profile(this, 2, [1, 0], [-1, 4], 'blue');
+        //this.prof2.draw(0, 500);
         //
         this.moveGrid();
         //console.log(`accel: ${this.func.terms[0].coef * 2}`);
@@ -163,15 +172,15 @@ export default class Command{
         this.viewType = type;
         if(type == 0){
             this.objects.forEach(obj => {
-                obj.self.attr("r", 20);
+                obj.self.attr("r", pixels(20));
             });
         }else{
             this.objects.forEach(obj => {
-                obj.self.attr("r", 15);
+                obj.self.attr("r", pixels(15));
             });
         }
         this.sels.forEach((sel, idx) => {
-            sel.attr("r", parseInt(this.selObs[idx].self.attr("r")) + 5);
+            sel.attr("r", parseInt(this.selObs[idx].self.attr("r")) + pixels(5));
         });
         this.fullReset();
     }
@@ -185,9 +194,9 @@ export default class Command{
         this.moveGrid();
         this.drawTimeline();
         this.moveTimeline();
-        this.spawnExtremes();
         this.toggleVectors();
         this.props.update(this.selected);
+        this.spawnExtremes();
     }
     //
     /**
@@ -198,8 +207,8 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        this.prof.draw(0, 500);
-        this.prof2.draw(0, 500);
+        //this.prof.draw(0, 500);
+        //this.prof2.draw(0, 500);
     }
     //
     /**
@@ -243,7 +252,7 @@ export default class Command{
     }
     //
     /**
-     * move all or some svg elements in timelin
+     * move all or some svg elements in timeline
      * @param {Array<Object>} [objs] list of objects to move
      */
     moveTimeline(objs, noProps = false){
@@ -426,8 +435,13 @@ export default class Command{
         this.input.active = new Object(this, this.idCount, px, py);
         this.objects.push(this.input.active);
         this.idCount++;
+        //
+        if(this.viewType != 0){
+            this.input.active.self.attr("r", pixels(15));
+            this.input.active.update();
+            this.input.active.move();
+        }
         this.select(this.input.active);
-        console.log(this.selected);
         this.selected.self.raise();
         this.drawTimeline();
     }
@@ -527,8 +541,8 @@ export default class Command{
                 sell.remove();
             });
             console.log(obj.self.attr("r"));
-            this.sels = [this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", 4).style("stroke-opacity", .6)
-                    .attr("r", parseInt(obj.self.attr("r")) + 5)
+            this.sels = [this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", pixels(4)).style("stroke-opacity", .6)
+                    .attr("r", parseInt(obj.self.attr("r")) + pixels(5))
                     .attr("cx", this.scaleX(obj.px))
                     .attr("cy", this.scaleY(obj.py))];
             this.selObs = [obj];
@@ -570,7 +584,7 @@ export default class Command{
                 this.sels.splice(idx, 1);
             }
         }else{//object had not been selected
-            this.sels.push(this.svg.append("circle").style("stroke", "#47d7ff").style("stroke-width", 4).style("fill", "transparent").style("stroke-opacity", .6)
+            this.sels.push(this.svg.append("circle").style("stroke", "#47d7ff").style("stroke-width", pixels(4)).style("fill", "transparent").style("stroke-opacity", .6)
                             .attr("r", parseInt(obj.self.attr("r")) + 5)
                             .attr("cx", this.scaleX(obj.px))
                             .attr("cy", this.scaleY(obj.py)));
@@ -623,6 +637,10 @@ export default class Command{
         this.sels[1].style("stroke", "#47d7ff");
     }
     //#endregion
+}
+
+function pixels(px){
+    return px * unitPx;
 }
 
 function inBounds(x, y, x1, y1, x2, y2){

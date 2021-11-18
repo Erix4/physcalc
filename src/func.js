@@ -1,3 +1,8 @@
+/**
+ * The piece and profile classes should have an adaptive depth which changes depending on the length of terms
+ *      - for terms without converging derivatives, set depth to convergence of convergin terms
+ */
+
 export default class Profile{
     constructor(command, depth, xCoefs, yCoefs, color){
         this.command = command;
@@ -178,6 +183,7 @@ export default class Profile{
         let curIdx = this.getLeftIdx(t);
         if(curIdx == -1){//time is left of every piece
             curIdx = 0;//set calc index to the last one
+            t = this.bounds[0][0];//set time to the left bound
         }
         //
         this.setPieceValTime(power, t, curIdx, x, y, propagator);
@@ -307,13 +313,16 @@ export default class Profile{
      */
     getLeftIdx(time){
         let idx = 0;
+        if(time < this.bounds[0][0]){//if time is before the first piece
+            return -1;
+        }
         for(var n = 1; n < this.bounds.length; n++){
             if(time < this.bounds[n][0]){//if time is before left bound
                 return idx;
             }
             idx++;
         }
-        return -1;//the current time is before every piece
+        return idx;//the current time is before every piece
     }
     //
     /**
@@ -433,13 +442,33 @@ export class Piece{
     //
     calcDomain(power = 0){//fix to allow constants
         var vals = [];
+        let xCrosses = 0;
         this.paras[power].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
             vals.push([val, 0]);
-        })
+            xCrosses++;
+        });
+        let yCrosses = 0;
         this.paras[power].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
             vals.push([val, 1]);//put them all in a list
-            //console.log(val);
+            yCrosses++;
         });
+        //
+        if(xCrosses == 0){//no place where x crosses the visible boundari
+            if(this.paras[power].xFunc.terms.length == 1 && inBounds(this.paras[power].xFunc.terms[0].coef, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1])){
+                vals.push([this.command.scaleX.domain()[0], 0]);
+                vals.push([this.command.scaleX.domain()[1], 0]);
+            }else{
+                return [];
+            }
+        }
+        if(yCrosses == 0){
+            if(this.paras[power].yFunc.terms.length == 1 && inBounds(this.paras[power].yFunc.terms[0].coef, this.command.scaleY.domain()[0], this.command.scaleY.domain()[1])){
+                vals.push([this.command.scaleY.domain()[0], 1]);
+                vals.push([this.command.scaleY.domain()[1], 1]);
+            }else{
+                return [];
+            }
+        }
         //
         vals.sort((a,b)=>a[0]-b[0]);//sort domain values numerically by first element
         //
@@ -1238,7 +1267,7 @@ export class Func{
         //solve for solutions (X)
         var X = [Y[len] / U[len][len]];
         for(var i = len - 1; i >= 0; i--){
-            X.splice(0, 0 , Math.round(calcRowSolUpper(Y[i], U, i, X), 5));
+            X.splice(0, 0 , calcRowSolUpper(Y[i], U, i, X));
         }
         console.log("Solutions: ");
         console.log(X);
@@ -1311,17 +1340,6 @@ function subRow(row1, row2, mult){
     return newRow;
 }
 
-function calcRowSolution(input, sumList, idx, start, end, solutions){
-    var sum = 0;
-    for(var i = start; i <= end; i++){
-        console.log(`Adding sum ${sumList[idx][i] * solutions[i]}`);
-        sum += sumList[idx][i] * solutions[i];
-    }
-    //
-    console.log(`from (i-s)/L to (${input} - ${sum}) / ${sumList[idx][idx]}`);
-    return (input - sum) / sumList[idx][idx];
-}
-
 function calcRowSolLower(input, L, idx, Y){
     var sum = 0;
     for(var i = 0; i < idx; i++){
@@ -1379,4 +1397,93 @@ function visibleLine(command, firstPt, secPt){
 
 function inBounds(value, start, end){
     return (value > start && value < end);
+}
+
+function countSignChanges(func){//count number of sign changes
+    var signChanges = 0;
+    for(var i = 1; i < len(func); i++){
+        if(func[i] * func[i-1] < 0){
+            signChanges += 1;
+        }
+    }
+    return signChanges;
+}
+
+function calcFunc(func, x){//find value of function for a given x
+    var sum = 0;
+    for(var i = 0; i < len(func); i++){
+        sum += func[len(func)-1-i] * Math.pow(x, i);
+    }
+    return sum;
+}
+
+function findRoot(func, derFunc, x0){//find root for a given guess
+    var x = x0;
+    for(var i = 0; i < 500; i++){
+        x = x - calcFunc(func, x) / calcFunc(derFunc, x)
+        if(Math.abs(calcFunc(func, x)) < 1e-10){
+            return x;
+        }
+    }
+    return x;
+}
+
+function numSimilar(num1, num2){//check if two numbers are similar
+    return abs(num1 - num2) < 1e-9;
+}
+
+function numInList(num, list){//check if a number is in a list}
+    list.forEach(i => {
+        if(numSimilar(i, num)){
+            return true;
+        }
+    });
+    return false;
+}
+
+function findRealRoots(func){//find real roots of a function
+    func.forEach((val, i) => func[i] += val == 0 ? .00001 : 0);//add .00001 if number is 0 to prevent dividing by zero
+    //
+    var nFunc = func.slice();
+    var posRoots = countSignChanges(func)
+    for i in range(len(func) - 2, -1, -2):
+        nFunc[i] *= -1
+    negRoots = countSignChanges(nFunc)
+    //
+    derFunc = []
+    for i in range(0, len(func) - 1):
+        derFunc.append(func[i]*(len(func)-1-i))
+    //
+    guess = 0
+    roots = []
+    posRootsFound = 0
+    negRootsFound = 0
+    for i in range(500):
+        root = findRoot(func, derFunc, guess)
+        if(not numInList(root, roots)):
+            print("new root found:", root)
+            roots.append(root)
+            if(root >= 0):
+                posRootsFound += 1
+            else:
+                negRootsFound += 1
+        if posRootsFound == posRoots and negRootsFound == negRoots:
+            break
+        guess += 1
+    //
+    guess = -1
+    for i in range(500):
+        root = findRoot(func, derFunc, guess)
+        if(not numInList(root, roots)):
+            print("new root found:", root)
+            roots.append(root)-
+            if(root >= 0):
+                posRootsFound += 1
+            else:
+                negRootsFound += 1
+        if posRootsFound == posRoots and negRootsFound == negRoots:
+            break
+        guess -= 1
+    //
+    return roots
 }

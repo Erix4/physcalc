@@ -88,7 +88,7 @@ export default class Grid{
      * @param {Number} py zoom center y in pixels
      */
     zoom(c, px, py){
-        if(-Math.log10(this.scale) < 12 || c > 1){
+        if((-Math.log10(this.scale) < 12 || c > 1) && (Math.log10(this.scale) < 30 || c < 1)){
             this.scale *= c;
         }
         //

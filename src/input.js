@@ -87,6 +87,7 @@ export default class Input{
                             obj.delete();
                         });
                         this.command.select();
+                        this.command.spawnExtremes();
                     }
                     break;
                 case "l":
@@ -169,39 +170,47 @@ export default class Input{
             //console.log(this.moveState);
             //
             switch(this.moveState){
-                case 1:
+                case 1://field move
                     if(this.shifting){
-                        this.command.dragSelect(stX, stY, emx, emy);
+                        this.command.dragSelect(stX, stY, emx, emy);//drag select
                     }else{
-                        this.command.shiftView(emx - mX, emy - mY);
+                        this.command.shiftView(emx - mX, emy - mY);//move field
                     }
                     break;
-                case 2:
-                    this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);
-                    this.command.objPosChange(this.selObs);
+                case 2://object move
+                    this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);//move object(s)
+                    this.command.objPosChange(this.selObs);//update corresponding displays
                     break;
-                case 3: 
-                    this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
+                case 3://set initial object value
+                    switch(this.command.viewType){
+                        case 0:
+                            this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
+                            break;
+                        case 1:
+                            this.active.setValue(0, this.command.scaleY.invert(emy), 0);
+                            break;
+                        case 2:
+                            this.active.setValue(0, 0, this.command.scaleY.invert(emy));
+                            break;
+                    }
                     this.command.updateGrid([this.active]);
                     this.command.moveGrid([this.active]);
                     break;
-                case 4:
+                case 4://change arrow values
                     this.active.reval(emx, emy);
                     break;
-                case 5:
+                case 5://set the time via timeline
                     command.setTime(command.timeline.timeX.invert(event.clientX));
                     break;
-                case 6:
+                case 6://retime an object via timeline extremes
                     this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
                     command.updateGrid();
                     command.drawGrid();
-                    //command.spawnExtremes();
                     command.moveGrid();
                     command.timeline.movePoints();
                     break;
-                default:
-                    command.prof.setValues(0, command.scaleX.invert(emx), command.scaleY.invert(emy));
-                    command.drawGrid();
+                default://regular mouse movement
+                    //command.drawGrid();
                     break;
             }
             //
@@ -293,13 +302,13 @@ export default class Input{
         var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
             console.log("drag entered");
-            d3.select("#getFile").style("pointer-events", "all");
+            d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
             e.stopPropagation();
             e.preventDefault();
         }, false);
         dropbox.addEventListener("dragleave", e => {
             console.log("drag left");
-            d3.select("#getFile").style("pointer-events", "none");
+            d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
         }, false);
         dropbox.addEventListener("dragover", e => {
             e.stopPropagation();
@@ -315,6 +324,7 @@ export default class Input{
             const files = dt.files;
             //
             this.command.openState(files[0]);
+            d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
         }, false);
         //
         d3.select("#vt0").on("mousedown", function(){
@@ -348,7 +358,7 @@ export default class Input{
         var input = this;
         point.on("mousedown", function(){
             input.moveState = 6;
-            let id = parseInt(point.attr("ob"))
+            let id = parseInt(point.attr("ob"));
             console.log(id);
             let idx = input.command.objects.findIndex(obj => obj.id == id);
             console.log(`idx: ${idx}`);

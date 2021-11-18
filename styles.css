@@ -27,6 +27,11 @@ div{
     cursor: default;
 }
 
+#headImg{
+    height: 80%;
+    padding-left: 15px;
+}
+
 h1{
     margin-left: 10px;
     font-family: 'Heavitas';
@@ -132,6 +137,8 @@ h1{
     z-index: 5;
     padding: 0;
     pointer-events: none;
+    background-color: #47d7ff;
+    opacity: 0;
 }
 
 /*#region Interface*/
