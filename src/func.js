@@ -993,8 +993,7 @@ export class Func{
                 }
                 return roots;
             default:
-                //console.log("I can't do that yet!");
-                return [];
+                return findRealRoots(this.getCoefs());
         }
     }
     //
@@ -1401,7 +1400,7 @@ function inBounds(value, start, end){
 
 function countSignChanges(func){//count number of sign changes
     var signChanges = 0;
-    for(var i = 1; i < len(func); i++){
+    for(var i = 1; i < func.length; i++){
         if(func[i] * func[i-1] < 0){
             signChanges += 1;
         }
@@ -1411,8 +1410,8 @@ function countSignChanges(func){//count number of sign changes
 
 function calcFunc(func, x){//find value of function for a given x
     var sum = 0;
-    for(var i = 0; i < len(func); i++){
-        sum += func[len(func)-1-i] * Math.pow(x, i);
+    for(var i = 0; i < func.length; i++){
+        sum += func[func.length-1-i] * Math.pow(x, i);
     }
     return sum;
 }
@@ -1429,16 +1428,18 @@ function findRoot(func, derFunc, x0){//find root for a given guess
 }
 
 function numSimilar(num1, num2){//check if two numbers are similar
-    return abs(num1 - num2) < 1e-9;
+    return Math.abs(num1 - num2) < 1e-7;
 }
 
 function numInList(num, list){//check if a number is in a list}
+    var bool = false;
     list.forEach(i => {
         if(numSimilar(i, num)){
-            return true;
+            bool = true;
+            return;
         }
     });
-    return false;
+    return bool;
 }
 
 function findRealRoots(func){//find real roots of a function
@@ -1446,44 +1447,55 @@ function findRealRoots(func){//find real roots of a function
     //
     var nFunc = func.slice();
     var posRoots = countSignChanges(func)
-    for i in range(len(func) - 2, -1, -2):
+    for(var i = func.length; i >= 0; i -= 2){
         nFunc[i] *= -1
-    negRoots = countSignChanges(nFunc)
+    }
+    var negRoots = countSignChanges(nFunc)
     //
-    derFunc = []
-    for i in range(0, len(func) - 1):
-        derFunc.append(func[i]*(len(func)-1-i))
+    var derFunc = []
+    for(var i = 0; i < func.length - 1; i++){
+        derFunc.push(func[i]*(func.length-1-i));
+    }
     //
-    guess = 0
-    roots = []
-    posRootsFound = 0
-    negRootsFound = 0
-    for i in range(500):
-        root = findRoot(func, derFunc, guess)
-        if(not numInList(root, roots)):
-            print("new root found:", root)
-            roots.append(root)
-            if(root >= 0):
-                posRootsFound += 1
-            else:
-                negRootsFound += 1
-        if posRootsFound == posRoots and negRootsFound == negRoots:
-            break
-        guess += 1
+    var guess = 0;
+    var roots = [];
+    var posRootsFound = 0;
+    var negRootsFound = 0;
+    for(var i = 0; i < 500; i++){
+        var root = findRoot(func, derFunc, guess)
+        if(!numInList(root, roots)){
+            console.log("new root found:", root);
+            roots.push(root);
+            if(root >= 0){
+                posRootsFound += 1;
+            }else{
+                negRootsFound += 1;
+            }
+        }
+        if(posRootsFound == posRoots && negRootsFound == negRoots){
+            break;
+        }
+        guess += 1;
+    }
     //
     guess = -1
-    for i in range(500):
+    for(var i = 0; i < 500; i++){
         root = findRoot(func, derFunc, guess)
-        if(not numInList(root, roots)):
-            print("new root found:", root)
-            roots.append(root)-
-            if(root >= 0):
-                posRootsFound += 1
-            else:
-                negRootsFound += 1
-        if posRootsFound == posRoots and negRootsFound == negRoots:
-            break
-        guess -= 1
+        if(!numInList(root, roots)){
+            console.log("new root found:", root);
+            roots.push(root);
+            if(root >= 0){
+                posRootsFound += 1;
+            }else{
+                negRootsFound += 1;
+            }
+        }
+        //
+        if(posRootsFound == posRoots && negRootsFound == negRoots){
+            break;
+        }
+        guess -= 1;
+    }
     //
-    return roots
+    return roots;
 }

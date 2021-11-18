@@ -65,10 +65,14 @@ export default class Command{
         this.func = new Func(1000, [1, 1]);
         this.func.resolve([[0, 0, 0], [0, 1, 0], [444, 1, 1.83]]);
         this.func.draw(this, -10, 10);
-        console.log(`------`)
+        console.log(`------`);
         console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
         console.log(`Distance: ${this.func.calc(1.83)}`);
-        console.log(`------`)
+        console.log(`------`);
+        //
+        this.nfunc = new Func(100, [2, 1, -6, -5]);
+        var roots = this.nfunc.calcRoots().sort((a,b)=>a-b);
+        this.nfunc.draw(this, roots[0], roots[roots.length - 1]);
         //
         //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
         //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
