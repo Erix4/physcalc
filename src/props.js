@@ -14,6 +14,8 @@ export default class Props{
         this.vely = d3.select("#vely");
         this.accelx = d3.select("#accelx");
         this.accely = d3.select("#accely");
+        this.jerkx = d3.select("#jerkx");
+        this.jerky = d3.select("#jerky");
         //
         this.calcB = d3.select("#calcB");
         //
@@ -38,6 +40,8 @@ export default class Props{
             this.vely.property("value", this.selected.yS[1].toFixed(3));
             this.accelx.property("value", this.selected.xS[2].toFixed(3));
             this.accely.property("value", this.selected.yS[2].toFixed(3));
+            this.jerkx.property("value", this.selected.getVals(3)[0].toFixed(3));
+            this.jerky.property("value", this.selected.getVals(3)[1].toFixed(3));
             //
         }
     }

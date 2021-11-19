@@ -42,6 +42,7 @@ export default class Object{
         this.field = command.field;
         //
         this.id = id;
+        this.idx = command.objects.length;
         this.toBeDeleted = false;
         this.type = type;//0 = as projectile, 1 = in free fall, 2 = at rest, 3 = at position/default after changes
         //
@@ -189,6 +190,20 @@ export default class Object{
     }
     //
     /**
+     * calculate the values of the object at the current or given time
+     * @param {Number} power  the power at which to calculate
+     * @param {Number} [time] the time at which to calculate
+     * @returns the x and y values in an array
+     */
+    getVals(power, time){
+        if(!time && time != 0){
+            time = this.command.time;
+        }
+        //
+        return this.profile.calc(power, time);
+    }
+    //
+    /**
      * Move the SVG element for the object
      */
     move(){
@@ -302,7 +317,12 @@ export default class Object{
         let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
         //
         while(this.nets.length < curPiece.paras.length){//while the current piece is deeper than the number of net vectors
-            this.nets.push(new netArrow(command, this, this.nets.length));//add a new net vector
+            this.nets.push(new netArrow(this.command, this, this.nets.length));//add a new net vector
+            let compPower = [];
+            for(var a in curPiece.comps[this.nets.length]){
+                compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
+            }
+            this.comps.push(compPower);
         }
     }
     //
@@ -507,6 +527,9 @@ export default class Object{
         //
         this.command.deleteExtreme(this);
         this.command.updateGrid();
+        this.command.objects.forEach(obj => {
+            obj.idx = this.command.objects.indexOf(obj);
+        });
         this.command.drawGrid();
         this.command.drawTimeline();
         this.command.select();

@@ -121,13 +121,10 @@ export default class Input{
                     break;
                 case "v":
                     let newMode = command.vectorMode + 1;
-                    console.log(newMode);
                     if(newMode == 3){
                         newMode = 0;
                     }
-                    console.log(newMode);
                     this.command.toggleVectors(newMode);
-                    console.log(`Toggling vectors: ${this.command.vectorMode}`);
                     break;
                 case "Enter":
                     break;
@@ -250,7 +247,6 @@ export default class Input{
                 //
             }
             //
-            console.log(`State: ${input.moveState}, props: ${input.propsState}`);
             if(input.moveState != 7 && input.propsState){
                 input.command.props.update(input.command.selected);
                 input.propsState = false;
@@ -359,9 +355,7 @@ export default class Input{
         point.on("mousedown", function(){
             input.moveState = 6;
             let id = parseInt(point.attr("ob"));
-            console.log(id);
             let idx = input.command.objects.findIndex(obj => obj.id == id);
-            console.log(`idx: ${idx}`);
             input.command.selected = input.command.objects[idx];
             input.active = point;
             input.command.select(input.command.objects[idx]);
@@ -369,7 +363,6 @@ export default class Input{
             input.tX = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[0];
             input.tY = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[1];
             input.command.selected.profile.setOrigin(parseFloat(point.attr("val")));
-            console.log(`X: ${input.tX}, Y: ${input.tY} @ t=${point.attr("val")}`);
         });
         //
         point.on("mouseenter", function(){
@@ -466,6 +459,12 @@ export default class Input{
         self.accely.on("mousedown", function(){
             input.fieldClick(this);
         });
+        self.jerkx.on("mousedown", function(){
+            input.fieldClick(this);
+        });
+        self.jerky.on("mousedown", function(){
+            input.fieldClick(this);
+        });
         //
         self.t.on("input", function(){
             if(isNumeric(this.value)){
@@ -517,6 +516,21 @@ export default class Input{
             }
         });
         //
+        self.jerkx.on("input", function(){
+            if(isNumeric(this.value)){
+                console.log(`Val: ${this.value}, parsed: ${parseFloat(this.value)}`);
+                command.selected.setValue(3, parseFloat(this.value), parseFloat(self.jerky.property("value")));
+                input.valueUpdate(3);
+            }
+        });
+        //
+        self.jerky.on("input", function(){
+            if(isNumeric(this.value)){
+                command.selected.setValue(3, parseFloat(self.jerkx.property("value")), parseFloat(this.value));
+                input.valueUpdate(3);
+            }
+        });
+        //
         self.calcB.on("mousedown", function(){
             console.log("Hello!");
         });
@@ -531,6 +545,7 @@ export default class Input{
     valueUpdate(power){
         this.command.updateGrid([this.command.selected], true);
         this.command.funcChange([this.command.selected]);
+        this.command.selected.respawnArrows();
         this.command.selected.updateVectors(power);
         this.command.selected.moveVectors(power);
         this.command.props.renderEqs();

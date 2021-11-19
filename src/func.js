@@ -9,7 +9,7 @@ export default class Profile{
         this.color = color;
         this.depth = depth;
         //
-        this.pieces = [new Piece(command, depth, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
+        this.pieces = [new Piece(command, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
         //
         this.bounds = [[-Infinity, Infinity]];//list of bounds for each piece
         console.log(this.bounds);
@@ -35,7 +35,7 @@ export default class Profile{
                 }else{//if there are other pieces (before the current)
                     this.bounds.push([this.bounds[this.bounds.length - 1][1], Infinity]);//add a new bound
                 }
-                this.pieces.push(new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
+                this.pieces.push(new Piece(this.command, xCoefs, yCoefs, this.color));
                 this.junctions[this.junctions.length - 1] = j1;
                 this.junctions.push(j);
             }else{
@@ -44,11 +44,11 @@ export default class Profile{
                 }else{
                     this.bounds.push([this.bounds[nextIdx - 1][1], this.bounds[nextIdx][0]]);//set new bound from the end of the previous piece to the start of the next piece
                 }
-                this.pieces.splice(nextIdx, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));
+                this.pieces.splice(nextIdx, 0, new Piece(this.command, xCoefs, yCoefs, this.color));
                 this.junctions.splice(nextIdx, 0, j);
             }
         }else{
-            this.pieces.splice(curIdx + 1, 0, new Piece(this.command, this.depth, xCoefs, yCoefs, this.color));//add a new piece after the current piece
+            this.pieces.splice(curIdx + 1, 0, new Piece(this.command, xCoefs, yCoefs, this.color));//add a new piece after the current piece
             //
             let curEnd = this.bounds[curIdx][1];//find the end of the current piece
             this.bounds[curIdx][1] = time;//set the current piece to end at the current time
@@ -367,7 +367,11 @@ export default class Profile{
             }
         }
         //
-        return this.pieces[curIdx].paras[power].calc(time);//return the value of the applicable piece
+        if(power >= this.pieces[curIdx].paras.length){
+            return [0, 0];
+        }else{
+            return this.pieces[curIdx].paras[power].calc(time);//return the value of the applicable piece
+        }
     }
     //
     /**
@@ -399,7 +403,7 @@ export default class Profile{
 }
 
 export class Piece{
-    constructor(command, depth, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
+    constructor(command, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
         this.obj = command.objects[command.objects.length - 1];
         //
@@ -407,28 +411,31 @@ export class Piece{
         //
         this.paras = [new Para(command.time, 500, xCoefs, yCoefs, this.color)];
         this.comps = [[new Para(command.time, 500, xCoefs, yCoefs)]];
-        for(var n = 0; n < depth; n++){//generate derivatives
-            xCoefs = [];
-            let xTerms = this.paras[n].xFunc.terms;//get terms of x function of last parametric function
-            for(var a = 0; a < xTerms.length - 1; a++){//find coefficients for derivative function (but not for last)
-                xCoefs.push(xTerms[a].coef * xTerms[a].power);
-            }
-            yCoefs = [];
-            let yTerms = this.paras[n].yFunc.terms;
-            for(var a = 0; a < yTerms.length - 1; a++){
-                yCoefs.push(yTerms[a].coef * yTerms[a].power);
-                //console.log(yTerms[a].coef * yTerms[a].power);
-            }
-            //
-            if(xCoefs.length == 0){
-                xCoefs.push(0);
-            }
-            if(yCoefs.length == 0){
-                yCoefs.push(0);
-            }
-            this.paras.push(new Para(0, 300, xCoefs, yCoefs, this.color));
-            this.comps.push([new Para(0, 300, xCoefs, yCoefs)]);//add current net function as top component
+        while(this.paras[this.paras.length-1].xFunc.terms.length > 1 || this.paras[this.paras.length-1].yFunc.terms.length > 1){//while there are more derivatives
+            this.newDerivatives();//generate new derivatives
+        }//basically, keep making new derivatives until the base functions are constants
+    }
+    //
+    newDerivatives(){
+        var xCoefs = [];
+        let xTerms = this.paras[this.paras.length - 1].xFunc.terms;//get terms of x function of last parametric function
+        for(var a = 0; a < xTerms.length - 1; a++){//find coefficients for derivative function (but not for last)
+            xCoefs.push(xTerms[a].coef * xTerms[a].power);
         }
+        var yCoefs = [];
+        let yTerms = this.paras[this.paras.length - 1].yFunc.terms;
+        for(var a = 0; a < yTerms.length - 1; a++){
+            yCoefs.push(yTerms[a].coef * yTerms[a].power);
+        }
+        //
+        if(xCoefs.length == 0){
+            xCoefs.push(0);
+        }
+        if(yCoefs.length == 0){
+            yCoefs.push(0);
+        }
+        this.paras.push(new Para(0, 300, xCoefs, yCoefs, this.color));
+        this.comps.push([new Para(0, 300, xCoefs, yCoefs)]);//add current net function as top component
     }
     //
     draw(power, steps){
@@ -551,6 +558,10 @@ export class Piece{
     }
     //
     setValTime(power, t, x, y, propogator = true){
+        while(power >= this.paras.length){
+            console.log(`New derivatives, set to ${x}, ${y}`);
+            this.newDerivatives();
+        }
         this.paras[power].setOff(t, x, y);
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());
         if(propogator){
@@ -558,12 +569,8 @@ export class Piece{
         }
     }
     //
-    setValues(power, x, y, propogator = true){
-        this.paras[power].setOff(this.command.time, x, y);//offset the functions at the desired power so current time returns desired values
-        this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());//update components
-        if(propogator){
-            this.propagate(power);//propagate new para to other powers
-        }
+    setValues(power, x, y, propogator = true){//set value at current time
+        this.setValTime(power, this.command.time, x, y, propogator);
     }
     //
     setPower(power, xCoefs, yCoefs, xOff, yOff){//set the net functions for a given power and changes top component so sum matches
@@ -993,7 +1000,9 @@ export class Func{
                 }
                 return roots;
             default:
-                return findRealRoots(this.getCoefs());
+                let shiftEq = this.getCoefs();
+                shiftEq[shiftEq.length - 1] -= val;//shift equation to desired value
+                return findRealRoots(shiftEq);
         }
     }
     //
@@ -1464,7 +1473,6 @@ function findRealRoots(func){//find real roots of a function
     for(var i = 0; i < 500; i++){
         var root = findRoot(func, derFunc, guess)
         if(!numInList(root, roots)){
-            console.log("new root found:", root);
             roots.push(root);
             if(root >= 0){
                 posRootsFound += 1;
@@ -1482,7 +1490,6 @@ function findRealRoots(func){//find real roots of a function
     for(var i = 0; i < 500; i++){
         root = findRoot(func, derFunc, guess)
         if(!numInList(root, roots)){
-            console.log("new root found:", root);
             roots.push(root);
             if(root >= 0){
                 posRootsFound += 1;

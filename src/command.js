@@ -62,17 +62,13 @@ export default class Command{
         //
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
-        this.func = new Func(1000, [1, 1]);
-        this.func.resolve([[0, 0, 0], [0, 1, 0], [444, 1, 1.83]]);
-        this.func.draw(this, -10, 10);
-        console.log(`------`);
-        console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
-        console.log(`Distance: ${this.func.calc(1.83)}`);
-        console.log(`------`);
-        //
-        this.nfunc = new Func(100, [2, 1, -6, -5]);
-        var roots = this.nfunc.calcRoots().sort((a,b)=>a-b);
-        this.nfunc.draw(this, roots[0], roots[roots.length - 1]);
+        //this.func = new Func(1000, [1, 1]);
+        //this.func.resolve([[0, 0, 0], [0, 1, 0], [444, 1, 1.83]]);
+        //this.func.draw(this, -10, 10);
+        //console.log(`------`);
+        //console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
+        //console.log(`Distance: ${this.func.calc(1.83)}`);
+        //console.log(`------`);
         //
         //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
         //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
@@ -211,8 +207,6 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        //this.prof.draw(0, 500);
-        //this.prof2.draw(0, 500);
     }
     //
     /**
@@ -302,7 +296,6 @@ export default class Command{
             mode = this.vectorMode;
         }
         //
-        console.log("mode is " + mode);
         objs.forEach(obj => {
             obj.toggleVectors(mode);
         });
@@ -320,7 +313,7 @@ export default class Command{
         var objIds = [];
         objs.forEach(obj => {
             obj.spawnExtremes();
-            objIds.push(this.objects.indexOf(obj));
+            objIds.push(obj.idx);
         });
         this.timeline.spawnExtremes(objIds);
     }
@@ -355,7 +348,7 @@ export default class Command{
     findIdxs(objs){
         var idxs = [];
         objs.forEach(obj => {
-            idxs.push(this.objects.indexOf(obj));
+            idxs.push(obj.idx);
         });
         return idxs;
     }
@@ -544,7 +537,6 @@ export default class Command{
             this.sels.forEach(sell => {
                 sell.remove();
             });
-            console.log(obj.self.attr("r"));
             this.sels = [this.svg.append("circle").style("stroke", "#47a3ff").style("fill", "transparent").style("stroke-width", pixels(4)).style("stroke-opacity", .6)
                     .attr("r", parseInt(obj.self.attr("r")) + pixels(5))
                     .attr("cx", this.scaleX(obj.px))
@@ -580,9 +572,6 @@ export default class Command{
             }else if(idx == 0){//object is main select and there are no other selects
                 this.select();//deselect all
             }else{//object is misc. select
-                console.log(this.selObs);
-                console.log(this.sels);
-                console.log(idx);
                 this.selObs.splice(idx, 1);//remove select
                 this.sels[idx].remove();
                 this.sels.splice(idx, 1);

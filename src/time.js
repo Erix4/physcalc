@@ -102,7 +102,6 @@ export default class Timeline{
         this.cx = mx - ((mx - this.cx) * c);
         //
         this.calcSize();
-        console.log("Zooming");
     }
     /**
      * find the distance between grid units of res
@@ -172,8 +171,6 @@ export default class Timeline{
                         .attr("cy", 12 * idx + 12);//height from top depends on object index
                 }
                 while(this.timePoints[idx].length < obj.extremes.length){//add points until there are the same name number
-                    console.log("Adding points at index " + idx);
-                    console.log(this.timePoints);
                     this.timePoints[idx].push(this.svg.append("circle").style("fill", obj.points[n].style("fill")).attr("val", obj.extremes[n]).attr("ob", obj.id)
                     .attr("r", 5)
                     .attr("cx", this.timeX(obj.extremes[n]))//convert time of extreme to x in pixels
@@ -184,7 +181,6 @@ export default class Timeline{
                 while(this.timePoints[idx].length > obj.extremes.length){
                     this.timePoints[idx][this.timePoints[idx].length - 1].remove();
                     this.timePoints[idx].pop();
-                    console.log("Removing circle");
                 }
             }else{//object has not yet been pointed
                 var objPoints = [];
