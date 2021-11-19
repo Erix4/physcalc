@@ -176,7 +176,7 @@ export default class Input{
                     break;
                 case 2://object move
                     this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);//move object(s)
-                    this.command.objPosChange(this.selObs);//update corresponding displays
+                    this.command.objPosChange(this.command.selObs);//update corresponding displays
                     break;
                 case 3://set initial object value
                     switch(this.command.viewType){
@@ -211,6 +211,7 @@ export default class Input{
                     break;
             }
             //
+            //console.log(this.moveState);
             mX = emx;
             mY = emy;
         });
@@ -234,6 +235,9 @@ export default class Input{
                         this.command.select(this.command.selected);
                         this.command.selected.self.raise();
                         break;
+                    case 5://only necessary if the time isn't set on the mousedown
+                        //command.setTime(command.timeline.timeX.invert(event.clientX));
+                        break;
                     case 6:
                         this.command.time = (parseFloat(this.active.attr("val")));
                         command.timeline.move();
@@ -243,8 +247,6 @@ export default class Input{
                         command.props.retime();
                         break;
                 }
-            }else{//movement
-                //
             }
             //
             if(input.moveState != 7 && input.propsState){
@@ -259,11 +261,15 @@ export default class Input{
             this.moveState = 0;
         });
         //
+        document.addEventListener('dblclick', function (e) {
+            input.command.spawnExtremes();
+            input.timeline.colorPoints(input.command.findIdxs(input.command.objects));
+        });
+        //
         this.timeline.svg.on("mousedown", function(){
             if(input.moveState == 0){
-                input.moveState = 5;
                 command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
-                input.propsState = false;
+                input.moveState = 5;
             }
         });
         //
@@ -354,6 +360,7 @@ export default class Input{
         var input = this;
         point.on("mousedown", function(){
             input.moveState = 6;
+            console.log("point click detected");
             let id = parseInt(point.attr("ob"));
             let idx = input.command.objects.findIndex(obj => obj.id == id);
             input.command.selected = input.command.objects[idx];
@@ -392,6 +399,7 @@ export default class Input{
                 point.style("fill", "white");
             }
             input.moveState = 2;
+            input.command.select(obj);
             input.timeline.colorPoints(input.command.findIdxs([obj]));
         });
     }
@@ -422,6 +430,10 @@ export default class Input{
             input.command.selObs.forEach(obj => {
                 obj.profile.setOrigin(input.command.time);
             });
+        });
+        //
+        obj.self.on("dblclick", function(){//this isn't working
+            console.log("object double");
         });
     }
     //

@@ -94,7 +94,6 @@ export default class Object{
             }
             this.comps.push(compPower);
             //
-            console.log(this.comps.slice());
         }
         this.updateVectors();
         this.comps.forEach(comp => {
