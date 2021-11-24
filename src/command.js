@@ -32,7 +32,7 @@ export default class Command{
         this.running = false;
         this.loopStart = loopStart;
         //
-        this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration
+        this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration, -1 = both
         this.viewType = 0;//type of grid view, 0 = x and y, 1 = x, 2 = y
         //
         this.idCount = 0;
@@ -62,13 +62,13 @@ export default class Command{
         //
         this.dragBox = this.svg.append("rect").style("stroke", "#47a3ff").style("fill", "#47d7ff").style("fill-opacity", .6).style("visibility", "hidden");
         //
-        //this.func = new Func(1000, [1, 1]);
-        //this.func.resolve([[0, 0, 0], [0, 1, 0], [444, 1, 1.83]]);
+        this.func = new Func(1000, [1, 1]);
+        this.func.resolve([[0, 0, 0], [18.5, 1, 0], [46.1, 1, 2.47]]);
         //this.func.draw(this, -10, 10);
-        //console.log(`------`);
-        //console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
-        //console.log(`Distance: ${this.func.calc(1.83)}`);
-        //console.log(`------`);
+        console.log(`------`);
+        console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
+        console.log(`Distance: ${this.func.calc(2.47)}`);
+        console.log(`------`);
         //
         //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
         //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
@@ -94,10 +94,7 @@ export default class Command{
      */
     shiftView(cx, cy){
         this.grid.shiftPos(cx, cy);
-        this.drawGrid();
-        this.moveGrid();
-        this.moveSelects();
-        this.moveExtremes();
+        this.updateView();
     }
     //
     /**
@@ -118,10 +115,7 @@ export default class Command{
         //
         this.grid.cx = cx;
         this.grid.cy = cy;
-        this.drawGrid();
-        this.moveGrid();
-        this.moveSelects();
-        this.moveExtremes();
+        this.updateView();
     }
     //
     /**
@@ -132,18 +126,12 @@ export default class Command{
      */
     zoom(c, px, py){
         this.grid.zoom(c, px, py);
-        this.drawGrid();
-        this.moveGrid();
-        this.moveExtremes();
-        this.moveSelects();
+        this.updateView();
     }
     //
     zoomX(c, px, py){
         this.grid.zoomX(c, px, py);
-        this.drawGrid();
-        this.moveGrid();
-        this.moveExtremes();
-        this.moveSelects();
+        this.updateView();
     }
     //
     zoomTimeline(c, px, py){
@@ -162,6 +150,16 @@ export default class Command{
         this.drawGrid();
         this.moveGrid();
         this.drawTimeline();
+        this.moveExtremes();
+        this.moveSelects();
+    }
+    //
+    /**
+     * update the grid after a change in the view
+     */
+    updateView(){
+        this.drawGrid();
+        this.moveGrid();
         this.moveExtremes();
         this.moveSelects();
     }

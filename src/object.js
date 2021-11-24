@@ -92,15 +92,15 @@ export default class Object{
             for(var a in curPiece.comps[n]){
                 compPower.splice(0, 0, new compArrow(command, this, n, a, 0));//insert new comp arrow at beginning of power list
             }
-            this.comps.push(compPower);
+            //this.comps.push(compPower);
             //
         }
         this.updateVectors();
-        this.comps.forEach(comp => {
+        /*this.comps.forEach(comp => {
             comp.forEach(arrow => {
                 arrow.self.head.raise();
             });
-        });
+        });*/
         this.nets.forEach(net => {
             net.self.neck.raise();
             net.self.tailA.raise();
@@ -171,20 +171,20 @@ export default class Object{
     updateVectors(power){
         if(this.power){
             this.nets[power - 1].update();
-            this.comps[power - 1].forEach(comp => {
+            /*this.comps[power - 1].forEach(comp => {
                 comp.update();
-            });
+            });*/
         }else{
             this.nets.forEach(net => {
                 net.update();
             });
-            for(var n = 0; n < 2; n++){//repeat to propagate changes
+            /*for(var n = 0; n < 2; n++){//repeat to propagate changes
                 this.comps.forEach(comp => {
                     comp.forEach(arrow => {
                         arrow.update();
                     });
                 });
-            }
+            }*/
         }
     }
     //
@@ -223,18 +223,18 @@ export default class Object{
     moveVectors(power){
         if(power){
             this.nets[power - 1].move();
-            this.comps[power - 1].forEach(comp => {
+            /*this.comps[power - 1].forEach(comp => {
                 comp.move();
-            });
+            });*/
         }else{
             this.nets.forEach(net => {
                 net.move();
             });
-            this.comps.forEach(comp => {
+            /*this.comps.forEach(comp => {
                 comp.forEach(arrow => {
                     arrow.move();
                 });
-            });
+            });*/
         }
     }
     //
@@ -247,18 +247,20 @@ export default class Object{
                 this.profile.draw(0, 300);
                 break;
             case 1:
-                for(var n = 0; n <= this.depth; n++){
+                this.profile.pieces[this.piece].paras[0].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                /*for(var n = 0; n <= this.depth; n++){//draw derivatives
                     if(!this.isStaticX(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }
+                }*/
                 break;
             case 2:
-                for(var n = 0; n <= this.depth; n++){
+                this.profile.pieces[this.piece].paras[0].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
+                /*for(var n = 0; n <= this.depth; n++){
                     if(!this.isStaticY(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }
+                }*/
                 break;
         }
     }
@@ -288,24 +290,39 @@ export default class Object{
      * @param {number} mode vectormode to set object to
      */
     toggleVectors(mode){
-        this.updateVectors(mode);
-        this.moveVectors(mode);
         //
         this.vectorMode = mode;
-        this.comps.forEach(comp => {
+        /*this.comps.forEach(comp => {
             comp.forEach(arrow => {
                 arrow.self.hide();
             });
-        });
-        this.nets.forEach(net => {
-            net.self.hide();
-        });
-        //
-        if(this.vectorMode > 0){
-            this.nets[this.vectorMode - 1].self.show();
-            this.comps[this.vectorMode - 1].forEach(arrow => {
-                arrow.show();
+        });*/
+        if(this.vectorMode == -1){
+            this.nets.forEach((net, power) => {
+                net.self.show();
+                this.updateVectors(power);
+                this.moveVectors(power);
             });
+            this.nets[this.nets.length - 1].self.newColor("#00e3f7");
+            /*this.comps.forEach(level => {
+                level.forEach(comp => {
+                    comp.self.show();
+                });
+            });*/
+        }else{
+            this.updateVectors(mode);
+            this.moveVectors(mode);
+            //
+            this.nets.forEach(net => {
+                net.self.hide();
+            });
+            //
+            if(this.vectorMode > 0){
+                this.nets[this.vectorMode - 1].self.show();
+                /*this.comps[this.vectorMode - 1].forEach(arrow => {
+                    arrow.show();
+                });*/
+            }
         }
     }
     //
@@ -317,11 +334,11 @@ export default class Object{
         //
         while(this.nets.length < curPiece.paras.length){//while the current piece is deeper than the number of net vectors
             this.nets.push(new netArrow(this.command, this, this.nets.length));//add a new net vector
-            let compPower = [];
+            /*let compPower = [];
             for(var a in curPiece.comps[this.nets.length]){
                 compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
-            }
-            this.comps.push(compPower);
+            }*/
+            //this.comps.push(compPower);
         }
     }
     //
@@ -724,7 +741,7 @@ class Arrow{
         this.head = command.svg.append("circle").style("fill", "white")
                         .attr("cx", command.scaleX(this.sx + this.ex))
                         .attr("cy", command.scaleY(this.sy + this.ey))
-                        .attr("r", this.headSize);
+                        .attr("r", this.headSize).style("overflow", "visible");
         //
         this.hide();
     }
@@ -762,6 +779,14 @@ class Arrow{
         this.head.attr("cx", this.command.scaleX(this.sx + this.ex))
                 .attr("cy", this.command.scaleY(this.sy + this.ey))
                 .attr("r", this.headSize);
+    }
+    //
+    newColor(color){
+        this.color = color;
+        //
+        this.neck.style("stroke", this.color);
+        this.tailA.style("stroke", this.color);
+        this.tailB.style("stroke", this.color);
     }
     //
     hide(){

@@ -105,6 +105,9 @@ export default class Input{
                 case "Shift":
                     this.shifting = true;
                     break;
+                case "Control":
+                    this.controlling = true;
+                    break;
                 case "s":
                     if(event.ctrlKey){
                         event.preventDefault();
@@ -114,17 +117,27 @@ export default class Input{
                     break;
             }
         });
+        //
+        var delta = 500;
+        var lastKeypressTime = 0;//to capture double key press
+        //
         document.addEventListener("keyup", event => {
             switch(event.key){
                 case "a":
                     adding = false;
                     break;
                 case "v":
-                    let newMode = command.vectorMode + 1;
-                    if(newMode == 3){
-                        newMode = 0;
+                    var thisKeypressTime = new Date();
+                    if(thisKeypressTime - lastKeypressTime <= delta){
+                        this.command.toggleVectors(-1);//show both velocity and acceleration
+                    }else{
+                        let newMode = command.vectorMode + 1;
+                        if(newMode == 3){
+                            newMode = 0;
+                        }
+                        this.command.toggleVectors(newMode);
                     }
-                    this.command.toggleVectors(newMode);
+                    lastKeypressTime = thisKeypressTime;
                     break;
                 case "Enter":
                     break;
@@ -197,7 +210,11 @@ export default class Input{
                     this.active.reval(emx, emy);
                     break;
                 case 5://set the time via timeline
-                    command.setTime(command.timeline.timeX.invert(event.clientX));
+                    if(this.shifting){
+                        //
+                    }else{
+                        command.setTime(command.timeline.timeX.invert(event.clientX));
+                    }
                     break;
                 case 6://retime an object via timeline extremes
                     this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
@@ -358,18 +375,23 @@ export default class Input{
     //
     newPoint(point){
         var input = this;
+        let id = parseInt(point.attr("ob"));
+        let idx = input.command.objects.findIndex(obj => obj.id == id);//find index of parent object
+        let object = input.command.objects[idx];//store parent object
+        //
         point.on("mousedown", function(){
             input.moveState = 6;
             console.log("point click detected");
-            let id = parseInt(point.attr("ob"));
-            let idx = input.command.objects.findIndex(obj => obj.id == id);
-            input.command.selected = input.command.objects[idx];
+            input.command.selected = object;
             input.active = point;
-            input.command.select(input.command.objects[idx]);
+            input.command.select(object);
+            if(object.lock){
+                object.toggleLock();
+            }
             //
-            input.tX = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[0];
-            input.tY = input.command.selected.profile.calc(0, parseFloat(point.attr("val")))[1];
-            input.command.selected.profile.setOrigin(parseFloat(point.attr("val")));
+            input.tX = object.profile.calc(0, parseFloat(point.attr("val")))[0];
+            input.tY = object.profile.calc(0, parseFloat(point.attr("val")))[1];
+            object.profile.setOrigin(parseFloat(point.attr("val")));
         });
         //
         point.on("mouseenter", function(){
