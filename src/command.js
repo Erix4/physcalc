@@ -542,7 +542,7 @@ export default class Command{
             this.selObs = [obj];
             this.selected = obj;
             this.props.update(this.selected);
-            obj.self.raise();
+            obj.raise();
         }
     }
     //

@@ -286,6 +286,21 @@ export default class Object{
     }
     //
     /**
+     * raise all SVG elements for the object
+     */
+    raise(){
+        this.nets.forEach(net => {
+            net.self.raise();
+        });
+        this.self.raise();
+        /*this.comps.forEach(level => {
+            level.forEach(comp => {
+                comp.self.raise();
+            });
+        });*/
+    }
+    //
+    /**
      * toggle/set the vector mode for this object
      * @param {number} mode vectormode to set object to
      */
@@ -332,14 +347,16 @@ export default class Object{
     respawnArrows(){
         let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
         //
-        while(this.nets.length < curPiece.paras.length){//while the current piece is deeper than the number of net vectors
-            this.nets.push(new netArrow(this.command, this, this.nets.length));//add a new net vector
+        console.log(`depth: ${curPiece.paras.length}`);
+        while(this.nets.length < curPiece.paras.length - 1){//while the current piece is deeper than the number of net vectors
+            this.nets.push(new netArrow(this.command, this, this.nets.length + 1));//add a new net vector
             /*let compPower = [];
             for(var a in curPiece.comps[this.nets.length]){
                 compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
             }*/
             //this.comps.push(compPower);
         }
+        console.log(this.nets);
     }
     //
     /**
@@ -716,7 +733,8 @@ class Arrow{
             ty1 = 0;
             ty2 = 0;
         }else{
-            let theta = atan(ey, ex);
+            //console.log(`${command.scaleY(ey)} over ${command.scaleX(ex)}`);
+            let theta = atan(command.scaleY(ey), command.scaleX(ex));//FIX SOMETHING HERE FOR ANGLE WHEN GRID IS STRETCHED
             tx1 = this.tailSize * Math.cos(radians(theta + (90 + this.tailAng)));//tail x displacement
             tx2 = this.tailSize * Math.cos(radians(theta - (90 + this.tailAng)));//tail x displacement
             ty1 = this.tailSize * Math.sin(radians(theta + (90 + this.tailAng)));//tail y displacement
@@ -757,7 +775,8 @@ class Arrow{
             ty1 = 0;
             ty2 = 0;
         }else{
-            let theta = atan(this.ey, this.ex);
+            //console.log(`${this.command.scaleY(this.ey)} over ${this.command.scaleX(this.ex)}`);
+            let theta = atan(-this.command.grid.conY.invert(this.ey), this.command.grid.conX.invert(this.ex));
             tx1 = this.tailSize * Math.cos(radians(theta + (90 + this.tailAng)));//tail x displacement
             tx2 = this.tailSize * Math.cos(radians(theta - (90 + this.tailAng)));//tail x displacement
             ty1 = this.tailSize * Math.sin(radians(theta + (90 + this.tailAng)));//tail y displacement
@@ -801,6 +820,13 @@ class Arrow{
         this.tailA.style("visibility", "visible");
         this.tailB.style("visibility", "visible");
         this.head.style("visibility", "visible");
+    }
+    //
+    raise(){
+        this.neck.raise();
+        this.tailA.raise();
+        this.tailB.raise();
+        this.head.raise();
     }
     //
     delete(){
