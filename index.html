@@ -1,4 +1,640 @@
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Physics Calculator</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-axis@3"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://kit.fontawesome.com/e8a3873f26.js" crossorigin="anonymous"></script>
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css"
+    />
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="noInternet">
+        <h1 class="errorDisp">It looks like you're not connected to the web. Please reconnect and try again.</h1>
+    </div>
+    <input id="getFile"></input>
+    <div id="fullDisplay">
+        <div id="header">
+            <h1 id="title" class="noSelect">Physics Calculator</h1>
+            <div id="add" class="headerButton">Add</div>
+            <div id="save" class="headerButton">Save</div>
+            <div id="settingsB" class="headerB">
+                <i id="settingsIcon" class="fas fa-cog"></i>
+            </div>
+        </div>
+        <div id="interface">
+            <div data-simplebar id="leftcolumn">
+                <div id="propHead" class="container">
+                    <h2 id="propTitle" class="text noSelect">An object</h2>
+                </div>
+                <div id="tabContainer">
+                    <div id="tabs">
+                        <div class="tab" val="1">
+                            <p class="tabText text">1</p>
+                        </div>
+                        <div id="addTab" class="tab"><i id="tabIcon" class="fas fa-plus"></i></div>
+                    </div>
+                </div>
+                <div id="tabInfo">
+                    <div id="firstJunc" class="juncType">
+                        <img class="discIcon" src="/assets/contIcon1.svg"/>
+                        <img class="discIcon" src="/assets/discontIcon2.svg"/>
+                        <img class="discIcon" src="/assets/imcomIcon1.svg"/>
+                        <img class="sel discIcon" src="/assets/infinity-solid.svg"/>
+                    </div>
+                    <input class="noField tabField" type="number">
+                    <p id="tabInfoText" class="text">&#60;t&#60;</p>
+                    <input class="noField tabField" type="number">
+                    <div class="juncType">
+                        <img class="discIcon" src="/assets/contIcon1.svg"/>
+                        <img class="discIcon" src="/assets/discontIcon2.svg"/>
+                        <img class="discIcon" src="/assets/imcomIcon1.svg"/>
+                        <img class="sel discIcon" src="/assets/infinity-solid.svg"/>
+                    </div>
+                    <select class="tabDrop">
+                        <option>mm</option>
+                        <option>cm</option>
+                        <option selected="selected">m</option>
+                        <option>km</option>
+                    </select>
+                </div>
+                <div class="expand"
+                    ><div id="valueExpand" class="propExpand">
+                        <h3 class="expandText text noSelect">Values</h3>
+                        <i class="expandIcon noSelect fas fa-caret-right"></i>
+                    </div>
+                    <div class="propContents">
+                        <div class="valueContents overfold">
+                            <div class="labelLine">
+                                <p class="propLabel text">Position</p>
+                                <div class="toggles">
+                                    <div class="toggleButton undoButton">
+                                        <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                        <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                    </div>
+                                </div>
+                            </div
+                            ><div class="propInput">
+                                <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                <p class="propParaLabel text">X: </p>
+                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <p class="propParaLabel text">Y: </p>
+                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <div class="labelLine">
+                                <p class="propLabel text">Velocity</p>
+                                <div class="toggles">
+                                    <div class="toggleButton undoButton">
+                                        <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                        <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="propInput">
+                                <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                <p class="propParaLabel text">x: </p>
+                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <p class="propParaLabel text">y: </p>
+                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <div class="labelLine">
+                                <p class="propLabel text">Acceleration</p>
+                                <div class="toggles">
+                                    <div class="toggleButton undoButton">
+                                        <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                        <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                    </div>
+                                    <div class="toggleButton">
+                                        <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="propInput">
+                                <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                <p class="propParaLabel text">x: </p>
+                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <p class="propParaLabel text">y: </p>
+                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                        </div
+                        ><div class="expand"
+                            ><div class="subPropExpand propExpand">
+                                <h3 class="expandText subExpandText text noSelect">More</h3>
+                                <i class="expandIcon subExpandText noSelect fas fa-caret-right"></i>
+                            </div>
+                            <div id="valueContentsMore" class="propContents">
+                                <div class="valueContents overfold">
+                                    <div class="labelLine">
+                                        <p class="propLabel text">Jerk</p>
+                                        <!--<div class="undoButton">
+                                            <i class="undo fas fa-undo-alt"></i>
+                                        </div>-->
+                                        <div class="toggles">
+                                            <div class="toggleButton">
+                                                <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                                <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                            </div>
+                                            <div class="toggleButton">
+                                                <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                    </div
+                                    ><div class="propInput">
+                                        <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                        <p class="propParaLabel text">X: </p>
+                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                        <p class="propParaLabel text">Y: </p>
+                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                    </div>
+                                    <div class="labelLine">
+                                        <p class="propLabel text">Snap</p>
+                                        <div class="toggles">
+                                            <div class="toggleButton">
+                                                <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                                <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                            </div>
+                                            <div class="toggleButton">
+                                                <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="propInput">
+                                        <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                        <p class="propParaLabel text">x: </p>
+                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                        <p class="propParaLabel text">y: </p>
+                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                    </div>
+                                    <div class="labelLine">
+                                        <p class="propLabel text">Crackle</p>
+                                        <div class="toggles">
+                                            <div class="toggleButton">
+                                                <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                                <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                            </div>
+                                            <div class="toggleButton">
+                                                <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="propInput">
+                                        <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                        <p class="propParaLabel text">x: </p>
+                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                        <p class="propParaLabel text">y: </p>
+                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                    </div>
+                                    <div class="labelLine">
+                                        <p class="propLabel text">Pop</p>
+                                        <div class="toggles">
+                                            <div class="toggleButton">
+                                                <i class="cart toggleIcon noSelect fas fa-border-all"></i>
+                                                <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
+                                            </div>
+                                            <div class="toggleButton">
+                                                <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="propInput">
+                                        <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                        <p class="propParaLabel text">x: </p>
+                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                        <p class="propParaLabel text">y: </p>
+                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <select class="propdrop">
+                                            <option>mm</option>
+                                            <option>cm</option>
+                                            <option selected="selected">m</option>
+                                            <option>km</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div
+                ><div class="expand">
+                    <div id="eqExpand" class="propExpand">
+                        <h3 class="expandText text noSelect">Equations</h3>
+                        <i class="expandIcon noSelect fas fa-caret-right"></i>
+                    </div>
+                    <div class="propContents">
+                        <div class="eqContents overfold">
+                            <div class="propInput">
+                                <p id="propLabelUnit" class="propLabel text">Units: </p>
+                                <select id="eqUnits" class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <p class="propLabel text">Eq 1</p>
+                            <p class="propLabel text">Eq 2</p>
+                        </div>
+                        <div class="expand">
+                            <div id="valueExpand" class="subPropExpand propExpand">
+                                <h3 class="expandText subExpandText text noSelect">More</h3>
+                                <i class="expandIcon subExpandText noSelect fas fa-caret-right"></i>
+                            </div>
+                            <div id="valueContentsMore" class="propContents">
+                                <div class="overfold">
+                                    <p class="propLabel text">Eq 3</p>
+                                    <p class="propLabel text">Eq 4</p>
+                                    <p class="propLabel text">Eq 5</p>
+                                    <p class="propLabel text">Eq 6</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="expand"
+                    ><div id="solveExpand" class="propExpand">
+                        <h3 class="expandText text noSelect">Solver</h3>
+                        <i class="expandIcon noSelect fas fa-caret-right"></i>
+                    </div>
+                    <div id="solveContent" class="propContents">
+                        <div class="overfold">
+                            <div class="propInput">
+                                <p id="propLabelUnit" class="propLabel text">Solve: </p>
+                                <select id="eqUnits" class="propdrop">
+                                    <option selected="selected">for motion</option>
+                                    <option>for point</option>
+                                </select>
+                            </div>
+                            <div class="solver labelLine">
+                                <p class="propLabel text">At time</p>
+                                <input id="xPos" class="timeInput propField" type="number" value="0">
+                                <select id="calcTimeUnits" class="propdrop">
+                                    <option>ms</option>
+                                    <option selected="selected">s</option>
+                                    <option>min</option>
+                                    <option>hrs</option>
+                                </select>
+                                <p class="propLabel text">,</p>
+                                <select class="propdrop">
+                                    <option selected="selected">position</option>
+                                </select>
+                                <p class="propLabel text">:</p>
+                            </div>
+                            <div class="solver propInput">
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="readCalcLabel propParaLabel text">x: </p>
+                                <input id="xPos" class="solveInput propField" type="number">
+                                <select class="readCalcDrop propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="propParaLabel text">y: </p>
+                                <input id="yPos" class="solveInput propField" type="number">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <div class="solver labelLine">
+                                <p class="propLabel text">At time</p>
+                                <input id="xPos" class="timeInput propField" type="number" value="0">
+                                <select id="calcTimeUnits" class="propdrop">
+                                    <option>ms</option>
+                                    <option selected="selected">s</option>
+                                    <option>min</option>
+                                    <option>hrs</option>
+                                </select>
+                                <p class="propLabel text">,</p>
+                                <select class="propdrop">
+                                    <option selected="selected">position</option>
+                                    <option>velocity</option>
+                                </select>
+                                <p class="propLabel text">:</p>
+                            </div>
+                            <div class="solver propInput">
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="propParaLabel text">x: </p>
+                                <input id="xPos" class="solveInput propField" type="number">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="propParaLabel text">y: </p>
+                                <input id="yPos" class="solveInput propField" type="number">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <div class="solver labelLine">
+                                <p class="propLabel text">At time</p>
+                                <input id="xPos" class="timeInput propField" type="number" value="0">
+                                <select id="calcTimeUnits" class="propdrop">
+                                    <option>ms</option>
+                                    <option selected="selected">s</option>
+                                    <option>min</option>
+                                    <option>hrs</option>
+                                </select>
+                                <p class="propLabel text">,</p>
+                                <select class="propdrop">
+                                    <option selected="selected">position</option>
+                                    <option>velocity</option>
+                                    <option>acceleration</option>
+                                </select>
+                                <p class="propLabel text">:</p>
+                            </div>
+                            <div class="solver propInput">
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="propParaLabel text">x: </p>
+                                <input id="xPos" class="solveInput propField" type="number">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                                <label class="checkbox"><input type="checkbox"/></label>
+                                <p class="propParaLabel text">y: </p>
+                                <input id="yPos" class="solveInput propField" type="number">
+                                <select class="propdrop">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option selected="selected">m</option>
+                                    <option>km</option>
+                                </select>
+                            </div>
+                            <div class="bigButton">Calc!</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="expand">
+                    <div id="applyExpand" class="propExpand">
+                        <h3 class="expandText text noSelect">Apply</h3>
+                        <i class="expandIcon noSelect fas fa-caret-right"></i>
+                    </div>
+                    <div class="propContents">
+                        <div class="eqContents overfold">
+                            <div class="propInput">
+                                <p id="propLabelUnit" class="propLabel text">To: </p>
+                                <select id="eqUnits" class="propdrop">
+                                    <option selected="selected">position</option>
+                                    <option>velocity</option>
+                                    <option>accleration</option>
+                                    <option>jerk</option>
+                                    <option>snap</option>
+                                    <option>crackle</option>
+                                    <option>pop</option>
+                                </select>
+                            </div>
+                            <div class="apply propInput">
+                            <p class="propParaLabel text">x: </p>
+                            <input id="xPos" class="fitWidth propField" type="number" value="0">
+                            <select class="propdrop">
+                                <option>mm</option>
+                                <option>cm</option>
+                                <option selected="selected">m</option>
+                                <option>km</option>
+                            </select>
+                            <p class="propParaLabel text">y: </p>
+                            <input id="yPos" class="fitWidth propField" type="number" value="0">
+                            <select class="propdrop">
+                                <option>mm</option>
+                                <option>cm</option>
+                                <option selected="selected">m</option>
+                                <option>km</option>
+                            </select>
+                        </div>
+                        <div class="bigButton">Apply!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="lefthandle" class="columnhandle"></div>
+            <div id="fieldcolumn">
+                <canvas id="fieldCanvas" class="fill"></canvas>
+                <svg id="fieldSVG" class="fill"></svg>
+                <div id="leftfield">
+                    <div id="timeValue">
+                        <p id="timeText" class="text">time = </p>
+                        <input id="timeInput" class="field" type="number" value="0"/>
+                        <select id="timeValueDrop" class="propdrop">
+                            <option>ms</option>
+                            <option selected="selected">s</option>
+                            <option>min</option>
+                            <option>hr</option>
+                        </select>
+                    </div>
+                    <div id="vectorSwitch">
+                        <div id="vt0" class="vectorButton seld"><p class="vectorText">f(t)</p></div>
+                        <div id="vt1" class="vectorButton"><p class="vectorText">x(t)</p></div>
+                        <div id="vt2" class="vectorButton"><p class="vectorText">y(t)</p></div>
+                    </div>
+                </div>
+                <div id="settings">
+                    <div class="settingLine">
+                        <h2 class="settingText expandText text noSelect">Settings</h2>
+                    </div>
+                    <div class="settingLine">
+                        <label class="settingToggle checkbox"><input type="checkbox" checked="checked"/></label>
+                        <p class="settingToggle text">Gravity:</p>
+                        <input class="settingField propField" type="number" value="10">
+                        <select class="settingScale propdrop">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
+                    </div>
+                    <p class="settingToggle text">Field Scale</p>
+                    <div class="settingLine">
+                        <input class="settingField propField" type="number" value="-10">
+                        <p class="settingToggle text">	&#60; x &#60;&#160;</p>
+                        <input class="settingField propField" type="number" value="10">
+                        <select class="settingScale propdrop">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
+                    </div>
+                    <div class="settingLine">
+                        <input class="settingField propField" type="number" value="-10">
+                        <p class="settingToggle text">	&#60; y &#60;&#160;</p>
+                        <input class="settingField propField" type="number" value="10">
+                        <select class="settingScale propdrop">
+                            <option>mm</option>
+                            <option>cm</option>
+                            <option selected="selected">m</option>
+                            <option>km</option>
+                        </select>
+                    </div>
+                    <div class="settingLine"><div id="squareButton" class="scaleButton">
+                        <p class="settingToggle text">Square</p>
+                    </div></div>
+                    <div class="settingLine"><div class="scaleButton">
+                        <p class="settingToggle text">Normalize</p>
+                    </div></div>
+                    <div class="settingLine">
+                        <label class="settingToggle checkbox"><input type="checkbox"/></label>
+                        <p class="settingToggle text">Auto-normalize</p>
+                    </div>
+                    <div class="settingLine">
+                        <label class="settingToggle checkbox"><input type="checkbox"/></label>
+                        <p class="settingToggle text">Time Snapping</p>
+                    </div>
+                    <div class="settingLine">
+                        <label class="settingToggle checkbox"><input type="checkbox" checked="checked"/></label>
+                        <p class="settingToggle text">Critical Points</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="time">
+            <div id="timeHead">
+                <div id="playback" class="cutout">
+                    <div class="playbackButton"></div>
+                    <div class="playbackButton"></div>
+                    <div class="playbackButton"></div>
+                    <div class="playbackButton"></div>
+                </div>
+                <div id="norm" class="range cutout">
+                    <p class="text">Normalize</p>
+                </div>
+                <div id="timeRange" class="range cutout">
+                    <div class="leftRange rangeButton"><input value="-10" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="0" class="rangeField field" type="number"/></div>
+                    <div class="rangeButton"><input value="10" class="rangeField field" type="number"/></div>
+                </div>
+                <select class="range cutout propdrop">
+                    <option>ms</option>
+                    <option selected="selected">s</option>
+                    <option>min</option>
+                    <option>hr</option>
+                </select>
+            </div>
+            <canvas id="timeCanvas" class="time"></canvas>
+            <svg id="timeSVG" class="time"></svg>
+        </div>
+    </div>
+    <script src="/index.js"></script>
+</body>
+</html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Phys Calc</title>
@@ -10,25 +646,17 @@
     <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
     </script>
-    <link rel="stylesheet" href="styles.css"><!--Javascript before CSS is slightly faster-->
+    <link rel="stylesheet" href="styles.css"><!-Javascript before CSS is slightly faster-
 </head>
 <body>
 <input id="getFile"></input>
     <div id="header">
-        <!--<h1>Physics Calculator</h1>-->
+        <!-<h1>Physics Calculator</h1>-
         <img id="headImg" src="/assets/fc3.png"/>
         <div id="addList">
             <div class="headerB" id="addB">
                 <p class="headerBText" id="addText">ADD</p>
             </div>
-            <!--<div id="addDrop">
-                <p>Object</p>
-                <p>Force</p>
-            </div>-->
-            <!--<select id="addDrop" class="propdrop">
-                <option class="addChoice">Object</option>
-                <option class="addChoice">Force</option>
-            </select>-->
         </div>
         <div id="saveB" class="headerB">
             <p class="headerBText">SAVE</p>
@@ -36,28 +664,6 @@
         <div id="settingsB" class="headerB">
             <i class="fas fa-cog"></i>
         </div>
-        <!--<div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Tutorials
-            <span class="caret"></span></button>
-            <ul class="dropdown-menu">
-            <li><a tabindex="-1" href="#">HTML</a></li>
-            <li><a tabindex="-1" href="#">CSS</a></li>
-            <li class="dropdown-submenu">
-                <a class="test" tabindex="-1" href="#">New dropdown <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                <li><a tabindex="-1" href="#">2nd level dropdown</a></li>
-                <li><a tabindex="-1" href="#">2nd level dropdown</a></li>
-                <li class="dropdown-submenu">
-                    <a class="test" href="#">Another dropdown <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                    <li><a href="#">3rd level dropdown</a></li>
-                    <li><a href="#">3rd level dropdown</a></li>
-                    </ul>
-                </li>
-                </ul>
-            </li>
-            </ul>
-        </div>-->
     </div>
     <div id="interface">
         <div id="leftcolumn">
@@ -130,11 +736,11 @@
                     <div class="eq" id="math">\(\)</div>
                     <div class="eq" id="xeq">\(x(t)=?\)</div>
                     <div class="eq" id="yeq">\(y(t)=?\)</div>
-                    <!--<div id="display"></div>-->
+                    <!-<div id="display"></div>-
                 </div>
                 <img src="/assets/moreButtonL.png"/>
                 <div class="section" id="calc">
-                    <!--<h3>Calculator</h3>-->
+                    <!-<h3>Calculator</h3>-
                     <div style="margin-top:7px" class="container">
                         <div class="container">
                             <select class="propdrop">
@@ -197,13 +803,13 @@
                 <div id="stepforward" class="button"><i class="fas fa-fast-forward"></i></div>
             </div>
         </div>
-        <!--<div id="scroll-o">
-            <div id="scroll-i">-->
+        <!-<div id="scroll-o">
+            <div id="scroll-i">-
                 <canvas class="time" id="tcan"></canvas>
                 <svg class="time" id="tsvg"></svg>
-            <!--</div>
-        </div>-->
+            <!-</div>
+        </div>-
     </div>
     <script src="/index.js"></script>
 </body>
-</html>
+</html>-->

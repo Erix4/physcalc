@@ -4,7 +4,7 @@ export default class Grid{
         console.log("Creating Field");
         this.svg = svg;
         this.body = d3.select("body");
-        this.timeline = d3.select("#timeline")
+        this.timeline = d3.select("#time")
         //
         this.totalW = parseInt(this.body.style("width"));
         this.totalH = parseInt(this.body.style("height")) - parseInt(this.timeline.style("height"));
@@ -21,8 +21,8 @@ export default class Grid{
         this.strX = 1;//x stretch multiplies by y scale
         //
         this.calcSize();
-        canvas.width = this.scrW;
-        canvas.height = this.scrH;
+        this.command.canvas.width = this.scrW;
+        this.command.canvas.height = this.scrH;
         //
         this.gridMin = this.getGridRes() / 2;//minimum distance between grid lines (pixels)
         this.gridMax = this.getGridRes() * 2;//minimum distance between grid lines (pixels)

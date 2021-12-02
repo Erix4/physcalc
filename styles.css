@@ -8,6 +8,974 @@
 }
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
 
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+body{
+    background-color: black;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+#getFile{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 3;
+    padding: 0;
+    pointer-events: none;
+    background-color: #47d7ff;
+    opacity: 0;
+    border: 0;
+}
+
+#noInternet{
+    display: none;
+}
+
+.checkbox {
+    display: inline-flex;
+    cursor: pointer;
+    position: relative;
+}
+
+.checkbox > input {
+    height: 1.3em;
+    width: 1.3em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+    border: 4px solid #34495E;
+    border-radius: 4px;
+    outline: none;
+    background-color: #41B883;
+    cursor: pointer;
+}
+
+.checkbox > input:checked {
+    background-color: white;
+}
+
+.checkbox > input:hover{
+    border: 4px solid white;
+}
+
+#fullDisplay{
+    height: 100%;
+}
+
+.noSelect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+
+/*#region: Header*/
+
+.headerButton{
+    background-color: #ffa294;;
+    color: #ff6f59;
+    font-family: 'Heavitas';
+    font-size: 170%;
+    border-radius: .3em;
+    margin-left: .3em;
+    padding-left: .2em;
+    padding-right: .2em;
+    transition: .2s;
+    cursor: pointer;
+}
+
+.headerButton:hover{
+    background-color: #ff6f59;
+    color: #ffa294;
+}
+
+.headerButton:active{
+    background-color: #ff472b;
+}
+
+#header{
+    height: 5%;
+    width: 100%;
+    background-color: #ff6f59;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+h1{
+    margin: 0;
+}
+
+#title{
+    font-family: 'heavitas';
+    color: white;
+}
+
+i{
+    color: white;
+}
+
+#settingsB{
+    background-color: #555;
+    color: white;
+    margin-left: auto;
+    font-size: 250%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: .2em;
+    padding-right: .2em;
+}
+
+#settingsB:hover{
+    background-color: black;
+}
+
+#settingsIcon{
+    transition: .5s;
+}
+
+#settingsB:hover #settingsIcon{
+    transform: rotate(45deg);
+}
+
+/*#endregion*/
+
+/*#region: Interface*/
+#interface{
+    height: 85%;
+    width: 100%;
+    bottom: 0;
+    display: flex;
+    background-color: black;
+}
+
+/*#region: leftcolumn*/
+#leftcolumn{
+    width: 25%;/*25%*/
+    height: 100%;
+    background-color: #254441;
+    overflow-y: auto;
+    left: 0;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.container{
+    background-color: aqua;
+}
+
+.text{
+    margin: 0;
+}
+
+#propHead{
+    padding: 5px;
+    padding-left: 15px;
+}
+
+#propTitle{
+    font-family: 'heavitas';
+    font-size: 90%;
+}
+
+/*#region: tabs*/
+
+#tabContainer{
+    background-color: blueviolet;
+    width: 100%;
+    font-size: 100%;
+}
+
+#tabs{
+    display: flex;
+    font-size: 100%;
+    width: 100%;
+}
+
+.tab{
+    background-color: blue;
+    padding: 5px;
+    /*padding-left: 40px;
+    padding-right: 40px;*/
+    width: 20%;
+    display: flex;
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}
+
+.newtab:after{
+    content: '';
+    height: 90%;
+    width: 2px;
+    left: -1px;
+    top: 5%;
+    position: absolute;
+    background-color: #fcba03;
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.tab:hover{
+    background-color: #fcba03;
+    transition: .2s;
+}
+
+.tabText{
+    font-family: 'heavitas';
+    font-size: 55%;
+    color: white;
+    margin: auto;
+}
+
+#addTab{
+    background-color: aquamarine;
+    display: flex;
+    width: 10%;
+}
+
+#addTab:hover{
+    background-color: #fcba03;
+}
+
+#tabIcon{
+    font-size: 55%;
+    margin: auto;
+}
+
+#tabInfo{
+    display: flex;
+    font-size: 60%;
+}
+
+#tabInfoText{
+    font-family: 'heavitas';
+    margin: .3em;
+}
+
+.juncType{
+    background-color: #ff6f59;
+    margin: .2em;
+    border-radius: .2em;
+    display: flex;
+}
+
+.juncType:hover{
+    background-color: #41B883;
+    transition: .2s;
+}
+
+#firstJunc .discIcon{
+    transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -ms-transform: scaleX(-1);
+}
+
+.discIcon{
+    width: 1.5em;
+    color: black;
+    display: none;
+    margin: auto;
+}
+
+.sel{
+    display: inline;
+}
+
+.tabField{
+    width: 20%;
+    margin-top: .2em;
+    margin-bottom: .2em;
+    font-family: 'LatinM';
+    font-size: 100%;
+}
+
+.noField{
+    pointer-events:none;
+    background-color: gray;
+}
+
+.tabDrop{
+    border-radius: 2px;
+    font-family: "nunito", "sans-serif";
+    font-size: 100%;
+    font-weight: 700;
+    border: none;
+    margin: .2em;
+    padding: 0;
+}
+
+.tabField::-webkit-outer-spin-button,
+.tabField::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.tabField[type=number] {
+    -moz-appearance: textfield;
+}
+
+/*#endregion*/
+
+/*#region: labelline*/
+
+.labelLine{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: 100%;
+    /*background-color: peachpuff;*/
+}
+
+.vectorIcon{
+    transform: rotate(-45deg);
+}
+
+.toggles{
+    margin-left: auto;
+    display: flex;
+}
+
+.toggleButton{
+    background-color: #ff6f59;
+    margin-right: 10px;
+    padding: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+    font-size: 100%;
+    border-radius: 4px;
+    display: flex;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.toggleButton:hover{
+    background-color: #fcba03;
+    transition: .2s;
+}
+
+.toggleIcon{
+    font-size: 70%;
+}
+
+.undo{
+    color: black;
+    font-size: 50%;
+}
+
+.undoButton{
+    background-color: transparent;
+}
+
+.undoButton:hover{
+    background-color: transparent;
+    transition: .2s;
+}
+
+.undoButton:hover .undo{
+    color: red;
+    transition: 0.2s;
+}
+
+.cart{
+    display: inline;
+}
+
+.polar{
+    display: none;
+}
+
+/*#endregion*/
+
+/*#region: expansion*/
+
+.expand{
+    width: 100%;
+    padding: 0;
+    font-size: 100%;
+    display: block;
+}
+
+.propExpand{
+    background-color: #3a706b;
+    width: 100%;
+    display: flex;
+    vertical-align: middle;
+    font-size: 100%;
+    padding-left: 2%;
+}
+
+.subPropExpand{
+    background-color: #172b29;
+    display: flex;
+}
+
+.subExpandText{
+    font-size: 60% !important;
+    color: white;
+}
+
+.expandText{
+    font-family: 'heavitas';
+    font-size: 80%;
+    width: auto;
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.expandIcon{
+    font-size: 80%;
+    margin-left: auto;
+    display: inline;
+    margin-right: .7em;
+    transform: rotate(90deg);
+}
+
+.expandIcon.subExpandText{
+    transform: rotate(0deg);
+    font-size: 1.8vw !important;
+}
+
+.propExpand:hover{
+    background-color: #ff6f59;
+}
+
+.propContents{
+    background-color: 254441;
+    width: 100%;
+    font-size: 100%;
+}
+
+.overfold{
+    padding: .2%;
+    padding-left: 2.5%;
+    display: inline-block;
+    font-size: 100%;
+}
+
+.valueContents{
+    width: 100%;
+}
+
+#valueContentsMore{
+    display: none;
+}
+
+/*#endregion*/
+
+/*#region: proplabel*/
+
+.propLabel{
+    font-family: "nunito", "sans-serif";
+    font-size: 70%;
+    font-weight: 700;
+    cursor: default;
+}
+
+#propLabelUnit{
+    display: inline;
+}
+
+.propInput{
+    padding-left: 0px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    /*background-color: orangered;*/
+    display: flex;
+}
+
+.expandCompIcon{
+    font-size: 60%;
+    margin-right: 7px;
+    visibility: hidden;
+}
+
+.propdrop{
+    border-radius: 2px;
+    font-family: "nunito", "sans-serif";
+    font-size: 43%;
+    font-weight: 700;
+    border: none;
+    margin-right: 5px;
+    margin-left: .25em;
+    height: 50%;
+    padding: 0;
+}
+
+#eqUnits{
+    margin: auto;
+    margin-left: 10px;
+}
+
+.propField{
+    display: inline;
+    border: 0;
+    margin-top: -2px;
+    margin-bottom: 10px;
+    box-shadow: .2em .55em 0 -.4em #A5CBC3, -.2em .55em 0 -.4em #A5CBC3;
+    -webkit-transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s;
+    background-color: transparent;
+    font-family: 'LatinM';
+    font-weight: 800;
+    font-size: 53%;
+    color: #A5CBC3;
+    padding-left: .2em;
+}
+.propField:focus {
+    outline: none;
+    box-shadow: .55em .55em 0 -.4em #ff6f59, -.55em .55em 0 -.4em #ff6f59;
+}
+
+.propField::-webkit-outer-spin-button,
+.propField::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.propField[type=number] {
+    -moz-appearance: textfield;
+}
+
+.propParaLabel{
+    display: inline;
+    font-family: 'heavitas';
+    font-weight: 800;
+    font-size: 50%;
+    cursor: default;
+    margin-right: .2em;
+    color: white;
+}
+
+/*#endregion*/
+
+/*#region: solve and apply*/
+
+.solver.labelLine{
+    font-size: 80%;
+}
+
+.solver.propInput{
+    font-size: 80%;
+}
+
+.bigButton{
+    background-color: #41B883;
+    font-size: 70%;
+    font-family: 'Heavitas';
+    width: fit-content;
+    border: solid .3em #ff6f59;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-weight: 800;
+    margin-left: 5%;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.bigButton:hover{
+    border: solid .3em white;
+    transition: .2s;
+}
+
+.bigButton:active{
+    background-color: green;
+    transition: 0s;
+}
+
+.apply.propInput{
+    margin-left: .4em;
+}
+
+.timeInput{
+    width: 15%;
+    margin-bottom: 0;
+}
+
+.solveInput{
+    width: 20%;
+}
+
+#calcTimeUnits{
+    margin-right: 0;
+}
+
+/*#endregion*/
+
+.columnhandle{
+    width: 10px;
+    height: 100%;
+    background-color: #172b29;
+    cursor: e-resize;
+    z-index: 2;
+}
+
+.columnhandle:hover{
+    background-color: cadetblue;
+    transition: .2s;
+}
+
+/*#endregion*/
+
+.fill{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+/*#region: fieldcolumn*/
+
+#fieldcolumn{
+    height: 100%;
+    width: 75%;
+    display: flex;
+    position: relative;
+}
+
+#fieldSVG{
+    z-index: 1;
+}
+
+/*#region: left field*/
+
+#leftfield{
+    flex-direction: column;
+    display: flex;
+}
+
+#timeValue{
+    width: fit-content;
+    margin-left: 10px;
+    margin-top: 10px;
+    background-color: transparent;
+    display: flex;
+    z-index: 2;
+}
+
+#timeText{
+    font-family: "nunito", "sans-serif";
+    font-weight: 700;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 6px;
+    color: white;
+}
+
+#timeInput{
+    width: 4em;
+    font-size: 100%;
+    font-family: "nunito", "sans-serif";
+    font-weight: 800;
+    color: black;
+    text-align: center;
+    border: none;
+    border-radius: 3px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#timeValueDrop{
+    height: 100%;
+    font-size: 120%;
+    margin: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+#vectorSwitch{
+    width: 10em;
+    height: 2em;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    margin-top: auto;
+    display: flex;
+    z-index: 2;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.vectorButton{
+    width: 33.4%;
+    height: 100%;
+    display: flex;
+    background-color: #254441;
+    cursor: pointer;
+}
+
+.seld{
+    background-color: #a5cbc3;
+    color: black;
+    cursor: default;
+}
+
+.vectorButton:hover{
+    background-color: #76cab8;
+}
+
+.seld:hover{
+    background-color: #a5cbc3;
+}
+
+.vectorText{
+    font-family: 'LatinM';
+    font-size: 130%;
+    font-weight: 900;
+    margin: auto;
+    margin-top: -.1em;
+}
+
+/*#endregion*/
+
+/*#region: settings*/
+
+.settingText{
+    font-size: 200%;
+    margin-top: .2em;
+}
+
+#settings{
+    margin-left: auto;
+    background-color: #fcba03;
+    padding-right: 15px;
+    padding-left: 10px;
+    display: none;
+    z-index: 1;
+}
+
+.settingLine{
+    display: flex;
+    width: fit-content;
+    margin-bottom: 5px;
+}
+
+.settingField{
+    border: none;
+    font-size: 100%;
+    width: 5vw;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+}
+
+.settingScale{
+    font-size: 100%;
+    z-index: 1;
+}
+
+label.settingToggle{
+    z-index: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding-left: 5px;
+}
+
+label.settingToggle > input {
+    height: 1.3em;
+    width: 1.3em;
+    border: 3px solid black;
+    background-color: white;
+}
+
+label.settingToggle > input:checked {
+    background-color: gray;
+}
+
+p.settingToggle{
+    font-size: 130%;
+    font-family: "nunito", "sans-serif";
+    font-weight: 700;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+#squareButton{
+    margin-top: .6em;
+}
+
+.scaleButton{
+    background-color: orangered;
+    width: fit-content;
+    border: .2em solid black;
+    border-radius: .4em;
+    padding-left: .2em;
+    padding-right: .2em;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.scaleButton:hover{
+    background-color: darkred;
+    transition: .2s;
+}
+
+/*#endregion*/
+
+/*#endregion*/
+
+/*#region: time bar*/
+
+#time{
+    height: 10%;
+    width: 100%;
+    background-color: black;
+    position: relative;
+}
+
+.time{
+    width: 100%;
+    height: 75%;
+    top: 25%;
+    position: absolute;
+}
+
+#timeSVG{
+    z-index: 1;
+}
+
+#timeHead{
+    width: 100%;
+    height: 25%;
+    background-color: #ff6f59;
+    display: flex;
+    position: absolute;
+    align-items: center;
+}
+
+.cutout{
+    height: 80%;
+    background-color: gray;
+    top: 10%;
+}
+
+#playback{
+    width: 10%;
+    margin-left: 45%;
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+}
+
+.playbackButton{
+    width: 25%;
+    height: 100%;
+    background-color: lightcyan;
+}
+
+.playbackButton:hover{
+    background-color: cyan;
+}
+
+.range{
+    margin-right: 3px;
+    border-radius: 3px;
+    font-family: "nunito", "sans-serif";
+    font-weight: 700;
+}
+
+#norm{
+    margin-left: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 100%;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#norm:hover{
+    background-color: #555;
+}
+
+#timeRange{
+    width: 12%;
+    display: flex;
+    overflow: hidden;
+}
+
+.rangeButton{
+    width: 33.4%;
+    height: 100%;
+    background-color: lightgreen;
+    position: relative;
+}
+
+.rangeField{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: transparent;
+    border: 0;
+    font-family: 'LatinM';
+    font-weight: 800;
+    font-size: 90%;
+    color: black;
+    text-align: center;
+}
+
+.field::-webkit-outer-spin-button,
+.field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.field[type=number] {
+    -moz-appearance: textfield;
+}
+
+.leftRange:after{
+    content: '';
+    height: 100%;
+    width: 2px;
+    right: -1px;
+    position: absolute;
+    background-color: black;
+    z-index: 1;
+}
+
+.rangeButton:hover{
+    background-color: green;
+}
+
+.range.propdrop{
+    font-size: 90%;
+}
+
+.range option{
+    font-size: 100%;
+}
+
+/*#endregion*/
+
+/*#endregion*/
+
+/*@font-face {
+    font-family: 'heavitas';/*not licensed for professional use ($15 fee)
+    src: url('/fonts/Heavitas.ttf');
+}
+@font-face {
+    font-family: 'LatinM';
+    src: url('/fonts/lm-regular.woff') format('woff');
+}
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
+
 body{
     width: 100%;
     height: 100%;
@@ -129,24 +1097,12 @@ h1{
     margin-top: -1px;
   }
 
-#getFile{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    z-index: 5;
-    padding: 0;
-    pointer-events: none;
-    background-color: #47d7ff;
-    opacity: 0;
-}
-
-/*#region Interface*/
+/*#region Interface
 #interface{
     height: 85%;
 }
 
-/*#region props*/
+/*#region props
 #leftcolumn{
     height: 100%;
     width: 25%;
@@ -166,7 +1122,7 @@ h1{
     position: absolute;
     top: 0;
     display: inline-block;
-}*/
+}
 
 p{
     margin: 0;
@@ -204,7 +1160,7 @@ h2{
 }
 
 .eq{
-    /*width: 15%;*/
+    /*width: 15%;
     font-size: 42px;
     color: #A5CBC3;
     padding-left: 10px;
@@ -215,7 +1171,7 @@ h2{
 }
 
 .section{
-    /*padding: 5px;*/
+    /*padding: 5px;
     height: fit-content;
     overflow: hidden;
     border-bottom: 8px solid #172b29;
@@ -255,11 +1211,11 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-/* Firefox */
+/* Firefox 
 input[type=number] {
     -moz-appearance: textfield;
 }
-/*#endregion*/
+/*#endregion
 
 #svg{
     z-index: 2;
@@ -303,7 +1259,7 @@ button{
     margin-left: 5%;
     border-radius: 5px;
     display: inline-block;
-    /*align-items: center;*/
+    /*align-items: center;
     text-align: center;
     transition: all .3s;
     cursor: pointer;
@@ -361,7 +1317,7 @@ img{
 .viewButton:hover{
     background-color: #76cab8 !important;
 }
-/*#endregion*/
+/*#endregion
 
 .time{
     top: 92.5%;
@@ -371,7 +1327,7 @@ img{
     /*width: 100%;
     height: 100%;
     grid-column: 1;
-    grid-row: 1;*/
+    grid-row: 1;
 }
 
 #timeline{
@@ -471,4 +1427,4 @@ img{
 i{
     position: relative;
     top: .7px;
-}
+}*/

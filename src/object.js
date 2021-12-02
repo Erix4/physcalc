@@ -60,8 +60,8 @@ export default class Object{
         this.piece = 0;
         this.undef = false;//position is undefined due to incomplete piecewise profile
         //
-        this.px = this.command.scaleX.invert(px);//current values
-        this.py = this.command.scaleY.invert(py);
+        this.px;//current values
+        this.py;
         this.xS = [];//refactor for expandable values, power ascends (0, 1, 2...)
         this.yS = [];
         const vx = 5;//starting values, not used later
@@ -69,6 +69,23 @@ export default class Object{
         const ax = 0;
         const ay = 0;
         //
+        this.profile;
+        switch(command.viewType){
+            case 0:
+                this.px = this.command.scaleX.invert(px);
+                this.py = this.command.scaleY.invert(py);
+                break;
+            case 1:
+                this.command.setTime(this.command.scaleX.invert(px));
+                this.px = this.command.scaleY.invert(py);
+                this.py = 0;
+                break;
+            case 2:
+                this.command.setTime(this.command.scaleX.invert(px));
+                this.px = 0;
+                this.py = this.command.scaleY.invert(py);
+                break;
+        }
         this.profile = new Profile(this.command, this.depth, [ax / 2, vx, this.px], [ay / 2, vy, this.py], this.color);
         this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
@@ -107,6 +124,12 @@ export default class Object{
             net.self.tailB.raise();
             net.self.head.raise();
         });
+        //
+        if(command.viewType == 1){
+            this.px = this.command.scaleX.invert(px);
+        }else if(command.viewType == 2){
+            this.py = this.command.scaleX.invert(px);
+        }
         //
         this.svg = command.svg;
         //

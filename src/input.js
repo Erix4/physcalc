@@ -156,6 +156,8 @@ export default class Input{
             var emy = event.clientY;
             emx -= parseInt(d3.select("#leftcolumn").style("width"));
             emy -= parseInt(d3.select("#header").style("height"));
+            console.log(parseInt(d3.select("#leftcolumn").style("width")));
+            console.log(emx);
             //
             stX = emx;
             stY = emy;
@@ -197,9 +199,11 @@ export default class Input{
                             this.active.setValue(0, this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
                             break;
                         case 1:
+                            this.command.setTime(this.command.scaleX.invert(emx));
                             this.active.setValue(0, this.command.scaleY.invert(emy), 0);
                             break;
                         case 2:
+                            this.command.setTime(this.command.scaleX.invert(emx));
                             this.active.setValue(0, 0, this.command.scaleY.invert(emy));
                             break;
                     }
@@ -347,23 +351,23 @@ export default class Input{
         }, false);
         //
         d3.select("#vt0").on("mousedown", function(){
-            document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
-            document.getElementById("vt1").style = "background-color: #254441";
-            document.getElementById("vt2").style = "background-color: #254441";
+            d3.select('#vt0').attr("class", "vectorButton seld");
+            d3.select('#vt1').attr("class", "vectorButton");
+            d3.select('#vt2').attr("class", "vectorButton");
             //
             input.command.changeViewType(0);
         });
         d3.select("#vt1").on("mousedown", function(){
-            document.getElementById("vt1").style = "background-color: #a5cbc3 !important; color: black;";
-            document.getElementById("vt0").style = "background-color: #254441";
-            document.getElementById("vt2").style = "background-color: #254441";
+            d3.select('#vt0').attr("class", "vectorButton");
+            d3.select('#vt1').attr("class", "vectorButton seld");
+            d3.select('#vt2').attr("class", "vectorButton");
             //
             input.command.changeViewType(1);
         });
         d3.select("#vt2").on("mousedown", function(){
-            document.getElementById("vt2").style = "background-color: #a5cbc3 !important; color: black;";
-            document.getElementById("vt0").style = "background-color: #254441";
-            document.getElementById("vt1").style = "background-color: #254441";
+            d3.select('#vt0').attr("class", "vectorButton");
+            d3.select('#vt1').attr("class", "vectorButton");
+            d3.select('#vt2').attr("class", "vectorButton seld");
             //
             input.command.changeViewType(2);
         });

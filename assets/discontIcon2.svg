@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="svg-inline--fa fa-dot-circle fa-w-16" aria-hidden="true" data-icon="dot-circle" data-prefix="far" focusable="false" role="img" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <rect x="-.28164" y="126.52" width="196.63" height="48.08" rx="14.767" ry="14.144" stroke-linecap="square" stroke-miterlimit="2.8" stroke-width="233.88" style="paint-order:stroke fill markers"/>
+  <circle cx="256.47" cy="150.67" r="76.927" style="paint-order:stroke fill markers"/>
+  <rect x="317.75" y="337.92" width="194.21" height="48.08" rx="15.169" ry="14.144" stroke-linecap="square" stroke-miterlimit="2.8" stroke-width="232.44" style="paint-order:stroke fill markers"/>
+ </g>
+ <circle cx="256.28" cy="361.73" r="63.767" fill="none" stroke="#000" stroke-linecap="square" stroke-miterlimit="2.8" stroke-width="33.903" style="paint-order:stroke fill markers"/>
+</svg>

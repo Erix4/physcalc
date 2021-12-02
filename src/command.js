@@ -44,7 +44,7 @@ export default class Command{
         this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 20);
         this.grid.calcSize();//get scales and things
         //
-        this.timeline = new Timeline(this, document.getElementById('tcan'), d3.select("#tsvg"), 10);
+        this.timeline = new Timeline(this, document.getElementById('timeCanvas'), d3.select("#timeSVG"), 10);
         console.log(this.time.scrH);
         //
         this.input = new Input(this);

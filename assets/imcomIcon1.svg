@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="svg-inline--fa fa-dot-circle fa-w-16" aria-hidden="true" data-icon="dot-circle" data-prefix="far" focusable="false" role="img" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+ <g stroke-linecap="square" stroke-miterlimit="2.8">
+  <rect x="-.80916" y="231.92" width="263.27" height="48.08" rx="17.039" ry="14.144" stroke-width="270.62" style="paint-order:stroke fill markers"/>
+  <rect transform="rotate(45)" x="252.8" y="-23.947" width="218.39" height="48.08" rx="14.96" ry="14.144" stroke-width="246.48" style="paint-order:stroke fill markers"/>
+  <rect transform="matrix(-.70711 .70711 .70711 .70711 0 0)" x="-109.28" y="338" width="218.39" height="48.08" rx="14.96" ry="14.144" stroke-width="246.48" style="paint-order:stroke fill markers"/>
+ </g>
+</svg>
