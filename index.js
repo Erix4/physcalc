@@ -64,7 +64,7 @@ function fitSolve(){//fit the input fields in the solve section
 d3.select('#settingsB').on('click', function(){//show/hide the settings section and rotate the settings icon
     if(d3.select('#settings').style('display') == 'none'){
         d3.select('#settings').style('display', 'inline');
-        d3.select('#settingsIcon').transition().ease(d3.easeLinear).duration(500).style('transform', 'rotate(90deg)');
+        d3.select('#settingsIcon').style('transform', 'rotate(90deg)');
     }else{
         d3.select('#settings').style('display', 'none');
         d3.select('#settingsIcon').style('transform', 'rotate(0deg)');

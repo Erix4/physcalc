@@ -145,10 +145,11 @@ i{
 #settingsIcon{
     transition: .5s;
     color: #ff6f59;
+    transform: rotate(0deg);
 }
 
 #settingsB:hover #settingsIcon{
-    transform: rotate(45deg);
+    transform: rotate(45deg) !important;
 }
 
 /*#endregion*/
@@ -653,7 +654,7 @@ i{
 }
 
 .columnhandle:hover{
-    background-color: cadetblue;
+    background-color: #41B883;
     transition: .2s;
 }
 

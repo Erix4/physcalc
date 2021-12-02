@@ -1,3 +1,33 @@
+/*
+Ideal iniput layout:
+    1. Resize
+    2. Column resize
+    3. wheel event
+    4. 
+
+To include: 
+    - resize
+    - column resize
+    - wheel event
+    - keydown, keyup
+    - global mousedown
+    - global mousemove
+    - global mouseup
+    - field mousedown
+    - double click event
+    - timeline mousedown
+    - playback control buttons
+    - file drag events
+    - parametric/function controls
+    - save and add buttons
+no properties inputs
+Groups:
+    - resize events
+    - key events
+    - mouse events
+    - button click events
+*/
+
 export default class Input{
     constructor(command){
         this.moveState = 0;//track when type, 0 = none, 1 = field move, 2 = object move, 3 = object position set, 4 = vector change, 5 = timeline change
@@ -29,9 +59,13 @@ export default class Input{
         let canox = parseInt(d3.select("#leftcolumn").style("width"));
         let canoy = parseInt(d3.select("#header").style("height"));
         //
+        //#region resizing
+        //
         window.addEventListener("resize", event => {
             command.resize();
         });
+        //
+        //#endregion
         //
         document.addEventListener("wheel", event => {
             if(mY < this.command.scrH){
@@ -44,6 +78,8 @@ export default class Input{
                 command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
             }
         })
+        //
+        //#region key events
         //
         document.addEventListener("keydown", event => {
             switch(event.key){
@@ -151,6 +187,10 @@ export default class Input{
             }
         })
         //
+        //#endregion
+        //
+        //#region mouse events
+        //
         document.addEventListener("mousedown", function(){
             var emx = event.clientX;
             var emy = event.clientY;
@@ -169,6 +209,13 @@ export default class Input{
             //
             if(input.moveState == 0){
                 input.moveState = 1;
+            }
+        });
+        //
+        this.timeline.svg.on("mousedown", function(){
+            if(input.moveState == 0){
+                command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
+                input.moveState = 5;
             }
         });
         //
@@ -272,7 +319,7 @@ export default class Input{
                 input.command.props.update(input.command.selected);
                 input.propsState = false;
             }else if(input.propsState){
-                input.propActive.select();
+                //input.propActive.select();
             }
             //
             this.command.dragBox.style("visibility", "hidden");
@@ -285,12 +332,9 @@ export default class Input{
             input.timeline.colorPoints(input.command.findIdxs(input.command.objects));
         });
         //
-        this.timeline.svg.on("mousedown", function(){
-            if(input.moveState == 0){
-                command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
-                input.moveState = 5;
-            }
-        });
+        //#endregion
+        //
+        //#region buttons
         //
         d3.select("#forplay").on("mousedown", function(){
             if(!command.running || command.rate == 1){
@@ -320,6 +364,34 @@ export default class Input{
             }
         });
         //
+        d3.select("#vt0").on("mousedown", function(){
+            d3.select('#vt0').attr("class", "vectorButton seld");
+            d3.select('#vt1').attr("class", "vectorButton");
+            d3.select('#vt2').attr("class", "vectorButton");
+            //
+            input.command.changeViewType(0);
+        });
+        d3.select("#vt1").on("mousedown", function(){
+            d3.select('#vt0').attr("class", "vectorButton");
+            d3.select('#vt1').attr("class", "vectorButton seld");
+            d3.select('#vt2').attr("class", "vectorButton");
+            //
+            input.command.changeViewType(1);
+        });
+        d3.select("#vt2").on("mousedown", function(){
+            d3.select('#vt0').attr("class", "vectorButton");
+            d3.select('#vt1').attr("class", "vectorButton");
+            d3.select('#vt2').attr("class", "vectorButton seld");
+            //
+            input.command.changeViewType(2);
+        });
+        //
+        d3.select("#saveB").on("mousedown", function(){
+            input.command.saveState();
+        });
+        //
+        //#endregion
+        //
         var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
             console.log("drag entered");
@@ -347,32 +419,6 @@ export default class Input{
             this.command.openState(files[0]);
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
         }, false);
-        //
-        d3.select("#vt0").on("mousedown", function(){
-            d3.select('#vt0').attr("class", "vectorButton seld");
-            d3.select('#vt1').attr("class", "vectorButton");
-            d3.select('#vt2').attr("class", "vectorButton");
-            //
-            input.command.changeViewType(0);
-        });
-        d3.select("#vt1").on("mousedown", function(){
-            d3.select('#vt0').attr("class", "vectorButton");
-            d3.select('#vt1').attr("class", "vectorButton seld");
-            d3.select('#vt2').attr("class", "vectorButton");
-            //
-            input.command.changeViewType(1);
-        });
-        d3.select("#vt2").on("mousedown", function(){
-            d3.select('#vt0').attr("class", "vectorButton");
-            d3.select('#vt1').attr("class", "vectorButton");
-            d3.select('#vt2').attr("class", "vectorButton seld");
-            //
-            input.command.changeViewType(2);
-        });
-        //
-        d3.select("#saveB").on("mousedown", function(){
-            input.command.saveState();
-        });
     }
     //
     newPoint(point){
@@ -472,35 +518,8 @@ export default class Input{
         });
     }
     //
-    props(command, self){
+    props(command, self){//move this to the props file
         var input = this;
-        self.t.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.posx.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.posy.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.velx.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.vely.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.accelx.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.accely.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.jerkx.on("mousedown", function(){
-            input.fieldClick(this);
-        });
-        self.jerky.on("mousedown", function(){
-            input.fieldClick(this);
-        });
         //
         self.t.on("input", function(){
             if(isNumeric(this.value)){

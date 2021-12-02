@@ -1,13 +1,15 @@
 export default class Props{
     constructor(command){
         this.command = command;
+        let input = command.input;
         //
         this.selected;
         //
         this.column = d3.select("#column");
+        this.columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));//get pixel width of left column
         //
         this.head = d3.select("h2");
-        this.t = d3.select("#t");
+        this.t = d3.select("#timeInput");
         this.posx = d3.select("#posx");
         this.posy = d3.select("#posy");
         this.velx = d3.select("#velx");
@@ -17,11 +19,38 @@ export default class Props{
         this.jerkx = d3.select("#jerkx");
         this.jerky = d3.select("#jerky");
         //
+        this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
+        this.fields.forEach(field => {
+            d3.select(field).on('click', function(){
+                this.select();
+                input.fieldClick(this);
+            });
+        });
+        this.t.on('click', function(){
+            this.select();
+        });
+        //
+        let self = this;
+        this.fields.forEach((field, idx) => {
+            d3.select(field).on('input', function(){
+                if(isNumeric(this.value)){
+                    if(idx % 2 == 0){//x field
+                        command.selected.setValue(Math.floor(idx / 2), parseFloat(this.value), parseFloat(d3.select(self.fields[idx+1]).property("value")));
+                        command.objPosChange([command.selected], true);
+                        input.command.props.renderEqs();
+                    }else{//y field
+                        console.log(command.selected.px);
+                        command.selected.setValue(Math.floor(idx / 2), parseFloat(d3.select(self.fields[idx-1]).property("value")), parseFloat(this.value));
+                        command.objPosChange([command.selected], true);
+                        input.command.props.renderEqs();
+                    }
+                }
+            });
+        });
+        //
         this.calcB = d3.select("#calcB");
         //
         this.t.property("value", this.command.time.toFixed(3));
-        //
-        var self = this;
         //
         command.input.props(command, self);
     }
@@ -33,15 +62,9 @@ export default class Props{
         if(this.selected != null){
             //console.log(this.selected);
             //
-            this.head.text(`Object: ${this.selected.id + 1}`);
-            this.posx.property("value", this.selected.xS[0].toFixed(3));
-            this.posy.property("value", this.selected.yS[0].toFixed(3));
-            this.velx.property("value", this.selected.xS[1].toFixed(3));
-            this.vely.property("value", this.selected.yS[1].toFixed(3));
-            this.accelx.property("value", this.selected.xS[2].toFixed(3));
-            this.accely.property("value", this.selected.yS[2].toFixed(3));
-            this.jerkx.property("value", this.selected.getVals(3)[0].toFixed(3));
-            this.jerky.property("value", this.selected.getVals(3)[1].toFixed(3));
+            this.fields.forEach((field, idx) => {
+                d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(3));
+            });
             //
         }
     }
@@ -125,4 +148,10 @@ export default class Props{
 
 function round(number, places){
     return Math.round(Math.pow(10, places) * number) / Math.pow(10, places);
+}
+
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
 }
