@@ -126,6 +126,7 @@ window.addEventListener('resize', event => {//resize everything*
         columnWidth = window.innerWidth;
     }
     d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
+    d3.select('#leftcolumn').style('width', `${columnWidth}px`);
     d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
     fitWidth();
     fitSolve();
@@ -143,6 +144,17 @@ document.addEventListener("mouseup", event => {//stop resizing the left column*
 });
 
 //console.log(d3.select('.tab').style('height'));
+
+//document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
+//document.getElementById("vt1").style = "background-color: #254441";
+//document.getElementById("vt2").style = "background-color: #254441";
+
+MathJax.Hub.Config({
+    messageStyle: "none"
+});  
+
+let comm = new Command(loopStart, canvas, svg);//start the website
+
 window.addEventListener('mousemove', event => {//resize the left column sometimes*
     if(resizeLeft){
         let newX = event.clientX;
@@ -154,19 +166,10 @@ window.addEventListener('mousemove', event => {//resize the left column sometime
             columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
             fitWidth();
             fitSolve();
+            comm.resize();
         }
     }
 });
-
-//document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
-//document.getElementById("vt1").style = "background-color: #254441";
-//document.getElementById("vt2").style = "background-color: #254441";
-
-MathJax.Hub.Config({
-    messageStyle: "none"
-});  
-
-let comm = new Command(loopStart, canvas, svg);//start the website
 
 let lastTime = 0;
 

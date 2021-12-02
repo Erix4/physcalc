@@ -84,7 +84,7 @@ body{
 /*#region: Header*/
 
 .headerButton{
-    background-color: #ffa294;;
+    background-color: #ffa294;
     color: #ff6f59;
     font-family: 'Heavitas';
     font-size: 170%;
@@ -128,8 +128,7 @@ i{
 }
 
 #settingsB{
-    background-color: #555;
-    color: white;
+    background-color: black;
     margin-left: auto;
     font-size: 250%;
     height: 100%;
@@ -145,6 +144,7 @@ i{
 
 #settingsIcon{
     transition: .5s;
+    color: #ff6f59;
 }
 
 #settingsB:hover #settingsIcon{
@@ -174,7 +174,7 @@ i{
 }
 
 .container{
-    background-color: aqua;
+    background-color:  #41B883;
 }
 
 .text{
@@ -184,6 +184,7 @@ i{
 #propHead{
     padding: 5px;
     padding-left: 15px;
+    color: white;
 }
 
 #propTitle{
@@ -194,7 +195,7 @@ i{
 /*#region: tabs*/
 
 #tabContainer{
-    background-color: blueviolet;
+    background-color: #3a706b;
     width: 100%;
     font-size: 100%;
 }
@@ -206,7 +207,7 @@ i{
 }
 
 .tab{
-    background-color: blue;
+    background-color: #a5cbc3;
     padding: 5px;
     /*padding-left: 40px;
     padding-right: 40px;*/
@@ -220,17 +221,17 @@ i{
 .newtab:after{
     content: '';
     height: 90%;
-    width: 2px;
-    left: -1px;
+    width: .08em;
+    left: -.04em;
     top: 5%;
     position: absolute;
-    background-color: #fcba03;
+    background-color: #41B883;
     z-index: 1;
     border-radius: 5px;
 }
 
 .tab:hover{
-    background-color: #fcba03;
+    background-color: #ff6f59;
     transition: .2s;
 }
 
@@ -242,13 +243,13 @@ i{
 }
 
 #addTab{
-    background-color: aquamarine;
+    background-color: #76cab8;
     display: flex;
-    width: 10%;
+    width: 1em;
 }
 
 #addTab:hover{
-    background-color: #fcba03;
+    background-color: #ff6f59;
 }
 
 #tabIcon{
@@ -267,14 +268,14 @@ i{
 }
 
 .juncType{
-    background-color: #ff6f59;
+    background-color: #41B883;
     margin: .2em;
     border-radius: .2em;
     display: flex;
 }
 
 .juncType:hover{
-    background-color: #41B883;
+    background-color: #ff6f59;
     transition: .2s;
 }
 
@@ -302,11 +303,12 @@ i{
     margin-bottom: .2em;
     font-family: 'LatinM';
     font-size: 100%;
+    border: none;
 }
 
 .noField{
     pointer-events:none;
-    background-color: gray;
+    background-color: #a5cbc3;
 }
 
 .tabDrop{
@@ -339,6 +341,7 @@ i{
     align-items: center;
     width: 100%;
     font-size: 100%;
+    color: white;
     /*background-color: peachpuff;*/
 }
 
@@ -352,7 +355,7 @@ i{
 }
 
 .toggleButton{
-    background-color: #ff6f59;
+    background-color: #41B883;
     margin-right: 10px;
     padding: 2px;
     padding-left: 3px;
@@ -365,16 +368,17 @@ i{
 }
 
 .toggleButton:hover{
-    background-color: #fcba03;
+    background-color: #ff6f59;
     transition: .2s;
 }
 
 .toggleIcon{
     font-size: 70%;
+    color: white;
 }
 
 .undo{
-    color: black;
+    color:  #41B883;
     font-size: 50%;
 }
 
@@ -427,7 +431,7 @@ i{
 
 .subExpandText{
     font-size: 60% !important;
-    color: white;
+    color: #41B883;
 }
 
 .expandText{
@@ -454,6 +458,10 @@ i{
 
 .propExpand:hover{
     background-color: #ff6f59;
+}
+
+.propExpand:hover .subExpandText{
+    color: white;
 }
 
 .propContents{
@@ -490,6 +498,7 @@ i{
 
 #propLabelUnit{
     display: inline;
+    color: white;
 }
 
 .propInput{
@@ -526,9 +535,9 @@ i{
 .propField{
     display: inline;
     border: 0;
-    margin-top: -2px;
-    margin-bottom: 10px;
-    box-shadow: .2em .55em 0 -.4em #A5CBC3, -.2em .55em 0 -.4em #A5CBC3;
+    margin-top: -.3em;
+    margin-bottom: .5em;
+    box-shadow: .35em .7em 0 -.55em #A5CBC3, -.35em .7em 0 -.55em #A5CBC3;
     -webkit-transition: box-shadow 0.2s;
     transition: box-shadow 0.2s;
     background-color: transparent;
@@ -540,7 +549,7 @@ i{
 }
 .propField:focus {
     outline: none;
-    box-shadow: .55em .55em 0 -.4em #ff6f59, -.55em .55em 0 -.4em #ff6f59;
+    box-shadow: .7em .7em 0 -.55em #ff6f59, -.7em .7em 0 -.55em #ff6f59;
 }
 
 .propField::-webkit-outer-spin-button,
@@ -561,10 +570,25 @@ i{
     font-size: 50%;
     cursor: default;
     margin-right: .2em;
-    color: white;
+    color: #a5cbc3;
 }
 
 /*#endregion*/
+
+.eq{
+    font-size: 115%;
+    color: #a5cbc3;
+    margin-top: -.2em;
+}
+
+#math{
+    display: none;
+    font-size: 115%;
+}
+
+.eqContents{
+    padding-bottom: .4em;
+}
 
 /*#region: solve and apply*/
 
@@ -861,7 +885,7 @@ p.settingToggle{
 
 .cutout{
     height: 80%;
-    background-color: gray;
+    background-color: #ff6f59;
     top: 10%;
 }
 
@@ -876,11 +900,24 @@ p.settingToggle{
 .playbackButton{
     width: 25%;
     height: 100%;
-    background-color: lightcyan;
+    background-color:  #ffa294;
+    display: flex;
+}
+
+.playbackButton i{
+    color: black;
+    margin: auto;
+}
+
+#backplay{
+    transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -ms-transform: scaleX(-1);
 }
 
 .playbackButton:hover{
-    background-color: cyan;
+    background-color: #ff6f59;
 }
 
 .range{
@@ -897,6 +934,7 @@ p.settingToggle{
     font-size: 100%;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
+    background-color: #ffa294;
 }
 
 #norm:hover{
@@ -912,7 +950,7 @@ p.settingToggle{
 .rangeButton{
     width: 33.4%;
     height: 100%;
-    background-color: lightgreen;
+    background-color: #ffa294;;
     position: relative;
 }
 
@@ -956,6 +994,7 @@ p.settingToggle{
 
 .range.propdrop{
     font-size: 90%;
+    background-color: #ffa294;
 }
 
 .range option{

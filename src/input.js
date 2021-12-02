@@ -154,10 +154,8 @@ export default class Input{
         document.addEventListener("mousedown", function(){
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= parseInt(d3.select("#leftcolumn").style("width"));
+            emx -= parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
             emy -= parseInt(d3.select("#header").style("height"));
-            console.log(parseInt(d3.select("#leftcolumn").style("width")));
-            console.log(emx);
             //
             stX = emx;
             stY = emy;
@@ -177,7 +175,7 @@ export default class Input{
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= parseInt(d3.select("#leftcolumn").style("width"));
+            emx -= parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
             emy -= parseInt(d3.select("#header").style("height"));
             //console.log(this.moveState);
             //

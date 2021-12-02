@@ -337,8 +337,9 @@
                                     <option>km</option>
                                 </select>
                             </div>
-                            <p class="propLabel text">Eq 1</p>
-                            <p class="propLabel text">Eq 2</p>
+                            <div class="eq" id="math">\(\)</div>
+                            <div class="eq text" id="xeq">\(x(t)=?\)</div>
+                            <div class="eq text" id="yeq">\(y(t)=?\)</div>
                         </div>
                         <div class="expand">
                             <div id="valueExpand" class="subPropExpand propExpand">
@@ -607,10 +608,10 @@
         <div id="time">
             <div id="timeHead">
                 <div id="playback" class="cutout">
-                    <div class="playbackButton"></div>
-                    <div class="playbackButton"></div>
-                    <div class="playbackButton"></div>
-                    <div class="playbackButton"></div>
+                    <div id="stepback" class="playbackButton"><i class="fas fa-fast-backward"></div>
+                    <div id="backplay" class="playbackButton"><i id="backpl" class="fas fa-play"></div>
+                    <div id="forplay" class="playbackButton"><i id="forpl" class="fas fa-play"></div>
+                    <div id="stepforward" class="playbackButton"><i class="fas fa-fast-forward"></i></div>
                 </div>
                 <div id="norm" class="range cutout">
                     <p class="text">Normalize</p>
