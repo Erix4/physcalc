@@ -6,20 +6,13 @@ export default class Props{
         this.selected;
         //
         this.column = d3.select("#column");
-        this.columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));//get pixel width of left column
+        //
+        this.precision = 3;
+        this.inputPrecision = 0;
         //
         this.head = d3.select("h2");
         this.t = d3.select("#timeInput");
         this.tt = d3.select("#timeBarTime");
-        console.log(this.tt);
-        this.posx = d3.select("#posx");
-        this.posy = d3.select("#posy");
-        this.velx = d3.select("#velx");
-        this.vely = d3.select("#vely");
-        this.accelx = d3.select("#accelx");
-        this.accely = d3.select("#accely");
-        this.jerkx = d3.select("#jerkx");
-        this.jerky = d3.select("#jerky");
         //
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         this.fields.forEach(field => {
@@ -50,8 +43,19 @@ export default class Props{
                         command.objPosChange([command.selected], true);
                         input.command.props.renderEqs();
                     }
+                    let prc = getPrecision(this.value);//this doesn't work
+                    if(prc > this.inputPrecision){
+                        this.precision = prc;
+                        this.inputPrecision = prc;
+                    }
                 }
             });
+        });
+        //
+        this.t.on("input", function(){
+            if(isNumeric(this.value)){
+                command.setTime(parseFloat(this.value), true);
+            }
         });
         //
         this.calcB = d3.select("#calcB");
@@ -64,8 +68,6 @@ export default class Props{
             self.update(command.selected);
             command.objPosChange([command.selected]);
         });
-        //
-        command.input.props(command, self);
     }
     //
     update(selected){
@@ -76,7 +78,7 @@ export default class Props{
             //console.log(this.selected);
             //
             this.fields.forEach((field, idx) => {
-                d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(3));
+                d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
             });
             //
         }
@@ -88,69 +90,6 @@ export default class Props{
             for(var n = 0; n < eqs.length; n++){
                 this.renderPowerEqs(n, eqs[2 * n], eqs[2 * n + 1]);
             }
-            /*let curPara = this.selected.profile.pieces[this.selected.profile.getValIdx(this.command.time)].paras[0];
-            //
-            var str = `x(t)=`;
-            let para = this.selected.profile.pieces[this.selected.piece].paras[0];
-            let len = para.xFunc.terms.length - 1;
-            let num = 0;
-            for(var n = len; n > 0; n--){
-                num = para.getTermX(n);
-                if(num >= 0 && n < len){
-                    str += "+";
-                }
-                if(Math.abs(num) != 1){
-                    str += `${round(num, 3)}`;
-                }else if(num < 0){
-                    str += "-";
-                }
-                str += `t`;
-                if(n > 1){
-                    str += `^${n}`;
-                }
-            }
-            num = para.getTermX(0);
-            if(num >= 0){
-                str += "+";
-            }
-            str += `${round(num, 3)}`;
-            //
-            var math = MathJax.Hub.getAllJax("math")[0];
-            MathJax.Hub.Queue(["Text", math, str]);
-            //
-            MathJax.Hub.Queue(function(){
-                d3.select("#xeq").html(d3.select("#math").html());
-            });
-            //
-            str = `y(t)=`;
-            len = para.yFunc.terms.length - 1;
-            for(var n = len; n > 0; n--){
-                num = para.getTermY(n);
-                if(num >= 0 && n < len){
-                    str += "+";
-                }
-                if(Math.abs(num) != 1){
-                    str += `${round(num, 3)}`;
-                }else if(num < 0){
-                    str += "-";
-                }
-                str += `t`;
-                if(n > 1){
-                    str += `^${n}`;
-                }
-            }
-            num = para.getTermY(0);
-            if(num >= 0){
-                str += "+";
-            }
-            str += `${round(num, 3)}`;
-            //
-            math = MathJax.Hub.getAllJax("math")[0];
-            MathJax.Hub.Queue(["Text", math, str]);
-            //
-            MathJax.Hub.Queue(function(){
-                d3.select("#yeq").html(d3.select("#math").html());
-            });*/
         }
     }
     //
@@ -212,6 +151,9 @@ export default class Props{
         //
         for(var n = len; n > 0; n--){
             num = coefs[n];
+            if(num == 0){
+                continue;
+            }
             if(num >= 0 && n < len){
                 str += "+";
             }
@@ -239,6 +181,14 @@ export default class Props{
     //
     newObj(){
         this.column.append("p", "hope");
+    }
+}
+
+function getPrecision(number){
+    if(number.split(".").length > 1){
+        return number.split(".")[1].length;
+    }else{
+        return 0;
     }
 }
 

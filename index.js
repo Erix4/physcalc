@@ -7,60 +7,6 @@ import Command from "./src/command";
 import 'simplebar';
 import 'simplebar/dist/simplebar.css';
 
-let headerHeight = parseFloat(d3.select('#header').style('height'));
-let columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
-let screenRatio = window.innerWidth / window.innerHeight;
-console.log(columnWidth);
-const RATIOTHRESHOLD = 0.9;
-
-//adjust header font-size and hide field by screen ratio
-if(screenRatio > RATIOTHRESHOLD){//horizontal
-    d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
-    d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-}else{//vertical
-    d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
-    d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-    d3.select('#leftcolumn').style('width', '100%');
-    d3.select('#fieldcolumn').style('display', 'none');
-    d3.select('#lefthandle').style('display', 'none');
-    columnWidth = window.innerWidth;
-}
-
-d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);//adjust left column font size
-
-fitWidth();//fit the input fields to the width of the left column
-fitSolve();
-
-function getExtra(){//get the width of the non-field elements of the values section
-    return getWidth('.expandCompIcon') + (2 * getWidth('.propParaLabel')) + (2 * getWidth('.propdrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
-}
-
-function getCalc(){//get the width of the non-field elements of the solver section
-    return (2 * getWidth('.checkbox')) + (2 * getWidth('.readCalcLabel')) + (2 * getWidth('.readCalcDrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
-}
-
-function getField(){//get the width of the field
-    if(d3.select('#settings').style('display') == 'none'){
-        return getWidth('#leftfield') + 10;
-    }else{
-        return parseFloat(d3.select('#settings').style('width')) + getWidth('#leftfield') + 10;
-    }
-}
-
-function fitWidth(){//fit the input fields to the width of the left column
-    let labelWidth = getExtra();
-    let fieldWidth = (columnWidth - labelWidth) / 2;
-    //
-    d3.selectAll('.fitWidth').style('width', `${fieldWidth}px`);
-}
-
-function fitSolve(){//fit the input fields in the solve section
-    let labelWidth = getCalc();
-    let fieldWidth = (columnWidth - labelWidth) / 2;
-    //
-    d3.selectAll('.solveInput').style('width', `${fieldWidth}px`);
-}
-
 d3.select('#settingsB').on('click', function(){//show/hide the settings section and rotate the settings icon
     if(d3.select('#settings').style('display') == 'none'){
         d3.select('#settings').style('display', 'inline');
@@ -105,43 +51,6 @@ d3.selectAll('.propExpand').on('click', function(){//expand the corresponding se
         d3.select(this).select('.expandIcon').style('transform', 'rotate(0deg)');
     }
 });
-
-window.addEventListener('resize', event => {//resize everything*
-    headerHeight = parseFloat(d3.select('#header').style('height'));
-    screenRatio = window.innerWidth / window.innerHeight;
-    if(screenRatio > RATIOTHRESHOLD){//horizontal
-        d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
-        d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-        d3.select('#leftcolumn').style('width', '25%');
-        d3.select('#fieldcolumn').style('display', 'flex');
-        d3.select('#lefthandle').style('display', 'block');
-        columnWidth = window.innerWidth * 0.25;
-    }else{//vertical
-        d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
-        d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-        d3.select('#leftcolumn').style('width', '100%');
-        d3.select('#fieldcolumn').style('display', 'none');
-        d3.select('#lefthandle').style('display', 'none');
-        columnWidth = window.innerWidth;
-    }
-    d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
-    d3.select('#leftcolumn').style('width', `${columnWidth}px`);
-    d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
-    fitWidth();
-    fitSolve();
-});
-
-var resizeLeft = false;
-var initalX = 0;
-d3.select("#lefthandle").on("mousedown", function(){//start resizing the left column
-    resizeLeft = true;
-    initalX = d3.event.clientX;
-});
-
-document.addEventListener("mouseup", event => {//stop resizing the left column*
-    resizeLeft = false;
-});
-
 //console.log(d3.select('.tab').style('height'));
 
 //document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";
@@ -153,22 +62,6 @@ MathJax.Hub.Config({
 });  
 
 let comm = new Command(loopStart, canvas, svg);//start the website
-
-window.addEventListener('mousemove', event => {//resize the left column sometimes*
-    if(resizeLeft){
-        let newX = event.clientX;
-        console.log(`field: ${getField()}`);
-        if(newX - 130 > getExtra() && window.innerWidth - newX > getField()){
-            d3.select('#leftcolumn').style('width', `${newX}px`);
-            d3.select('#fieldcolumn').style('width', `${window.innerWidth - newX}px`);
-            //initalX = newX;
-            columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
-            fitWidth();
-            fitSolve();
-            comm.resize();
-        }
-    }
-});
 
 let lastTime = 0;
 
@@ -186,9 +79,4 @@ function loop(timeStamp){
     if(comm.running){//use comm.running
         window.requestAnimationFrame(loop);
     }
-}
-
-function getWidth(id){
-    let elem = d3.select(id);
-    return parseFloat(elem.style('width')) + parseFloat(elem.style('margin-left')) + parseFloat(elem.style('margin-right'));
 }

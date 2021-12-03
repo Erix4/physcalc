@@ -61,10 +61,56 @@ export default class Input{
         //
         //#region resizing
         //
+        let headerHeight = parseFloat(d3.select('#header').style('height'));//initial state
+        let columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+        let screenRatio = window.innerWidth / window.innerHeight;
+        console.log(columnWidth);
+        const RATIOTHRESHOLD = 0.9;
+        //
+        //adjust header font-size and hide field by screen ratio
+        if(screenRatio > RATIOTHRESHOLD){//horizontal
+            d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
+            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+        }else{//vertical
+            d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+            d3.select('#leftcolumn').style('width', '100%');
+            d3.select('#fieldcolumn').style('display', 'none');
+            d3.select('#lefthandle').style('display', 'none');
+            columnWidth = window.innerWidth;
+        }
+        //
+        d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);//adjust left column font size
+        fitWidth(columnWidth);//fit the input fields to the width of the left column
+        fitSolve(columnWidth);
+        //
         window.addEventListener("resize", event => {
             command.resize();
             canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
             canoy = parseInt(d3.select("#header").style("height"));
+            //
+            headerHeight = parseFloat(d3.select('#header').style('height'));
+            screenRatio = window.innerWidth / window.innerHeight;
+            if(screenRatio > RATIOTHRESHOLD){//horizontal
+                d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '25%');
+                d3.select('#fieldcolumn').style('display', 'flex');
+                d3.select('#lefthandle').style('display', 'block');
+                columnWidth = window.innerWidth * 0.25;
+            }else{//vertical
+                d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '100%');
+                d3.select('#fieldcolumn').style('display', 'none');
+                d3.select('#lefthandle').style('display', 'none');
+                columnWidth = window.innerWidth;
+            }
+            d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
+            d3.select('#leftcolumn').style('width', `${columnWidth}px`);
+            d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
+            fitWidth(columnWidth);
+            fitSolve(columnWidth);
         });
         //
         //#endregion
@@ -223,6 +269,10 @@ export default class Input{
             }
         });
         //
+        d3.select("#lefthandle").on("mousedown", function(){//start resizing the left column
+            input.moveState = 8;
+        });
+        //
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
@@ -277,6 +327,20 @@ export default class Input{
                     command.timeline.movePoints();
                     if(command.viewType != 0){
                         command.moveExtremes();
+                    }
+                    break;
+                case 7:
+                    break;//do nothing
+                case 8://resize left column
+                    let newX = event.clientX;
+                    if(newX - 130 > getExtra() && window.innerWidth - newX > getField()){
+                        d3.select('#leftcolumn').style('width', `${newX}px`);
+                        d3.select('#fieldcolumn').style('width', `${window.innerWidth - newX}px`);
+                        //initalX = newX;
+                        columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+                        fitWidth(columnWidth);
+                        fitSolve(columnWidth);
+                        command.resize();
                     }
                     break;
                 default://regular mouse movement
@@ -401,14 +465,16 @@ export default class Input{
         //
         var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
-            console.log("drag entered");
-            d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
-            e.stopPropagation();
-            e.preventDefault();
+            if(window.getSelection().anchorNode == null){
+                d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
+                e.stopPropagation();
+                e.preventDefault();
+            }
         }, false);
         dropbox.addEventListener("dragleave", e => {
             console.log("drag left");
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
+            fake = false;
         }, false);
         dropbox.addEventListener("dragover", e => {
             e.stopPropagation();
@@ -525,79 +591,6 @@ export default class Input{
         });
     }
     //
-    props(command, self){//move this to the props file
-        var input = this;
-        //
-        self.t.on("input", function(){
-            if(isNumeric(this.value)){
-                command.setTime(parseFloat(this.value), true);
-            }
-        });
-        //
-        self.posx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(0, parseFloat(this.value), command.selected.py);
-                command.objPosChange([command.selected], true);
-                input.command.props.renderEqs();
-            }
-        });
-        //
-        self.posy.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(0, command.selected.px, parseFloat(this.value));
-                command.objPosChange([command.selected], true);
-                input.command.props.renderEqs();
-            }
-        });
-        //
-        self.velx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(1, parseFloat(this.value), parseFloat(self.vely.property("value")));
-                input.valueUpdate(1);
-            }
-        });
-        //
-        self.vely.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(1, parseFloat(self.velx.property("value")), parseFloat(this.value));
-                input.valueUpdate(1);
-            }
-        });
-        //
-        self.accelx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(2, parseFloat(this.value), parseFloat(self.accely.property("value")));
-                input.valueUpdate(2);
-            }
-        });
-        //
-        self.accely.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
-                input.valueUpdate(2);
-            }
-        });
-        //
-        self.jerkx.on("input", function(){
-            if(isNumeric(this.value)){
-                console.log(`Val: ${this.value}, parsed: ${parseFloat(this.value)}`);
-                command.selected.setValue(3, parseFloat(this.value), parseFloat(self.jerky.property("value")));
-                input.valueUpdate(3);
-            }
-        });
-        //
-        self.jerky.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(3, parseFloat(self.jerkx.property("value")), parseFloat(this.value));
-                input.valueUpdate(3);
-            }
-        });
-        //
-        self.calcB.on("mousedown", function(){
-            console.log("Hello!");
-        });
-    }
-    //
     fieldClick(elem){
         this.propsState = true;
         this.propActive = elem;
@@ -618,4 +611,39 @@ function isNumeric(str) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
            !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+function getWidth(id){//get width of any element, including margins
+    let elem = d3.select(id);
+    return parseFloat(elem.style('width')) + parseFloat(elem.style('margin-left')) + parseFloat(elem.style('margin-right'));
+}
+
+function getExtra(){//get the width of the non-field elements of the values section
+    return getWidth('.expandCompIcon') + (2 * getWidth('.propParaLabel')) + (2 * getWidth('.propdrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getCalc(){//get the width of the non-field elements of the solver section
+    return (2 * getWidth('.checkbox')) + (2 * getWidth('.readCalcLabel')) + (2 * getWidth('.readCalcDrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getField(){//get the width of the field
+    if(d3.select('#settings').style('display') == 'none'){
+        return getWidth('#leftfield') + 10;
+    }else{
+        return parseFloat(d3.select('#settings').style('width')) + getWidth('#leftfield') + 10;
+    }
+}
+
+function fitWidth(columnWidth){//fit the input fields to the width of the left column
+    let labelWidth = getExtra();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.fitWidth').style('width', `${fieldWidth}px`);
+}
+
+function fitSolve(columnWidth){//fit the input fields in the solve section
+    let labelWidth = getCalc();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.solveInput').style('width', `${fieldWidth}px`);
 }
