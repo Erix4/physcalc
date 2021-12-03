@@ -16,12 +16,23 @@ export default class Profile{
         this.junctions = [];//list of junctions between each piece (always one less than the number of peices), 0 = continous, 1 = discontinuous, 2 = incomplete
     }
     //
+    newSplitPiece(pieceIdx){
+        if(!pieceIdx && pieceIdx != 0){
+            pieceIdx = this.getValIdx(this.command.time);
+        }
+        //
+        let curPara = this.pieces[pieceIdx].paras[0];
+        this.newPiece(curPara.xFunc.getCoefs(), curPara.yFunc.getCoefs(), this.command.time, 0);
+        console.log(this.bounds);
+        console.log(this.pieces);
+    }
+    //
     /**
      * Push a new piece to the profile
      * @param {Array<Number>} xCoefs x coefficients of lowest power of piece
      * @param {Array<Number>} yCoefs y coefficients of lowest power of piece
      * @param {Number}        time   time at which piece is added
-     * @param {Number}        j1     junction type (0ctn, 1com, 2inc) at time
+     * @param {Number}        j     junction type (0ctn, 1com, 2inc) at time
      */
     newPiece(xCoefs, yCoefs, time, j){
         let curIdx = this.getCurIdx(time);
@@ -357,7 +368,7 @@ export default class Profile{
         }else{
             curIdx = this.getCurIdx(time);
             if(curIdx == -1){//time is not directly in a piece
-                let leftIdx = this.getLeftIdx(t);
+                let leftIdx = this.getLeftIdx(time);
                 if(leftIdx == -1){//time is left of every piece
                     console.log('time outside piece');
                     return this.pieces[0].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
@@ -405,7 +416,6 @@ export default class Profile{
 export class Piece{
     constructor(command, xCoefs, yCoefs, color){//depth is number of derivative functions, xCoefs & yCoefs are parametric position coefficients
         this.command = command;
-        this.obj = command.objects[command.objects.length - 1];
         //
         this.color = color;
         //

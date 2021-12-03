@@ -161,6 +161,8 @@ export default class Object{
             this.respawnArrows();
         }
         //
+        console.log(`current piece: ${this.piece}`);
+        //
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
             this.yS[n] = this.profile.calc(n, this.command.time)[1];

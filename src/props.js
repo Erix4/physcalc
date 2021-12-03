@@ -8,7 +8,6 @@ export default class Props{
         this.column = d3.select("#column");
         //
         this.precision = 3;
-        this.inputPrecision = 0;
         //
         this.head = d3.select("h2");
         this.t = d3.select("#timeInput");
@@ -44,9 +43,8 @@ export default class Props{
                         input.command.props.renderEqs();
                     }
                     let prc = getPrecision(this.value);//this doesn't work
-                    if(prc > this.inputPrecision){
-                        this.precision = prc;
-                        this.inputPrecision = prc;
+                    if(prc > self.precision){
+                        self.precision = prc;
                     }
                 }
             });
@@ -56,6 +54,12 @@ export default class Props{
             if(isNumeric(this.value)){
                 command.setTime(parseFloat(this.value), true);
             }
+        });
+        //
+        d3.select('#addTab').on('click', function(){
+            //self.command.selected.profile.newSplitPiece();
+            self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 0);
+            self.command.drawGrid();
         });
         //
         this.calcB = d3.select("#calcB");
