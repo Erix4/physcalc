@@ -191,10 +191,10 @@
                                 <div class="valueContents overfold">
                                     <div class="labelLine">
                                         <p class="propLabel text">Jerk</p>
-                                        <!--<div class="undoButton">
-                                            <i class="undo fas fa-undo-alt"></i>
-                                        </div>-->
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -226,6 +226,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Snap</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -257,6 +260,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Crackle</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -288,6 +294,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Pop</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -348,10 +357,10 @@
                             </div>
                             <div id="valueContentsMore" class="propContents">
                                 <div class="overfold">
-                                    <p class="propLabel text">Eq 3</p>
-                                    <p class="propLabel text">Eq 4</p>
-                                    <p class="propLabel text">Eq 5</p>
-                                    <p class="propLabel text">Eq 6</p>
+                                    <div class="eq text">\(x'(t)=?\)</div>
+                                    <div class="eq text">\(y'(t)=?\)</div>
+                                    <div class="eq text">\(x''(t)=?\)</div>
+                                    <div class="eq text">\(y''(t)=?\)</div>
                                 </div>
                             </div>
                         </div>
@@ -618,7 +627,7 @@
                 </div>
                 <div id="timeRange" class="range cutout">
                     <div class="leftRange rangeButton"><input value="-10" class="rangeField field" type="number"/></div>
-                    <div class="leftRange rangeButton"><input value="0" class="rangeField field" type="number"/></div>
+                    <div id="timeBarTime" class="leftRange rangeButton"><input value="0" class="rangeField field" type="number"/></div>
                     <div class="rangeButton"><input value="10" class="rangeField field" type="number"/></div>
                 </div>
                 <select class="range cutout propdrop">

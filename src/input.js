@@ -56,28 +56,32 @@ export default class Input{
         this.tX = 0;
         this.tY = 0;
         //
-        let canox = parseInt(d3.select("#leftcolumn").style("width"));
+        let canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
         let canoy = parseInt(d3.select("#header").style("height"));
         //
         //#region resizing
         //
         window.addEventListener("resize", event => {
             command.resize();
+            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+            canoy = parseInt(d3.select("#header").style("height"));
         });
         //
         //#endregion
         //
         document.addEventListener("wheel", event => {
-            if(mY < this.command.scrH){
-                if(event.shiftKey){
-                    command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
+            if(event.clientX > canox){
+                if(mY < this.command.scrH){
+                    if(event.shiftKey){
+                        command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    }else{
+                        command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    }
                 }else{
-                    command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
                 }
-            }else{
-                command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
             }
-        })
+        });
         //
         //#region key events
         //
@@ -222,8 +226,8 @@ export default class Input{
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            emy -= parseInt(d3.select("#header").style("height"));
+            emx -= canox;
+            emy -= canoy;
             //console.log(this.moveState);
             //
             switch(this.moveState){
@@ -271,6 +275,9 @@ export default class Input{
                     command.drawGrid();
                     command.moveGrid();
                     command.timeline.movePoints();
+                    if(command.viewType != 0){
+                        command.moveExtremes();
+                    }
                     break;
                 default://regular mouse movement
                     //command.drawGrid();

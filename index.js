@@ -96,7 +96,6 @@ d3.select('#addTab').on('click', function(){//add new tabs, their separators, bu
 
 d3.selectAll('.propExpand').on('click', function(){//expand the corresponding sections in the properties menu
     let contents = d3.select(this.parentNode).select('.propContents');
-    console.log(contents);
     if(contents.style('display') == 'none'){
         contents.style('display', 'block');
         d3.select(this).select('.expandIcon').style('transform', 'rotate(90deg)');

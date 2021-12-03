@@ -460,18 +460,20 @@ export class Piece{
             yCrosses++;
         });
         //
-        if(xCrosses == 0){//no place where x crosses the visible boundari
+        if(xCrosses == 0){//no place where x crosses the visible boundary
             if(this.paras[power].xFunc.terms.length == 1 && inBounds(this.paras[power].xFunc.terms[0].coef, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1])){
-                vals.push([this.command.scaleX.domain()[0], 0]);
-                vals.push([this.command.scaleX.domain()[1], 0]);
+                vals.forEach(val => {
+                    vals.push([val[0], 0]);
+                });
             }else{
                 return [];
             }
         }
         if(yCrosses == 0){
             if(this.paras[power].yFunc.terms.length == 1 && inBounds(this.paras[power].yFunc.terms[0].coef, this.command.scaleY.domain()[0], this.command.scaleY.domain()[1])){
-                vals.push([this.command.scaleY.domain()[0], 1]);
-                vals.push([this.command.scaleY.domain()[1], 1]);
+                vals.forEach(val => {
+                    vals.push([val[0], 1]);
+                });
             }else{
                 return [];
             }
@@ -486,12 +488,12 @@ export class Piece{
         if(this.paras.length > power + 1){//if there are more derivatives
             vals.forEach(val => {
                 if(val[1] == 0){//x domain
-                    if(this.paras[power + 1].xFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                    if(this.paras[power + 1].xFunc.calc(val[0]) == 0 && xCrosses != 0){//discard value if derivative is 0
                         return;
                     }
                     x = !x;
                 }else{//y domain
-                    if(this.paras[power + 1].yFunc.calc(val[0]) == 0){//discard value if derivative is 0
+                    if(this.paras[power + 1].yFunc.calc(val[0]) == 0 && yCrosses != 0){//discard value if derivative is 0
                         return;
                     }
                     y = !y;
