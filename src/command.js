@@ -531,6 +531,7 @@ export default class Command{
             });
             this.sels = [];
             this.selObs = [];
+            this.props.update();
         }else if(!this.input.shifting){
             this.sels.forEach(sell => {
                 sell.remove();

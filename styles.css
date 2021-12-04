@@ -20,6 +20,7 @@ body{
     width: 100%;
     height: 100%;
     position: absolute;
+    overscroll-behavior-y: none;
 }
 
 #getFile{
@@ -46,16 +47,16 @@ body{
 }
 
 .checkbox > input {
-    height: 1.3em;
-    width: 1.3em;
+    height: 1em;
+    width: 1em;
     -webkit-appearance: none;
     -moz-appearance: none;
     -o-appearance: none;
     appearance: none;
-    border: 4px solid #34495E;
+    border: .2em solid white;
+    outline: .25em solid black;
     border-radius: 4px;
-    outline: none;
-    background-color: #41B883;
+    background-color: white;
     cursor: pointer;
 }
 
@@ -64,7 +65,7 @@ body{
 }
 
 .checkbox > input:hover{
-    border: 4px solid white;
+    background-color: #41B883;
 }
 
 #fullDisplay{
@@ -161,6 +162,7 @@ i{
     bottom: 0;
     display: flex;
     background-color: black;
+    overflow: hidden;
 }
 
 /*#region: leftcolumn*/
@@ -172,6 +174,7 @@ i{
     left: 0;
     overflow-x: hidden;
     position: relative;
+    z-index: 2;
 }
 
 .container{
@@ -677,6 +680,23 @@ i{
 
 #fieldSVG{
     z-index: 1;
+}
+
+#pointLabels{
+    z-index: 1;
+}
+
+.pointLabel{
+    background-color: white;
+    border-radius: .2em;
+    height: fit-content;
+    padding: .3em;
+    position: absolute;
+}
+
+.pointLabel p{
+    font-size: 120%;
+    font-family: "LatinMs";
 }
 
 /*#region: left field*/

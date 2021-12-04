@@ -3,13 +3,13 @@ export default class Props{
         this.command = command;
         let input = command.input;
         //
-        this.selected;
+        this.selected = null;
         //
         this.column = d3.select("#column");
         //
         this.precision = 3;
         //
-        this.head = d3.select("h2");
+        this.head = d3.select("#propTitle");
         this.t = d3.select("#timeInput");
         this.tt = d3.select("#timeBarTime");
         //
@@ -36,11 +36,11 @@ export default class Props{
                     if(idx % 2 == 0){//x field
                         command.selected.setValue(Math.floor(idx / 2), parseFloat(this.value), parseFloat(d3.select(self.fields[idx+1]).property("value")));
                         command.objPosChange([command.selected], true);
-                        input.command.props.renderEqs();
+                        self.renderEqs();
                     }else{//y field
                         command.selected.setValue(Math.floor(idx / 2), parseFloat(d3.select(self.fields[idx-1]).property("value")), parseFloat(this.value));
                         command.objPosChange([command.selected], true);
-                        input.command.props.renderEqs();
+                        self.renderEqs();
                     }
                     let prc = getPrecision(this.value);//this doesn't work
                     if(prc > self.precision){
@@ -58,7 +58,7 @@ export default class Props{
         //
         d3.select('#addTab').on('click', function(){
             //self.command.selected.profile.newSplitPiece();
-            self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 0);
+            self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 0);//this breaks a lot of things
             self.command.drawGrid();
         });
         //
@@ -72,6 +72,8 @@ export default class Props{
             self.update(command.selected);
             command.objPosChange([command.selected]);
         });
+        //
+        this.update();
     }
     //
     update(selected){
@@ -81,20 +83,42 @@ export default class Props{
         if(this.selected != null){
             //console.log(this.selected);
             //
+            this.head.text(`Object: ${this.selected.id + 1}`);
+            this.head.style('color', `hsl(${this.selected.hue}, 100%, 80%)`);
             this.fields.forEach((field, idx) => {
                 d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
             });
             //
+        }else{
+            this.head.text(`No Object`);
+            this.head.style('color', `white`);
+            this.fields.forEach((field, idx) => {
+                d3.select(field).property("value", "");
+            });
         }
     }
     //
     renderEqs(){
         if(this.selected){
             let eqs = d3.selectAll('.eq').nodes().slice(1);
-            for(var n = 0; n < eqs.length; n++){
+            for(var n = 0; n < eqs.length / 2; n++){
                 this.renderPowerEqs(n, eqs[2 * n], eqs[2 * n + 1]);
             }
+        }else{
+            let eqs = d3.selectAll('.eq').nodes().slice(1);
+            for(var n = 0; n < eqs.length; n++){
+                this.renderCustomEq("-", eqs[n]);
+            }
         }
+    }
+    //
+    renderCustomEq(str, elem){
+        var math = MathJax.Hub.getAllJax("math")[0];
+        MathJax.Hub.Queue(["Text", math, str]);
+        //
+        MathJax.Hub.Queue(function(){
+            d3.select(elem).html(d3.select("#math").html());
+        });
     }
     //
     renderPowerEqs(power, elemx, elemy){

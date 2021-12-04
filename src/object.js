@@ -46,8 +46,11 @@ export default class Object{
         this.toBeDeleted = false;
         this.type = type;//0 = as projectile, 1 = in free fall, 2 = at rest, 3 = at position/default after changes
         //
+        //insert div
+        this.pointDiv = d3.select(`#pointLabels`).append("div").attr("class", "objectPoints").attr("value", `${this.id}`);
+        //
         this.hue = 35 * this.id;//0 = red
-        this.color = `hsl(${this.hue}, 100%, 50%`;
+        this.color = `hsl(${this.hue}, 100%, 50%)`;
         //
         this.gravity = command.gravity;
         //
@@ -409,9 +412,10 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
                         .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
+                    //
                 }
                 while(this.points.length < this.extremes.length){//add points until there are the same name number
-                    this.points.push(this.svg.append("circle").style("fill", this.color)
+                    this.points.push(this.svg.append("circle").style("fill", this.color).attr("val", this.extremes[n])
                         .attr("r", 6)
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
@@ -591,6 +595,7 @@ export default class Object{
         this.command.drawGrid();
         this.command.drawTimeline();
         this.command.select();
+        this.command.props.renderEqs();
     }
     //
 }

@@ -347,8 +347,8 @@
                                 </select>
                             </div>
                             <div class="eq" id="math">\(\)</div>
-                            <div class="eq text" id="xeq">\(x(t)=?\)</div>
-                            <div class="eq text" id="yeq">\(y(t)=?\)</div>
+                            <div class="eq text" id="xeq">\(-\)</div>
+                            <div class="eq text" id="yeq">\(-\)</div>
                         </div>
                         <div class="expand">
                             <div id="valueExpand" class="subPropExpand propExpand">
@@ -357,10 +357,10 @@
                             </div>
                             <div id="valueContentsMore" class="propContents">
                                 <div class="overfold">
-                                    <div class="eq text">\(x'(t)=?\)</div>
-                                    <div class="eq text">\(y'(t)=?\)</div>
-                                    <div class="eq text">\(x''(t)=?\)</div>
-                                    <div class="eq text">\(y''(t)=?\)</div>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
                                 </div>
                             </div>
                         </div>
@@ -376,8 +376,9 @@
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">Solve: </p>
                                 <select id="eqUnits" class="propdrop">
-                                    <option selected="selected">for motion</option>
                                     <option>for point</option>
+                                    <option selected="selected">for motion</option>
+                                    <option>without time</option>
                                 </select>
                             </div>
                             <div class="solver labelLine">
@@ -538,6 +539,7 @@
             <div id="fieldcolumn">
                 <canvas id="fieldCanvas" class="fill"></canvas>
                 <svg id="fieldSVG" class="fill"></svg>
+                <div id="pointLabels"></div>
                 <div id="leftfield">
                     <div id="timeValue">
                         <p id="timeText" class="text">time = </p>
