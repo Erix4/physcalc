@@ -692,6 +692,8 @@ i{
     height: fit-content;
     padding: .3em;
     position: absolute;
+    overflow: hidden;
+    border: 1px solid black;
 }
 
 .pointLabel p{

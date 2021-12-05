@@ -588,6 +588,10 @@ export default class Input{
         point.on("mousedown", function(){
             if(point.style("fill") == "white"){
                 point.style("fill", color);
+                let labell = obj.pointDiv.selectAll(`.pointLabel[val='${point.attr("val")}']`).nodes();
+                if(labell.length > 0){
+                    d3.select(labell[0]).remove();
+                }
             }else{
                 point.style("fill", "white");
                 ////<div class="pointLabel"><p class="text">\(1.23, 4.56\)</p></div>

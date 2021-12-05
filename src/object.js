@@ -404,6 +404,7 @@ export default class Object{
      * remove and respawn extreme points
      */
     spawnExtremes(){
+        this.pointDiv.html("");
         switch(this.command.viewType){
             case 0:
                 this.extremes = this.profile.getExtremes();
@@ -485,13 +486,30 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        let pointLabel = this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`);
+                        //console.log(this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`));
+                        pointLabel
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(pointLabel.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(pointLabel.style('height'))) - 10}px`);//move point
+                    }
                 }
+                //
                 break;
             case 1:
                 for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[0]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`)
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(this.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(this.style('height'))) - 10}px`);//move point
+                    }
                 }
                 break;
             case 2:
@@ -499,6 +517,13 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`)
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(this.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(this.style('height'))) - 10}px`);//move point
+                    }
                 }
                 break;
         }
