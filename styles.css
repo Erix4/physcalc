@@ -800,15 +800,18 @@ i{
 .settingText{
     font-size: 200%;
     margin-top: .2em;
+    color: white;
 }
 
 #settings{
     margin-left: auto;
-    background-color: #fcba03;
+    background-color: #254441;
     padding-right: 15px;
     padding-left: 10px;
     display: none;
     z-index: 1;
+    color: white;
+    font-size: 120%;
 }
 
 .settingLine{
@@ -824,6 +827,8 @@ i{
     padding: 0;
     margin: 0;
     z-index: 1;
+    font-size: 140%;
+    margin-top: -.3em;
 }
 
 .settingScale{
@@ -841,12 +846,9 @@ label.settingToggle{
 label.settingToggle > input {
     height: 1.3em;
     width: 1.3em;
-    border: 3px solid black;
-    background-color: white;
 }
 
 label.settingToggle > input:checked {
-    background-color: gray;
 }
 
 p.settingToggle{
@@ -857,12 +859,17 @@ p.settingToggle{
     margin-bottom: auto;
 }
 
+.settingToggle.text{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+
 #squareButton{
     margin-top: .6em;
 }
 
 .scaleButton{
-    background-color: orangered;
+    background-color: #76cab8;
     width: fit-content;
     border: .2em solid black;
     border-radius: .4em;
@@ -873,7 +880,7 @@ p.settingToggle{
 }
 
 .scaleButton:hover{
-    background-color: darkred;
+    background-color: #ff6f59;
     transition: .2s;
 }
 
