@@ -12,7 +12,7 @@ export default class Profile{
         this.pieces = [new Piece(command, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
         //
         this.bounds = [[-Infinity, Infinity]];//list of bounds for each piece
-        console.log(this.bounds);
+        //console.log(this.bounds);
         this.junctions = [];//list of junctions between each piece (always one less than the number of peices), 0 = continous, 1 = discontinuous, 2 = incomplete
     }
     //
@@ -36,7 +36,7 @@ export default class Profile{
      */
     newPiece(xCoefs, yCoefs, time, j){
         let curIdx = this.getCurIdx(time);
-        console.log(`curIdx: ${curIdx}`);
+        //console.log(`curIdx: ${curIdx}`);
         //
         if(curIdx == -1){//if there is no piece at the current time
             let nextIdx = this.getRightIdx(time);
@@ -47,7 +47,7 @@ export default class Profile{
                     this.bounds.push([this.bounds[this.bounds.length - 1][1], Infinity]);//add a new bound
                 }
                 this.pieces.push(new Piece(this.command, xCoefs, yCoefs, this.color));
-                this.junctions[this.junctions.length - 1] = j1;
+                this.junctions[this.junctions.length - 1] = j;
                 this.junctions.push(j);
             }else{
                 if(nextIdx == 0){//if time is before every piece
@@ -67,6 +67,9 @@ export default class Profile{
             //
             this.junctions.splice(curIdx, 0, j);//add a new junction at the current time
         }
+        //
+        //console.log(`new piece:`);
+        //console.log(this.pieces[1]);
     }
     //
     /**
@@ -184,35 +187,42 @@ export default class Profile{
     //
     /**
      * Set the values at the given time and power
-     * @param {Number} power       depth of the value to set
-     * @param {Number} t           time  at which to set the value
-     * @param {Number} x           x value to set
-     * @param {Number} y           y value to set
-     * @param {Boolean} propogator whether to propagate the set values to other depths
+     * @param {Number} power         depth of the value to set
+     * @param {Number} t             time  at which to set the value
+     * @param {Number} x             x value to set
+     * @param {Number} y             y value to set
+     * @param {Number} [alignPower]  power to align the values to (default 0, position)
+     * @param {Boolean} [propogator] whether to propagate the set values to other depths
      */
-    setValTime(power, t, x, y, propagator = true){
+    setValTime(power, t, x, y, propagator = true, alignPower = 0){
         let curIdx = this.getLeftIdx(t);
         if(curIdx == -1){//time is left of every piece
             curIdx = 0;//set calc index to the last one
             t = this.bounds[0][0];//set time to the left bound
         }
         //
+        //console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
+        //
         this.setPieceValTime(power, t, curIdx, x, y, propagator);
-        var leftX = this.calc(power, this.bounds[curIdx][0], curIdx)[0];
-        var leftY = this.calc(power, this.bounds[curIdx][0], curIdx)[1];
+        var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];
+        var leftY = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[1];
         for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
-            this.setPieceValTime(power, this.bounds[i][1], i, leftX, leftY, propagator);
-            leftX = this.calc(power, this.bounds[i][0], i)[0];
-            leftY = this.calc(power, this.bounds[i][0], i)[1];
+            this.setOrigin(this.bounds[i][1], i);
+            this.setPieceValTime(alignPower, this.bounds[i][1], i, leftX, leftY, false);//only propagate position
+            leftX = this.calc(alignPower, this.bounds[i][0], i)[0];
+            leftY = this.calc(alignPower, this.bounds[i][0], i)[1];
         }
         //
-        var leftX = this.calc(power, this.bounds[curIdx][1], curIdx)[0];//sort this out
-        var leftY = this.calc(power, this.bounds[curIdx][1], curIdx)[1];
+        leftX = this.calc(alignPower, this.bounds[curIdx][1], curIdx)[0];//sort this out
+        leftY = this.calc(alignPower, this.bounds[curIdx][1], curIdx)[1];
         for(var i = curIdx + 1; i < this.pieces.length && this.junctions[i-1] == 0; i++){//pieces are to the left and the left juction is continous
-            this.setPieceValTime(power, this.bounds[i][0], i, leftX, leftY, propagator);
-            leftX = this.calc(power, this.bounds[i][1], i)[0];
-            leftY = this.calc(power, this.bounds[i][1], i)[1];
+            this.setOrigin(this.bounds[i][0], i);
+            this.setPieceValTime(alignPower, this.bounds[i][0], i, leftX, leftY, false);//only propagate position
+            leftX = this.calc(alignPower, this.bounds[i][1], i)[0];
+            leftY = this.calc(alignPower, this.bounds[i][1], i)[1];
         }
+        //
+        //console.log(this.pieces[curIdx]);
         //
         let curPiece = this.pieces[curIdx];
         let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
@@ -263,23 +273,18 @@ export default class Profile{
     }
     //
     /**
-     * set the shifting origin of one or all powers to a given time
+     * set the shifting origin of one or all powers to a given time in one or all pieces
      * @param {Number} time    time to set the origin to
+     * @param {Number} [pIdx] the piece to set the origin of
      * @param {Number} [power] the power of which to set the origins
      */
-    setOrigin(time, power){
-        if(power || power == 0){//if power is specified
-            this.pieces.forEach(piece => {//set the origin at the given power for every piece
-                piece.paras[power].xFunc.origin = time;
-                piece.paras[power].yFunc.origin = time;
-            });
+    setOrigin(time, pIdx, power){
+        if(pIdx || pIdx == 0){
+            this.pieces[pIdx].setOrigin(time, power);
         }else{
-            this.pieces.forEach(piece => {
-                piece.paras.forEach(para => {
-                    para.xFunc.origin = time;//set the origin for every power for every piece
-                    para.yFunc.origin = time;
-                });
-            });
+            this.pieces.forEach(piece => {//set the origin at the given power for every piece
+                piece.setOrigin(time, power);
+            }); 
         }
     }
     //
@@ -366,18 +371,18 @@ export default class Profile{
         if(pIdx || pIdx == 0){//if piece is specified
             curIdx = pIdx;
         }else{
-            curIdx = this.getCurIdx(time);
+            curIdx = this.getValIdx(time);
             if(curIdx == -1){//time is not directly in a piece
                 let leftIdx = this.getLeftIdx(time);
                 if(leftIdx == -1){//time is left of every piece
-                    console.log('time outside piece');
-                    return this.pieces[0].paras[power].calc(this.bounds[0][0]);//return the value at the left bound
+                    curIdx = 0;
+                    time = this.bounds[0][0];//return the value at the left bound
                 }else{
-                    return this.pieces[leftIdx].paras[power].calc(this.bounds[leftIdx][1]);//return the value at the right bound of the left applicable piece
+                    curIdx = leftIdx;
+                    time = this.bounds[leftIdx][1];//return the value at the right bound of the left applicable piece
                 }
             }
         }
-        //
         if(power >= this.pieces[curIdx].paras.length){
             return [0, 0];
         }else{
@@ -546,7 +551,7 @@ export class Piece{
             var yMax = 0;
             level.forEach(comp => {
                 levelComps.push(new Para(0, 1, comp[0].map(Number), comp[1].map(Number)));
-                console.log(comp[0].map(Number));
+                //console.log(comp[0].map(Number));
                 if(comp[0].length > xMax){
                     xMax = comp[0].length;
                 }
@@ -563,7 +568,7 @@ export class Piece{
     }
     //
     fullSet(x, y){
-        console.log("Full set");
+        //console.log("Full set");
         for(var n = this.paras.length - 1; n >= 0; n--){
             this.setValues(n, x, y)
         }
@@ -574,11 +579,15 @@ export class Piece{
             console.log(`New derivatives, set to ${x}, ${y}`);
             this.newDerivatives();
         }
+        //console.log(`setting this piece at power ${power} to ${x}, ${y} at t = ${t}`);
         this.paras[power].setOff(t, x, y);
+        //console.log(this.paras[0].xFunc.getCoefs());
         this.setPower(power, this.paras[power].xFunc.getCoefs().reverse(), this.paras[power].yFunc.getCoefs().reverse());
+        //console.log(this.paras[0].xFunc.getCoefs());
         if(propogator){
             this.propagate(power);
         }
+        //console.log(this.paras[0].xFunc.getCoefs());
     }
     //
     setValues(power, x, y, propogator = true){//set value at current time
@@ -691,12 +700,10 @@ export class Piece{
     //
     setOrigin(time, power){
         if(power || power == 0){//if power is specified
-            this.paras[power].xFunc.origin = time;
-            this.paras[power].yFunc.origin = time;
+            this.paras[power].setOrigin(time);
         }else{
             this.paras.forEach(para => {
-                para.xFunc.origin = time;
-                para.yFunc.origin = time;
+                para.setOrigin(time);
             });
         }
     }
@@ -829,6 +836,11 @@ export class Para{
     reset(){
         this.xFunc.terms = [];
         this.yFunc.terms = [];
+    }
+    //
+    setOrigin(t){
+        this.xFunc.origin = t;
+        this.yFunc.origin = t;
     }
     //
     setOff(t, x, y){
@@ -1141,9 +1153,9 @@ export class Func{
             c++;
         }
         if(X.length == 0){
-            console.log("APPROX FAILED.");
+            //console.log("APPROX FAILED.");
         }
-        console.log(X);
+        //console.log(X);
         return X;
     }
     //
@@ -1169,7 +1181,7 @@ export class Func{
         //let tlen = powerSets[0].length - 1;//record length of nonzero inputs - 1
         let tlen = -1;//tlen is index of last, not length
         powerSets[0].forEach(set => {tlen += (set.length > 0 ? 1 : 0)});//count number on nonempty lists in the nonzero power set
-        console.log(tlen);
+        //console.log(tlen);
         //
         let orderedInputs = [];//list of inputs in order (ready to be converted to matrix)
         powerSets.forEach(time => {//make sure each set is order correctly
@@ -1182,7 +1194,7 @@ export class Func{
             })
         });
         //var orderedInputs = inputs.slice();
-        console.log(orderedInputs.slice());
+        //console.log(orderedInputs.slice());
         //
         var A = [];
         orderedInputs.forEach(input => {//for each input (j is index), add a new row to the matrix
@@ -1193,7 +1205,7 @@ export class Func{
                 }else{
                     row.push(genDerMults(len, input[1], i));
                 }
-                console.log(`Pushed ${row[row.length - 1]} from ${genDerMults(len, input[1], i)} * ${Math.pow(input[2], len - input[1] - i)}`);
+                //console.log(`Pushed ${row[row.length - 1]} from ${genDerMults(len, input[1], i)} * ${Math.pow(input[2], len - input[1] - i)}`);
             }
             A.push(row);
         });
@@ -1205,8 +1217,8 @@ export class Func{
             //orderedInputs.push(...orderedInputs.splice(0, 1));
         }*/
         //
-        console.log("Initial matrix A:");
-        console.log(A.slice());
+        //console.log("Initial matrix A:");
+        //console.log(A.slice());
         //LU Decompositon
         var U = A.slice();//set upper triangular matrix equal to current matrix
         var L = [];
@@ -1223,14 +1235,14 @@ export class Func{
                 }else{
                     mult = U[i][j] / U[j][j];
                 }
-                console.log(`Multiplier: ${mult}, j: ${j}`);
+                //console.log(`Multiplier: ${mult}, j: ${j}`);
                 if(j < len && i < len){
                     var c = 0
-                    console.log(`Check bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
-                    console.log(`\tBut next  = ${U[i + 1][j + 1]}`);
+                    //console.log(`Check bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
+                    //console.log(`\tBut next  = ${U[i + 1][j + 1]}`);
                     while(U[i][j + 1] == (mult * U[j][j + 1]) && c < len && U[i + 1][j + 1] != 0){
-                        console.log(`RO bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
-                        console.log(`Evaluates ${U[i][j + 1] == (mult * U[j][j + 1])}`);
+                        //console.log(`RO bc ${U[i][j + 1]} == ${(mult * U[j][j + 1])}, ${mult} * ${U[j][j + 1]}`);
+                        //console.log(`Evaluates ${U[i][j + 1] == (mult * U[j][j + 1])}`);
                         //
                         if(orderedInputs[i][2] != 0 && i < tlen){//if input time is nonzero and it's not the last in the nonzero list
                             U.splice(tlen, 0, ...U.splice(i, 1));//move row and corresponding input to last in nonzero list
@@ -1239,7 +1251,7 @@ export class Func{
                             U.push(...U.splice(i, 1));//move row and corresponding input to last in list
                             orderedInputs.push(...orderedInputs.splice(i, 1));
                         }else{
-                            console.log("Uh oh");
+                            //console.log("Uh oh");
                         }
                         //
                         if(U[j][j] == 0){
@@ -1247,70 +1259,70 @@ export class Func{
                         }else{
                             mult = U[i][j] / U[j][j];
                         }
-                        console.log(`Multiplier: ${mult}, j: ${j}`);
+                        //console.log(`Multiplier: ${mult}, j: ${j}`);
                         //
                         c++;
                     }
                     if(c == len){
-                        console.log("Reorder failed");
+                        //console.log("Reorder failed");
                     }
                 }
                 L[i][j] = mult;
                 U[i] = subRow(U[i], U[j], L[i][j]);//subtract row for Guassian Elimination
-                console.log(U.slice());
+                //console.log(U.slice());
                 let zeroCheck = 0;
                 U[i].forEach(val => {zeroCheck += val});
                 if(zeroCheck == 0){
-                    console.log("Processed failed. Exiting function.");
+                    //console.log("Processed failed. Exiting function.");
                     return [];
                 }
             }
         }
         //
-        console.log(L);
-        console.log(U);
+        //console.log(L);
+        //console.log(U);
         //console.log("Check:");
         //console.log(multMatricis(L, U));//verified
         if(checkEqual(multMatricis(L, U), A)){
-            console.log("CONFIRMED");
+            //console.log("CONFIRMED");
         }else{
-            console.log("INCORRECT");
+            //console.log("INCORRECT");
         }
         //
         //solve for Y temporary values
         var Y = [orderedInputs[0][0] / L[0][0]];
         for(var i = 1; i <= len; i++){
             Y.push(calcRowSolLower(orderedInputs[i][0], L, i, Y));
-            console.log(Y[Y.length - 1]);
+            //console.log(Y[Y.length - 1]);
         }
-        console.log(Y);
+        //console.log(Y);
         //solve for solutions (X)
         var X = [Y[len] / U[len][len]];
         for(var i = len - 1; i >= 0; i--){
             X.splice(0, 0 , calcRowSolUpper(Y[i], U, i, X));
         }
-        console.log("Solutions: ");
-        console.log(X);
+        //console.log("Solutions: ");
+        //console.log(X);
         //
-        console.log("Check:");
+        //console.log("Check:");
         let check = true;
         orderedInputs.forEach((input, i) => {
-            console.log(`Equation ${i} should be ${input[0]}`);
+            //console.log(`Equation ${i} should be ${input[0]}`);
             var build = A[i][0] * X[0];
             var total = A[i][0] * X[0];
             for(var j = 1; j <= len; j++){
                 build += " + " + A[i][j] * X[j];
                 total += A[i][j] * X[j];
             }
-            console.log(`Evaluates to ${total} from ${build}`);
+            //console.log(`Evaluates to ${total} from ${build}`);
             if(total != input[0]){
                 check = false;
             }
         });
         if(check){
-            console.log("SUCCESS!!");
+            //console.log("SUCCESS!!");
         }else{
-            console.log("FAILED.");
+            //console.log("FAILED.");
         }
         return X;
     }
@@ -1363,22 +1375,22 @@ function subRow(row1, row2, mult){
 function calcRowSolLower(input, L, idx, Y){
     var sum = 0;
     for(var i = 0; i < idx; i++){
-        console.log(`Adding sum ${L[idx][i] * Y[i]}`);
+        //console.log(`Adding sum ${L[idx][i] * Y[i]}`);
         sum += L[idx][i] * Y[i];
     }
     //
-    console.log(`from (i-s)/L to (${input} - ${sum}) / ${L[idx][idx]}`);
+    //console.log(`from (i-s)/L to (${input} - ${sum}) / ${L[idx][idx]}`);
     return (input - sum) / L[idx][idx];
 }
 
 function calcRowSolUpper(input, U, idx, X){
     var sum = 0;
     for(var i = idx + 1; i < U.length; i++){
-        console.log(`Adding sum ${U[idx][i] * X[i - idx - 1]}`);
+        //console.log(`Adding sum ${U[idx][i] * X[i - idx - 1]}`);
         sum += U[idx][i] * X[i - idx - 1];
     }
     //
-    console.log(`from (i-s)/L to (${input} - ${sum}) / ${U[idx][idx]}`);
+    //console.log(`from (i-s)/L to (${input} - ${sum}) / ${U[idx][idx]}`);
     return (input - sum) / U[idx][idx];
 }
 
@@ -1478,11 +1490,13 @@ function findRealRoots(func){//find real roots of a function
         derFunc.push(func[i]*(func.length-1-i));
     }
     //
+    let testNum = 200;
+    //
     var guess = 0;
     var roots = [];
     var posRootsFound = 0;
     var negRootsFound = 0;
-    for(var i = 0; i < 500; i++){
+    for(var i = 0; i < testNum; i++){
         var root = findRoot(func, derFunc, guess)
         if(!numInList(root, roots)){
             roots.push(root);
@@ -1499,7 +1513,7 @@ function findRealRoots(func){//find real roots of a function
     }
     //
     guess = -1
-    for(var i = 0; i < 500; i++){
+    for(var i = 0; i < testNum; i++){
         root = findRoot(func, derFunc, guess)
         if(!numInList(root, roots)){
             roots.push(root);

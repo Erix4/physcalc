@@ -70,11 +70,11 @@ export default class Command{
         console.log(`Distance: ${this.func.calc(2.47)}`);
         console.log(`------`);
         //
-        //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
-        //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
-        //this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
-        //this.prof.newPiece([1, 0], [2, 4], 1, 1);
-        //this.prof.draw(0, 500);
+        this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
+        this.prof.draw(0, 500);
+        this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
+        this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
+        this.prof.newPiece([1, 0], [2, 4], 1, 1);
         //
         //this.prof2 = new Profile(this, 2, [1, 0], [-1, 4], 'blue');
         //this.prof2.draw(0, 500);
@@ -205,6 +205,7 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        this.prof.draw(0, 500);
     }
     //
     /**

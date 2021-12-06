@@ -239,6 +239,10 @@ i{
     transition: .2s;
 }
 
+.selt{
+    background-color: #254441;
+}
+
 .tabText{
     font-family: 'heavitas';
     font-size: 55%;

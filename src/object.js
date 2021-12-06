@@ -70,7 +70,7 @@ export default class Object{
         const vx = 5;//starting values, not used later
         const vy = 5;
         const ax = 0;
-        const ay = 0;
+        const ay = command.gravity;
         //
         this.profile;
         switch(command.viewType){
@@ -90,7 +90,7 @@ export default class Object{
                 break;
         }
         this.profile = new Profile(this.command, this.depth, [ax / 2, vx, this.px], [ay / 2, vy, this.py], this.color);
-        this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
+        //this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
         this.extremes = [];
         this.points = [];//svg points that illustrate extremes
@@ -158,13 +158,11 @@ export default class Object{
     update(){
         if(this.command.time < this.profile.bounds[this.piece][0]){
             this.piece--;
-            this.respawnArrows();
+            this.repieceArrows();
         }else if(this.command.time > this.profile.bounds[this.piece][1]){
             this.piece++;
-            this.respawnArrows();
+            this.repieceArrows();
         }
-        //
-        console.log(`current piece: ${this.piece}`);
         //
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
@@ -222,12 +220,12 @@ export default class Object{
      * @param {Number} [time] the time at which to calculate
      * @returns the x and y values in an array
      */
-    getVals(power, time){
+    getVals(power=0, time){
         if(!time && time != 0){
             time = this.command.time;
         }
         //
-        return this.profile.calc(power, time);
+        return this.profile.calc(power, time, 0);
     }
     //
     /**
@@ -377,7 +375,7 @@ export default class Object{
         //
         console.log(`depth: ${curPiece.paras.length}`);
         while(this.nets.length < curPiece.paras.length - 1){//while the current piece is deeper than the number of net vectors
-            this.nets.push(new netArrow(this.command, this, this.nets.length + 1));//add a new net vector
+            this.nets.push(new netArrow(this.command, this, this.nets.length + 1, curPiece));//add a new net vector
             /*let compPower = [];
             for(var a in curPiece.comps[this.nets.length]){
                 compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
@@ -385,6 +383,16 @@ export default class Object{
             //this.comps.push(compPower);
         }
         console.log(this.nets);
+    }
+    //
+    repieceArrows(piece){
+        if(!piece && piece != 0){
+            piece = this.piece;
+        }
+        //
+        this.nets.forEach(net => {
+            net.pIdx = piece;
+        });
     }
     //
     /**
@@ -551,7 +559,7 @@ export default class Object{
      */
     setValue(power, xPos, yPos){
         this.profile.setValues(power, xPos, yPos);
-        this.profile.setOrigin(this.command.time);
+        this.profile.setOrigin(this.command.time, this.piece);
     }
     //
     /**
@@ -563,7 +571,7 @@ export default class Object{
      */
     setValueTime(power, time, xPos, yPos){
         this.profile.setValTime(power, time, xPos, yPos);
-        this.profile.setOrigin(time);
+        this.profile.setOrigin(time, this.piece);
     }
     //
     /**
@@ -631,11 +639,12 @@ class netArrow{
         this.obj = obj;
         this.depth = depth;
         this.pIdx = pieceIdx;
+        console.log(`new arrow at index ${pieceIdx}`);
         //
         this.profile = obj.profile;
         //
         this.pos = this.profile.calc(depth, command.time);
-        console.log(this.pos);
+        //console.log(this.pos);
         this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(${240 - (depth * 20)}, 100%, 50%)`);
         this.command.input.newArrow(this);
     }

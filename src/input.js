@@ -201,6 +201,7 @@ export default class Input{
                     }
                     break;
                 case " ":
+                    event.preventDefault();
                     command.running = !command.running;
                     command.rate = 1;
                     if(command.running){

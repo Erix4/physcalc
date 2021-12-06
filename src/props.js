@@ -56,10 +56,41 @@ export default class Props{
             }
         });
         //
-        d3.select('#addTab').on('click', function(){
-            //self.command.selected.profile.newSplitPiece();
-            self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 0);//this breaks a lot of things
-            self.command.drawGrid();
+        d3.select('#gravitySet').on('click', function(){
+            input.fieldClick(this);
+        });
+        //
+        d3.select('#gravitySet').on('input', function(){
+            if(isNumeric(this.value)){
+                let orGrav = command.gravity;
+                command.gravity = parseFloat(this.value);
+                command.objects.forEach(obj => {
+                    if(obj.yS[2] == orGrav){//object still has default gravity
+                        obj.setValue(2, 0, command.gravity);
+                        command.objPosChange([command.selected], true);
+                        self.renderEqs();
+                    }
+                });
+            }
+        });
+        //
+        var tabNum = 1;
+        d3.select('#addTab').on('click', function(){//FIX: change number of tabs by object
+            if(command.selected != null){
+                tabNum++;
+                console.log(`add tab`);
+                let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', tabNum);
+                newTab.append('p').attr('class', 'tabText text').text(tabNum);
+                d3.select(this).raise();
+                if(tabNum == 10){
+                    d3.select(this).style('display', 'none');
+                }
+                //
+                self.command.selected.profile.newSplitPiece();
+                //self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 1);//this breaks a lot of things
+                console.log(self.command.selected.getVals());
+                self.command.drawGrid();
+            }
         });
         //
         this.calcB = d3.select("#calcB");
@@ -79,7 +110,6 @@ export default class Props{
     update(selected){
         this.selected = selected;
         //console.log("updating");
-        //console.log(selected);
         if(this.selected != null){
             //console.log(this.selected);
             //
@@ -89,6 +119,16 @@ export default class Props{
                 d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
             });
             //
+            let pIdx = this.selected.piece;
+            let bounds = this.selected.profile.bounds[pIdx];
+            d3.selectAll('.tabField').property("value", (d, i) => isFinite(bounds[i]) ? bounds[i].toFixed(3) : "");//the fanciest line of code I've ever written
+            d3.selectAll('.tab').attr('class', (d, i, j) => d3.select(j[i]).attr('class').split(' ')[0] == 'selt' ? d3.select(j[i]).attr('class').split(' ').slice(1).join(' ') : d3.select(j[i]).attr('class'));
+            console.log(pIdx);
+            let cNode = d3.select(d3.selectAll('.tab').nodes()[pIdx]);
+            cNode.attr('class', `selt ${cNode.attr('class')}`);
+            //if(pIdx == 0 || pIdx == this.selected.profile.bounds.length - 1){
+                //
+            //}
         }else{
             this.head.text(`No Object`);
             this.head.style('color', `white`);

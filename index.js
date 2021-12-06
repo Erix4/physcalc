@@ -29,17 +29,6 @@ d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons 
     }
 });
 
-var tabNum = 1;
-d3.select('#addTab').on('click', function(){//add new tabs, their separators, but prevent at max (10)
-    tabNum++;
-    let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', tabNum);
-    newTab.append('p').attr('class', 'tabText text').text(tabNum);
-    d3.select(this).raise();
-    if(tabNum == 10){
-        d3.select(this).style('display', 'none');
-    }
-});
-
 d3.selectAll('.propExpand').on('click', function(){//expand the corresponding sections in the properties menu
     let contents = d3.select(this.parentNode).select('.propContents');
     if(contents.style('display') == 'none'){
