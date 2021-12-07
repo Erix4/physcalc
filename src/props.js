@@ -113,8 +113,26 @@ export default class Props{
     }
     //
     diffObj(selected){
-        this.update(selected);
-        //
+        if(selected != null){
+            this.update(selected);
+            //
+            d3.selectAll('.newtab').remove();
+            this.tabNum = selected.profile.pieces.length;
+            //
+            let self = this;
+            for(var n = 1; n < this.tabNum; n++){
+                let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
+                newTab.append('p').attr('class', 'tabText text').text(self.tabNum);
+            }
+            //
+            d3.select('#addTab').raise();
+            if(this.tabNum == 10){
+                d3.select('#addTab').style('display', 'none');
+            }
+            //
+            this.updateTabs();
+            this.tabEvents();
+        }
     }
     //
     renderEqs(){

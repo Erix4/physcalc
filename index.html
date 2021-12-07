@@ -37,7 +37,7 @@
             </div>
         </div>
         <div id="interface">
-            <div data-simplebar id="leftcolumn">
+            <div id="leftcolumn">
                 <div id="propHead" class="container">
                     <h2 id="propTitle" class="text noSelect">An object</h2>
                 </div>
@@ -639,8 +639,10 @@
                     <option>hr</option>
                 </select>
             </div>
-            <canvas id="timeCanvas" class="time"></canvas>
-            <svg id="timeSVG" class="time"></svg>
+            <div data-simplebar id="timeline">
+                <canvas id="timeCanvas" class="time"></canvas>
+                <svg id="timeSVG" class="time"></svg>
+            </div>
         </div>
     </div>
     <script src="/index.js"></script>

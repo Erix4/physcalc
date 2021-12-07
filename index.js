@@ -34,6 +34,10 @@ d3.selectAll('.propExpand').on('click', function(){//expand the corresponding se
 //document.getElementById("vt1").style = "background-color: #254441";
 //document.getElementById("vt2").style = "background-color: #254441";
 
+let sb = new SimpleBar(document.getElementById('leftcolumn'), { autoHide: false });
+console.log(d3.select(sb));
+//console.log(d3.select(sb).style('height'));
+
 MathJax.Hub.Config({
     messageStyle: "none"
 });  
