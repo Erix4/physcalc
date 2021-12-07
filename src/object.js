@@ -156,13 +156,12 @@ export default class Object{
      * Update all internal values by function
      */
     update(){
-        if(this.command.time < this.profile.bounds[this.piece][0]){
-            this.piece--;
-            this.repieceArrows();
-        }else if(this.command.time > this.profile.bounds[this.piece][1]){
-            this.piece++;
+        if(this.profile.getCurIdx(this.command.time) != this.piece){
+            this.piece = this.profile.getValIdx(this.command.time);
             this.repieceArrows();
         }
+        //
+        //console.log(this.profile.calc(0, this.command.time));
         //
         for(var n = 0; n <= this.depth; n++){
             this.xS[n] = this.profile.calc(n, this.command.time)[0];
@@ -225,7 +224,7 @@ export default class Object{
             time = this.command.time;
         }
         //
-        return this.profile.calc(power, time, 0);
+        return this.profile.calc(power, time);
     }
     //
     /**
@@ -559,7 +558,7 @@ export default class Object{
      */
     setValue(power, xPos, yPos){
         this.profile.setValues(power, xPos, yPos);
-        this.profile.setOrigin(this.command.time, this.piece);
+        this.profile.setOrigin(this.command.time);
     }
     //
     /**
@@ -571,7 +570,7 @@ export default class Object{
      */
     setValueTime(power, time, xPos, yPos){
         this.profile.setValTime(power, time, xPos, yPos);
-        this.profile.setOrigin(time, this.piece);
+        this.profile.setOrigin(time);
     }
     //
     /**

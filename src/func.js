@@ -21,6 +21,7 @@ export default class Profile{
             pieceIdx = this.getValIdx(this.command.time);
         }
         //
+        console.log(`copying index ${pieceIdx}`);
         let curPara = this.pieces[pieceIdx].paras[0];
         this.newPiece(curPara.xFunc.getCoefs(), curPara.yFunc.getCoefs(), this.command.time, 0);
         console.log(this.bounds);
@@ -37,6 +38,8 @@ export default class Profile{
     newPiece(xCoefs, yCoefs, time, j){
         let curIdx = this.getCurIdx(time);
         //console.log(`curIdx: ${curIdx}`);
+        console.log(`x coefs:`);
+        console.log(xCoefs);
         //
         if(curIdx == -1){//if there is no piece at the current time
             let nextIdx = this.getRightIdx(time);
@@ -59,6 +62,7 @@ export default class Profile{
                 this.junctions.splice(nextIdx, 0, j);
             }
         }else{
+            console.log(`spliting in ${curIdx}`);
             this.pieces.splice(curIdx + 1, 0, new Piece(this.command, xCoefs, yCoefs, this.color));//add a new piece after the current piece
             //
             let curEnd = this.bounds[curIdx][1];//find the end of the current piece
@@ -66,6 +70,11 @@ export default class Profile{
             this.bounds.splice(curIdx + 1, 0, [time, curEnd]);//a a new bound starting at the current time and ending at the next time
             //
             this.junctions.splice(curIdx, 0, j);//add a new junction at the current time
+            //
+            let endPos = this.pieces[curIdx].calc(0, time);
+            //this.pieces[curIdx + 1].setOrigin(time, 0);//set the new piece to the current value at the current time
+            //this.pieces[curIdx + 1].setValTime(0, time, endPos[0], endPos[1], false);//set the new piece to the current value at the current time
+            console.log(this.pieces[curIdx+1].paras[0].xFunc.getCoefs());
         }
         //
         //console.log(`new piece:`);
@@ -120,6 +129,7 @@ export default class Profile{
      * @param {Number} steps the number of steps (or resolution) of the illustration
      */
     draw(power, steps){
+        //console.log(`drawing`);
         let divy = steps / this.pieces.length;//number of steps for each piece
         //
         this.pieces.forEach((piece, idx) => {
@@ -161,6 +171,7 @@ export default class Profile{
             doms[doms.length - 1][1] = this.bounds[pIdx][1];//set the right domain to the right bound
         }
         //
+        //console.log(doms);
         return doms;
     }
     //
@@ -296,7 +307,7 @@ export default class Profile{
     getCurIdx(time){
         let idx = 0;
         for(var bound of this.bounds){
-            if(time > bound[0] && time < bound[1]){
+            if(time >= bound[0] && time < bound[1]){
                 return idx;
             }
             idx++;
@@ -371,16 +382,16 @@ export default class Profile{
         if(pIdx || pIdx == 0){//if piece is specified
             curIdx = pIdx;
         }else{
-            curIdx = this.getValIdx(time);
-            if(curIdx == -1){//time is not directly in a piece
-                let leftIdx = this.getLeftIdx(time);
-                if(leftIdx == -1){//time is left of every piece
-                    curIdx = 0;
-                    time = this.bounds[0][0];//return the value at the left bound
-                }else{
-                    curIdx = leftIdx;
-                    time = this.bounds[leftIdx][1];//return the value at the right bound of the left applicable piece
-                }
+            curIdx = this.getCurIdx(time);
+        }
+        if(curIdx == -1){//time is not directly in a piece
+            let leftIdx = this.getLeftIdx(time);
+            if(leftIdx == -1){//time is left of every piece
+                curIdx = 0;
+                time = this.bounds[0][0];//return the value at the left bound
+            }else{
+                curIdx = leftIdx;
+                time = this.bounds[leftIdx][1];//return the value at the right bound of the left applicable piece
             }
         }
         if(power >= this.pieces[curIdx].paras.length){
@@ -424,6 +435,8 @@ export class Piece{
         //
         this.color = color;
         //
+        console.log(`new peice with x coefs: `);
+        console.log(xCoefs);
         this.paras = [new Para(command.time, 500, xCoefs, yCoefs, this.color)];
         this.comps = [[new Para(command.time, 500, xCoefs, yCoefs)]];
         while(this.paras[this.paras.length-1].xFunc.terms.length > 1 || this.paras[this.paras.length-1].yFunc.terms.length > 1){//while there are more derivatives
@@ -825,8 +838,6 @@ export class Para{
         this.yFunc = (new Func(this.steps, yCoefs));
         this.xFunc.color = color;
         this.yFunc.color = color;
-        this.xFunc.setOff(time);
-        this.yFunc.setOff(time);
     }
     //
     calc(t){

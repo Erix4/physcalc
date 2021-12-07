@@ -9,6 +9,8 @@ export default class Props{
         //
         this.precision = 3;
         //
+        this.tabNum = 1;
+        //
         this.head = d3.select("#propTitle");
         this.t = d3.select("#timeInput");
         this.tt = d3.select("#timeBarTime");
@@ -74,24 +76,7 @@ export default class Props{
             }
         });
         //
-        var tabNum = 1;
-        d3.select('#addTab').on('click', function(){//FIX: change number of tabs by object
-            if(command.selected != null){
-                tabNum++;
-                console.log(`add tab`);
-                let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', tabNum);
-                newTab.append('p').attr('class', 'tabText text').text(tabNum);
-                d3.select(this).raise();
-                if(tabNum == 10){
-                    d3.select(this).style('display', 'none');
-                }
-                //
-                self.command.selected.profile.newSplitPiece();
-                //self.command.selected.profile.newPiece([5, 0], [-9.81, 5, 0], 0, 1);//this breaks a lot of things
-                console.log(self.command.selected.getVals());
-                self.command.drawGrid();
-            }
-        });
+        this.tabEvents();
         //
         this.calcB = d3.select("#calcB");
         //
@@ -118,17 +103,6 @@ export default class Props{
             this.fields.forEach((field, idx) => {
                 d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
             });
-            //
-            let pIdx = this.selected.piece;
-            let bounds = this.selected.profile.bounds[pIdx];
-            d3.selectAll('.tabField').property("value", (d, i) => isFinite(bounds[i]) ? bounds[i].toFixed(3) : "");//the fanciest line of code I've ever written
-            d3.selectAll('.tab').attr('class', (d, i, j) => d3.select(j[i]).attr('class').split(' ')[0] == 'selt' ? d3.select(j[i]).attr('class').split(' ').slice(1).join(' ') : d3.select(j[i]).attr('class'));
-            console.log(pIdx);
-            let cNode = d3.select(d3.selectAll('.tab').nodes()[pIdx]);
-            cNode.attr('class', `selt ${cNode.attr('class')}`);
-            //if(pIdx == 0 || pIdx == this.selected.profile.bounds.length - 1){
-                //
-            //}
         }else{
             this.head.text(`No Object`);
             this.head.style('color', `white`);
@@ -136,6 +110,11 @@ export default class Props{
                 d3.select(field).property("value", "");
             });
         }
+    }
+    //
+    diffObj(selected){
+        this.update(selected);
+        //
     }
     //
     renderEqs(){
@@ -245,10 +224,112 @@ export default class Props{
     //
     retime(){
         this.t.property("value", this.command.time.toFixed(3));
+        this.tt.property("value", this.command.time.toFixed(3));
+        this.updateTabs();
     }
     //
     newObj(){
         this.column.append("p", "hope");
+    }
+    //
+    tabEvents(){
+        console.log(`calling tab events`);
+        console.log(this.tabNum);
+        let self = this;
+        //
+        d3.selectAll('.tab').on('click', function(d, i){
+            let selected = self.command.selected;
+            if(this.attributes.id==null){//not the add tab
+                if(selected.profile.bounds.length > 1){
+                    if(i == 0){
+                        console.log(`setting to ${selected.profile.bounds[0][1]-1}`);
+                        self.command.setTime(selected.profile.bounds[0][1]-1);
+                    }else{
+                        console.log(`setting to ${selected.profile.bounds[i][0]}`);
+                        self.command.setTime(selected.profile.bounds[i][0]);
+                    }
+                }
+            }else{//is the add tab
+                if(selected != null){
+                    self.tabNum++;
+                    console.log(`add tab`);
+                    let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
+                    newTab.append('p').attr('class', 'tabText text').text(self.tabNum);
+                    d3.select(this).raise();
+                    if(self.tabNum == 10){
+                        d3.select(this).style('display', 'none');
+                    }
+                    //
+                    selected.profile.newSplitPiece();
+                    selected.update();
+                    console.log(selected.getVals());
+                    self.command.drawGrid();
+                    self.tabEvents();
+                    console.log(selected.piece);
+                    self.updateTabs();
+                }
+            }
+        });
+        //
+        d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable.disable the bounds fields if necessary
+            let pIdx = self.selected.piece;
+            let bounds = self.selected.profile.bounds[pIdx];
+            if(pIdx == 0 && i == 0){//leftmost piece
+                if(isFinite(bounds[0])){//left bound is already a number
+                    self.selected.profile.bounds[pIdx][0] = -Infinity;
+                    return;
+                }
+                self.selected.profile.bounds[pIdx][0] = self.command.time;
+            }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
+                if(isFinite(bounds[1])){//right bound is already a number
+                    self.selected.profile.bounds[pIdx][1] = Infinity;
+                    return;
+                }
+                self.selected.profile.bounds[pIdx][1] = self.command.time;
+            }
+            self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
+            if(self.selected.profile.junctions[pIdx-1+i] == 0){
+                self.selected.shiftValue(0, 0, 0);
+            }
+            //
+            self.command.selected.update();
+            self.command.drawGrid();
+            self.updateTabs();
+        });
+    }
+    //
+    updateTabs(){
+        let pIdx = this.selected.piece;
+        let bounds = this.selected.profile.bounds[pIdx];
+        d3.selectAll('.tabField').property("value", (d, i) => isFinite(bounds[i]) ? bounds[i].toFixed(3) : "");//the fanciest line of code I've ever written
+        d3.selectAll('.tab').attr('class', (d, i, j) => d3.select(j[i]).attr('class').split(' ')[0] == 'selt' ? d3.select(j[i]).attr('class').split(' ').slice(1).join(' ') : d3.select(j[i]).attr('class'));
+        //console.log(pIdx);
+        let cNode = d3.select(d3.selectAll('.tab').nodes()[pIdx]);
+        cNode.attr('class', `selt ${cNode.attr('class')}`);
+        //
+        var junc = [0, 0];//0 is cont, 1 is disc, 2 is inc, 3 in inf
+        //
+        if(pIdx == 0){//leftmost piece
+            junc[0] = isFinite(bounds[0]) ? 2 : 3;//set left junction by value
+        }else{
+            junc[0] = this.selected.profile.junctions[pIdx-1];
+            //console.log(this.selected.profile.junctions);
+            //console.log(`junction left: ${this.selected.profile.junctions[pIdx-1]}`);
+        }
+        //
+        if(pIdx == this.selected.profile.pieces.length - 1){//rightmost piece
+            junc[1] = isFinite(bounds[1]) ? 2 : 3;//set junction by right value
+        }else{
+            junc[1] = this.selected.profile.junctions[pIdx];
+            //console.log(`junction right: ${this.selected.profile.junctions[pIdx]}`);
+        }
+        //
+        d3.selectAll('.juncType').nodes().forEach((juncBut, idx) => {
+            //console.log(d3.select(juncBut).selectAll('.discIcon').nodes());
+            d3.select(juncBut).select('.sel').attr('class', `discIcon`);
+            //console.log(junc[idx]);
+            d3.select(d3.select(juncBut).selectAll('.discIcon').nodes()[junc[idx]]).attr('class', `sel discIcon`);
+        });
     }
 }
 

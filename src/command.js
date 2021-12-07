@@ -543,7 +543,7 @@ export default class Command{
                     .attr("cy", this.scaleY(obj.py))];
             this.selObs = [obj];
             this.selected = obj;
-            this.props.update(this.selected);
+            this.props.diffObj(this.selected);
             obj.raise();
         }
     }

@@ -17,18 +17,6 @@ d3.select('#settingsB').on('click', function(){//show/hide the settings section 
     }
 });
 
-var cur = [3,3];
-d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable.disable the bounds fields if necessary
-    cur[i] = (cur[i] + 1) % 4;
-    d3.select(this).select('.sel').attr('class', `discIcon`);
-    d3.select(this.childNodes[cur[i]*2+1]).attr('class', `sel discIcon`);
-    if(cur[i] == 0){
-        d3.select(d3.selectAll('.tabField').nodes()[i]).attr('class', 'tabField');
-    }else if(cur[i] == 3){
-        d3.select(d3.selectAll('.tabField').nodes()[i]).attr('class', 'noField tabField');
-    }
-});
-
 d3.selectAll('.propExpand').on('click', function(){//expand the corresponding sections in the properties menu
     let contents = d3.select(this.parentNode).select('.propContents');
     if(contents.style('display') == 'none'){
