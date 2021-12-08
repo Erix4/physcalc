@@ -101,28 +101,28 @@ export default class Props{
             this.head.text(`Object: ${this.selected.id + 1}`);
             this.head.style('color', `hsl(${this.selected.hue}, 100%, 80%)`);
             this.fields.forEach((field, idx) => {
-                d3.select(field).property("value", this.selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
+                d3.select(field).property("value", selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
             });
         }else{
             this.head.text(`No Object`);
             this.head.style('color', `white`);
-            this.fields.forEach((field, idx) => {
+            this.fields.forEach(field => {
                 d3.select(field).property("value", "");
             });
         }
     }
     //
     diffObj(selected){
+        d3.selectAll('.newtab').remove();
         if(selected != null){
             this.update(selected);
             //
-            d3.selectAll('.newtab').remove();
             this.tabNum = selected.profile.pieces.length;
             //
             let self = this;
             for(var n = 1; n < this.tabNum; n++){
                 let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
-                newTab.append('p').attr('class', 'tabText text').text(self.tabNum);
+                newTab.append('p').attr('class', 'tabText text').text(n+1);
             }
             //
             d3.select('#addTab').raise();
@@ -132,6 +132,10 @@ export default class Props{
             //
             this.updateTabs();
             this.tabEvents();
+        }else{
+            d3.selectAll('.tabField').property('value', '');
+            d3.selectAll('.juncType').selectAll('.discIcon').attr('class', (d,i) => i == 3 ? `sel discIcon` : `discIcon`);
+            d3.selectAll('.tabField').attr('class', 'noField tabField');
         }
     }
     //
@@ -243,7 +247,9 @@ export default class Props{
     retime(){
         this.t.property("value", this.command.time.toFixed(3));
         this.tt.property("value", this.command.time.toFixed(3));
-        this.updateTabs();
+        if(this.selected != null){
+            this.updateTabs();
+        }
     }
     //
     newObj(){
@@ -261,7 +267,7 @@ export default class Props{
                 if(selected.profile.bounds.length > 1){
                     if(i == 0){
                         console.log(`setting to ${selected.profile.bounds[0][1]-1}`);
-                        self.command.setTime(selected.profile.bounds[0][1]-1);
+                        self.command.setTime(selected.profile.bounds[0][1]-.1);
                     }else{
                         console.log(`setting to ${selected.profile.bounds[i][0]}`);
                         self.command.setTime(selected.profile.bounds[i][0]);
@@ -295,12 +301,20 @@ export default class Props{
             if(pIdx == 0 && i == 0){//leftmost piece
                 if(isFinite(bounds[0])){//left bound is already a number
                     self.selected.profile.bounds[pIdx][0] = -Infinity;
+                    //
+                    self.command.selected.update();
+                    self.command.drawGrid();
+                    self.updateTabs();
                     return;
                 }
                 self.selected.profile.bounds[pIdx][0] = self.command.time;
             }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
                 if(isFinite(bounds[1])){//right bound is already a number
                     self.selected.profile.bounds[pIdx][1] = Infinity;
+                    //
+                    self.command.selected.update();
+                    self.command.drawGrid();
+                    self.updateTabs();
                     return;
                 }
                 self.selected.profile.bounds[pIdx][1] = self.command.time;
@@ -343,10 +357,10 @@ export default class Props{
         }
         //
         d3.selectAll('.juncType').nodes().forEach((juncBut, idx) => {
-            //console.log(d3.select(juncBut).selectAll('.discIcon').nodes());
             d3.select(juncBut).select('.sel').attr('class', `discIcon`);
-            //console.log(junc[idx]);
             d3.select(d3.select(juncBut).selectAll('.discIcon').nodes()[junc[idx]]).attr('class', `sel discIcon`);
+            //
+            d3.selectAll('.tabField').attr('class', (d, i) => junc[i] == 3 ? 'noField tabField' : 'tabField');
         });
     }
 }

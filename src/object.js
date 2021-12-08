@@ -162,10 +162,14 @@ export default class Object{
         }
         //
         //console.log(this.profile.calc(0, this.command.time));
+        console.log(this == this.command.selected);
         //
         for(var n = 0; n <= this.depth; n++){
-            this.xS[n] = this.profile.calc(n, this.command.time)[0];
-            this.yS[n] = this.profile.calc(n, this.command.time)[1];
+            //this.xS[n] = this.profile.calc(n, this.command.time)[0];
+            //this.yS[n] = this.profile.calc(n, this.command.time)[1];
+            let pos = this.getVals(n);
+            this.xS[n] = pos[0];
+            this.yS[n] = pos[1];
         }
         if(this.lock){
             this.setValue(0, this.px, this.py);//resolve function to shift the time
@@ -180,6 +184,7 @@ export default class Object{
             case 1:
                 this.px = this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[0];
+                console.log(`py: ${this.py} vs xS: ${this.xS[0]}`);
                 break;
             case 2:
                 this.px = this.command.time;
@@ -267,7 +272,8 @@ export default class Object{
      * Draw the function of the object
      */
     draw(){
-        switch(this.command.viewType){
+        this.profile.draw(0, 300);
+        /*switch(this.command.viewType){
             case 0:
                 this.profile.draw(0, 300);
                 break;
@@ -277,7 +283,7 @@ export default class Object{
                     if(!this.isStaticX(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }*/
+                }
                 break;
             case 2:
                 this.profile.pieces[this.piece].paras[0].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
@@ -285,9 +291,9 @@ export default class Object{
                     if(!this.isStaticY(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }*/
+                }
                 break;
-        }
+        }*/
     }
     //
     /**

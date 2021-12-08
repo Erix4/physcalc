@@ -84,6 +84,11 @@ export default class Command{
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);
+        this.newObject((this.scaleX.range()[1] - this.scaleX.range()[0]) / 2, (this.scaleY.range()[0] - this.scaleY.range()[1]) / 2);
+        this.input.moveState = 0;
+        this.drawGrid();
+        this.spawnExtremes([this.objects[0]]);
+        this.toggleVectors(1);
     }
     //
     //#region View Control
@@ -205,7 +210,7 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
-        this.prof.draw(0, 500);
+        //this.prof.draw(0, 500);
     }
     //
     /**
@@ -533,6 +538,7 @@ export default class Command{
             this.sels = [];
             this.selObs = [];
             this.props.update();
+            this.props.diffObj();
         }else if(!this.input.shifting){
             this.sels.forEach(sell => {
                 sell.remove();

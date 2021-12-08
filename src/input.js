@@ -366,13 +366,15 @@ export default class Input{
                     }
                     break;
                 case 6://retime an object via timeline extremes
-                    this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
-                    command.updateGrid();
-                    command.drawGrid();
-                    command.moveGrid();
-                    command.timeline.movePoints();
-                    if(command.viewType != 0){
-                        command.moveExtremes();
+                    if(event.shiftKey){
+                        this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
+                        command.updateGrid();
+                        command.drawGrid();
+                        command.moveGrid();
+                        command.timeline.movePoints();
+                        if(command.viewType != 0){
+                            command.moveExtremes();
+                        }
                     }
                     break;
                 case 7:

@@ -66,10 +66,10 @@
                         <img class="sel discIcon" src="/assets/infinity-solid.svg"/>
                     </div>
                     <select class="tabDrop">
-                        <option>mm</option>
-                        <option>cm</option>
-                        <option selected="selected">m</option>
-                        <option>km</option>
+                        <option>ms</option>
+                        <option selected="selected">s</option>
+                        <option>min</option>
+                        <option>hr</option>
                     </select>
                 </div>
                 <div class="expand"
@@ -628,9 +628,9 @@
                     <p class="text">Normalize</p>
                 </div>
                 <div id="timeRange" class="range cutout">
-                    <div class="leftRange rangeButton"><input value="-10" class="rangeField field" type="number"/></div>
-                    <div id="timeBarTime" class="leftRange rangeButton"><input value="0" class="rangeField field" type="number"/></div>
-                    <div class="rangeButton"><input value="10" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="-5" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input id="timeBarTime" value="0" class="rangeField field" type="number"/></div>
+                    <div class="rangeButton"><input value="5" class="rangeField field" type="number"/></div>
                 </div>
                 <select class="range cutout propdrop">
                     <option>ms</option>

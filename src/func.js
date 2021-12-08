@@ -129,17 +129,39 @@ export default class Profile{
      * @param {Number} steps the number of steps (or resolution) of the illustration
      */
     draw(power, steps){
+        let mode = this.command.viewType;
         //console.log(`drawing`);
         let divy = steps / this.pieces.length;//number of steps for each piece
+        console.log(`divy: ${divy}`);
         //
-        this.pieces.forEach((piece, idx) => {
-            var doms = this.calcDomain(idx, power);//domains for this piece
-            var divier = divy / doms.length;//number of steps for each domain in the piece
-            //
-            doms.forEach(dom => {//for every domain
-                piece.paras[power].draw(this.command, dom[0], dom[1], divier);//draw the given power for this piece at this domain
+        if(mode == 0){
+            this.pieces.forEach((piece, idx) => {
+                var doms = this.calcDomain(idx, power);//domains for this piece
+                console.log(`drawing piece ${idx} in:`);
+                console.log(doms);
+                var divier = divy / doms.length;//number of steps for each domain in the piece
+                //
+                doms.forEach(dom => {//for every domain
+                    piece.paras[power].draw(this.command, dom[0], dom[1], divier);//draw the given power for this piece at this domain
+                });
             });
-        });
+        }else{
+            this.pieces.forEach((piece, idx) => {
+                let reFunc = mode == 1 ? piece.paras[power].xFunc : piece.paras[power].yFunc;//the function to draw
+                //
+                var doms = this.calcDomain(idx, power, mode);//domains for this piece
+                console.log(`drawing piece ${idx} in:`);
+                console.log(doms);
+                var divier = divy / doms.length;//number of steps for each domain in the piece
+                console.log(`divier: ${divier}`);
+                //
+                doms.forEach(dom => {//for every domain
+                    reFunc.steps = divier;
+                    console.log(reFunc);
+                    reFunc.draw(this.command, dom[0], dom[1]);//draw the given power for this piece at this domain
+                });
+            });
+        }
     }
     //
     /**
@@ -148,8 +170,20 @@ export default class Profile{
      * @param {Number} [power] power of function (0 by default)
      * @returns {Array<Number>} domain of piece
      */
-    calcDomain(pIdx, power = 0){
-        let doms = this.pieces[pIdx].calcDomain(power);
+    calcDomain(pIdx, power = 0, mode = 0){
+        let doms;
+        switch(mode){
+            case 0:
+                doms = this.pieces[pIdx].calcDomain(power);
+                break;
+            case 1:
+                doms = this.pieces[pIdx].calcCompDomain(true, power);
+                break;
+            case 2:
+                doms = this.pieces[pIdx].calcCompDomain(false, power);
+                break;
+        }
+        console.log(doms);
         //
         while(doms.length > 0 && doms[0][1] < this.bounds[pIdx][0]){//while right domain is less than left bound of piece
             doms.splice(0, 1);//remove this domain
@@ -394,6 +428,7 @@ export default class Profile{
                 time = this.bounds[leftIdx][1];//return the value at the right bound of the left applicable piece
             }
         }
+        console.log(`calc in ${curIdx}`);
         if(power >= this.pieces[curIdx].paras.length){
             return [0, 0];
         }else{
@@ -475,15 +510,15 @@ export class Piece{
         });
     }
     //
-    calcDomain(power = 0){//fix to allow constants
+    calcDomain(power = 0){
         var vals = [];
         let xCrosses = 0;
-        this.paras[power].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]).forEach(val =>{
+        this.paras[power].xFunc.calcDomain(this.command.scaleX.domain()[0], this.command.scaleX.domain()[1], true).forEach(val =>{
             vals.push([val, 0]);
             xCrosses++;
         });
         let yCrosses = 0;
-        this.paras[power].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1]).forEach(val => {//get y time domains
+        this.paras[power].yFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1], true).forEach(val => {//get y time domains
             vals.push([val, 1]);//put them all in a list
             yCrosses++;
         });
@@ -554,6 +589,80 @@ export class Piece{
         }
         //
         return ranges.slice();//return ranges where function is visible
+    }
+    //
+    /**
+     * get domain for x and y components of para
+     * @param {Boolean} xComp   whether checking the x component
+     * @param {Number} power    the power to get the domain for
+     * @returns {Array<Number>} return all ranges where component is visible
+     */
+    calcCompDomain(xComp, power = 0){
+        var vals = [];
+        let crosses = 0;
+        let reFunc = xComp ? this.paras[power].xFunc : this.paras[power].yFunc;
+        //
+        reFunc.calcDomain(this.command.scaleY.domain()[0], this.command.scaleY.domain()[1], true).forEach(val =>{
+            vals.push(val);
+            crosses++;
+        });
+        //
+        if(crosses == 0){//no place where x crosses the visible boundary
+            if(reFunc.terms.length == 1 && inBounds(reFunc.terms[0].coef, this.command.scaleY.domain()[0], this.command.scaleY.domain()[1])){
+                vals.forEach(val => {
+                    vals.push([this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]]);
+                });
+            }else{
+                return [];
+            }
+        }
+        //
+        vals.sort((a,b)=>a-b);//sort domain values numerically by first element
+        //
+        var visible = false;
+        var ranges = [];
+        if(this.paras.length > power + 1){//if there are more derivatives
+            let uRefunc = xComp ? this.paras[power + 1].xFunc : this.paras[power + 1].yFunc;
+            //
+            vals.forEach(val => {
+                if(uRefunc.calc(val) == 0 && crosses != 0){//discard value if derivative is 0
+                    return;
+                }
+                if(!visible){
+                    ranges.push([val]);
+                }else{
+                    ranges[ranges.length - 1].push(val);
+                }
+                visible = !visible;
+            });
+        }else{//no derivative available
+            vals.forEach(val => {
+                if(!visible){
+                    ranges.push([val]);
+                }else{
+                    ranges[ranges.length - 1].push(val);
+                }
+                visible = !visible;
+            });
+        }
+        console.log(ranges);
+        //
+        var newRanges = ranges.slice();
+        for(var i = 0; i < ranges.length && ranges[i][1] < this.command.scaleX.domain()[0]; i++){
+            newRanges.splice(0, 1);
+        }
+        if(newRanges[0][0] < this.command.scaleX.domain()[0]){
+            newRanges[0][0] = this.command.scaleX.domain()[0];
+        }
+        //
+        for(var i = ranges.length - 1; i >= 0 && ranges[i][0] > this.command.scaleX.domain()[1]; i--){
+            newRanges.pop();
+        }
+        if(newRanges[newRanges.length - 1][1] > this.command.scaleX.domain()[1]){
+            newRanges[newRanges.length - 1][1] = this.command.scaleX.domain()[1];
+        }
+        //
+        return newRanges.slice();//return ranges where function is visible
     }
     //
     setAllComps(comps){//format: level>list>xy>terms
@@ -991,12 +1100,15 @@ export class Func{
         return sum;
     }
     //
-    calcDomain(start, end){
+    calcDomain(start, end, getAll=false){
         var vals = [];//all values where the function touches the screen boundary
         vals.push(...this.calcRoots(start));//length meaning: 0=function switches directions, end values will hold other domain, 1=one side of domain, 2=holds two domain
         vals.push(...this.calcRoots(end));
         //
         vals.sort((a,b)=>a-b);//sort domain values numerically
+        if(getAll){
+            return vals;
+        }
         if(vals.length > 1){
             return [vals[0], vals[vals.length - 1]];//return lowest and highest domain values
         }else{
