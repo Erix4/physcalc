@@ -142,9 +142,9 @@ export default class Profile{
         if(this.command.time >= t2){
             this.command.time = t2 - .1;
         }
-        //
-        this.setOrigin(t2, idx+1);//this has the potential to break
-        this.setValTime(0, t2, ...this.calc(0, t2, idx));
+        //START HERE--------------------------BOZO------------------
+        this.setOrigin(this.bounds[idx][0], idx);//this did to break
+        this.setValTime(0, this.bounds[idx][0], ...this.calc(0, this.bounds[idx][0], idx));
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated
