@@ -159,10 +159,10 @@ export default class Object{
         if(this.profile.getCurIdx(this.command.time) != this.piece){
             this.piece = this.profile.getValIdx(this.command.time);
             this.repieceArrows();
+            if(this == this.command.selected){
+                this.command.props.renderEqs();
+            }
         }
-        //
-        //console.log(this.profile.calc(0, this.command.time));
-        console.log(this == this.command.selected);
         //
         for(var n = 0; n <= this.depth; n++){
             //this.xS[n] = this.profile.calc(n, this.command.time)[0];

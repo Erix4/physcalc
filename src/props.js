@@ -55,6 +55,13 @@ export default class Props{
         this.t.on("input", function(){
             if(isNumeric(this.value)){
                 command.setTime(parseFloat(this.value), true);
+                self.tt.property("value", parseFloat(this.value).toFixed(3));
+            }
+        });
+        this.tt.on("input", function(){
+            if(isNumeric(this.value)){
+                command.setTime(parseFloat(this.value), true);
+                self.t.property("value", parseFloat(this.value).toFixed(3));
             }
         });
         //
@@ -260,6 +267,7 @@ export default class Props{
         console.log(`calling tab events`);
         console.log(this.tabNum);
         let self = this;
+        let input = this.command.input;
         //
         d3.selectAll('.tab').on('click', function(d, i){
             let selected = self.command.selected;
@@ -296,37 +304,59 @@ export default class Props{
         });
         //
         d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable.disable the bounds fields if necessary
-            let pIdx = self.selected.piece;
-            let bounds = self.selected.profile.bounds[pIdx];
-            if(pIdx == 0 && i == 0){//leftmost piece
-                if(isFinite(bounds[0])){//left bound is already a number
-                    self.selected.profile.bounds[pIdx][0] = -Infinity;
-                    //
-                    self.command.selected.update();
-                    self.command.drawGrid();
-                    self.updateTabs();
-                    return;
+            if(self.selected != null){
+                let pIdx = self.selected.piece;
+                let bounds = self.selected.profile.bounds[pIdx];
+                if(pIdx == 0 && i == 0){//leftmost piece
+                    if(isFinite(bounds[0])){//left bound is already a number
+                        self.selected.profile.bounds[pIdx][0] = -Infinity;
+                        //
+                        self.command.selected.update();
+                        self.command.drawGrid();
+                        self.updateTabs();
+                        return;
+                    }
+                    self.selected.profile.bounds[pIdx][0] = self.command.time;
+                }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
+                    if(isFinite(bounds[1])){//right bound is already a number
+                        self.selected.profile.bounds[pIdx][1] = Infinity;
+                        //
+                        self.command.selected.update();
+                        self.command.drawGrid();
+                        self.updateTabs();
+                        return;
+                    }
+                    self.selected.profile.bounds[pIdx][1] = self.command.time;
                 }
-                self.selected.profile.bounds[pIdx][0] = self.command.time;
-            }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
-                if(isFinite(bounds[1])){//right bound is already a number
-                    self.selected.profile.bounds[pIdx][1] = Infinity;
-                    //
-                    self.command.selected.update();
-                    self.command.drawGrid();
-                    self.updateTabs();
-                    return;
+                self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
+                if(self.selected.profile.junctions[pIdx-1+i] == 0){
+                    self.selected.shiftValue(0, 0, 0);
                 }
-                self.selected.profile.bounds[pIdx][1] = self.command.time;
+                //
+                self.command.selected.update();
+                self.command.drawGrid();
+                self.updateTabs();
             }
-            self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
-            if(self.selected.profile.junctions[pIdx-1+i] == 0){
-                self.selected.shiftValue(0, 0, 0);
+        });
+        //
+        d3.selectAll('.tabField').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select('.tabField').on('input', function(){
+            if(isNumeric(this.value) && self.selected.piece != -1){
+                console.log('calling left field input');
+                self.selected.profile.reLeftBoundPiece(self.selected.piece, parseFloat(this.value));
+                self.command.objPosChange([self.command.selected], true);
             }
-            //
-            self.command.selected.update();
-            self.command.drawGrid();
-            self.updateTabs();
+        });
+        d3.select('.tabField:nth-child(4)').on('input', function(){
+            if(isNumeric(this.value) && self.selected.piece != -1){
+                console.log('calling right field input');
+                self.selected.profile.reRightBoundPiece(self.selected.piece, parseFloat(this.value));
+                self.command.objPosChange([self.command.selected], true);
+            }
         });
     }
     //

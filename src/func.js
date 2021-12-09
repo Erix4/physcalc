@@ -87,34 +87,64 @@ export default class Profile{
      * @param {Number} t1  time of start
      * @param {Number} t2  time of end
      */
-    reBoundPiece(idx, t1, t2){//rebounding does not affect the piece or the junction type
+    reLeftBoundPiece(idx, t1){//rebounding does not affect (but is affected by) the piece or the junction type
         if(idx != 0){//if not the first piece
             if(t1 < this.bounds[idx][0]){//if the new piece starts before the current piece (push)
                 let stIdx = this.getCurIdx(t1);//get the index of the piece that contains the new time
+                let compressIdx = this.getRightIdx(t1);//get the index of the piece directly to the right or containing the new time
                 //
-                this.bounds[stIdx][1] = t1;//rebound the leftmost piece
-                for(var n = stIdx + 1; n < idx; n++){//compress every piece between the leftmost and the current piece
+                if(stIdx != -1){//new bound ends in an existing piece
+                    this.bounds[stIdx][1] = t1;//rebound the leftmost piece
+                }
+                for(var n = compressIdx + 1; n < idx; n++){//compress every piece between the leftmost and the current piece
                     this.bounds[n] = [t1, t1];
                 }
             }else if(this.junctions[idx - 1] != 2){//if the new piece starts after the current piece and the left juction is complete (pull)
-                this.bounds[idx][1] = t1;//rebound the left neighbor to end at the current start
+                this.bounds[idx - 1][1] = t1;//rebound the left neighbor to end at the current start
             }
         }
         this.bounds[idx][0] = t1;//rebound the current piece to start at the new start
         //
+        if(this.command.time < t1){
+            this.command.time = t1;
+        }
+        //console.log(`setting values to:`);
+        //console.log(this.calc(0, t1, 1));
+        this.setOrigin(t1, idx);
+        this.setValTime(0, t1, ...this.calc(0, t1, idx));
+    }
+    //
+    reRightBoundPiece(idx, t2){//rebounding does not affect (but is affected by) the piece or the junction type
+        //
+        console.log(`index given: ${idx}, bounds length: ${this.bounds.length}`);
         if(idx != this.bounds.length - 1){//if not the last piece
-            if(t2 > this.bounds[idx][1]){//if the new piece end after the current piece (push)
+            console.log(`is ${t2} > ${this.bounds[idx][1]}`);
+            if(t2 > this.bounds[idx][1]){//if the new piece ends after the current piece (push)
                 let endIdx = this.getCurIdx(t2);//get the index of the piece that contains the new time
+                let compressIdx = this.getLeftIdx(t2);//get the index of the piece directly to the left or containing the new time
+                console.log(`compress index: ${compressIdx}`);
                 //
-                this.bounds[endIdx][0] = t2;//rebound the rightmost piece
-                for(var n = endIdx - 1; n > idx; n--){//compress every piece between the rightmost and the current piece
+                if(endIdx != -1){//new bound ends in an existing piece
+                    this.bounds[endIdx][0] = t2;//rebound the rightmost piece
+                }
+                for(var n = compressIdx - 1; n > idx; n--){//compress every piece between the rightmost and the current piece
                     this.bounds[n] = [t2, t2];
                 }
             }else if(this.junctions[idx] != 2){//if the new piece starts after the current piece and the right juction is complete (pull)
-                this.bounds[idx][0] = t2;//rebound the right neighbor to end at the current start
+                console.log(`pulling piece ${idx + 1} to ${t2}`);
+                this.bounds[idx+1][0] = t2;//rebound the right neighbor to end at the current start
             }
+        }else{
+            console.log(`the last piece?`);
         }
         this.bounds[idx][1] = t2;//rebound the current piece to end at the new end
+        //
+        if(this.command.time >= t2){
+            this.command.time = t2 - .1;
+        }
+        //
+        this.setOrigin(t2, idx+1);//this has the potential to break
+        this.setValTime(0, t2, ...this.calc(0, t2, idx));
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated
@@ -132,13 +162,10 @@ export default class Profile{
         let mode = this.command.viewType;
         //console.log(`drawing`);
         let divy = steps / this.pieces.length;//number of steps for each piece
-        console.log(`divy: ${divy}`);
         //
         if(mode == 0){
             this.pieces.forEach((piece, idx) => {
                 var doms = this.calcDomain(idx, power);//domains for this piece
-                console.log(`drawing piece ${idx} in:`);
-                console.log(doms);
                 var divier = divy / doms.length;//number of steps for each domain in the piece
                 //
                 doms.forEach(dom => {//for every domain
@@ -150,10 +177,11 @@ export default class Profile{
                 let reFunc = mode == 1 ? piece.paras[power].xFunc : piece.paras[power].yFunc;//the function to draw
                 //
                 var doms = this.calcDomain(idx, power, mode);//domains for this piece
-                console.log(`drawing piece ${idx} in:`);
-                console.log(doms);
+                if(doms.length == 0){//if there are no domains
+                    //reFunc.steps = 1;
+                    //reFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);//draw the given power for this piece at this domain
+                }
                 var divier = divy / doms.length;//number of steps for each domain in the piece
-                console.log(`divier: ${divier}`);
                 //
                 doms.forEach(dom => {//for every domain
                     reFunc.steps = divier;
@@ -183,7 +211,6 @@ export default class Profile{
                 doms = this.pieces[pIdx].calcCompDomain(false, power);
                 break;
         }
-        console.log(doms);
         //
         while(doms.length > 0 && doms[0][1] < this.bounds[pIdx][0]){//while right domain is less than left bound of piece
             doms.splice(0, 1);//remove this domain
@@ -240,6 +267,7 @@ export default class Profile{
      * @param {Boolean} [propogator] whether to propagate the set values to other depths
      */
     setValTime(power, t, x, y, propagator = true, alignPower = 0){
+        console.log(`setting values`);
         let curIdx = this.getLeftIdx(t);
         if(curIdx == -1){//time is left of every piece
             curIdx = 0;//set calc index to the last one
@@ -279,6 +307,15 @@ export default class Profile{
         });**/
     }
     //
+    /**
+     * Set the values at the given time and power
+     * @param {Number} power         depth of the value to set
+     * @param {Number} t             time  at which to set the value
+     * @param {Number} pIdx          the index of the piece to set the value at
+     * @param {Number} x             x value to set
+     * @param {Number} y             y value to set
+     * @param {Boolean} [propogator] whether to propagate the set values to other depths
+     */
     setPieceValTime(power, t, pIdx, x, y, propagator=true){
         this.pieces[pIdx].setValTime(power, t, x, y, propagator);
     }
@@ -351,39 +388,35 @@ export default class Profile{
     //
     //the following function is useful for inferring bounds for new pieces
     /**
-     * get the piece which contains the given time or is to the right of it
+     * get the piece which is to the right of or contains the current time
      * @param {Number} time the time to check
      * @returns the index of the piece, or -1 if the time is to the right of every piece
      */
     getRightIdx(time){
-        let idx = 0;
-        this.bounds.forEach(bound => {
-            if(time > bound[1] && idx != this.bounds.length - 1){//if time is after right bound and this bound isn't the last
-                return idx + 1;
+        if(time > this.bounds[this.bounds.length - 1][1]){//if time is after the last piece
+            return -1;
+        }
+        for(var n = this.bounds.length - 1; n >= 0; n--){
+            if(time > this.bounds[n][1]){//if time is before left bound
+                return n + 1;
             }
-            idx++;
-        });
-        return -1;//the current time is past every piece
+        }
+        return 0;//the current time is before every piece
     }
     //
     //the following function is useful for calculating values
     /**
-     * get the piece which contains the given time or is to the left of it
+     * get the piece which is to the left of or contains the current time
      * @param {Number} time the time to check
      * @returns the index of the piece, or -1 if the time is to the left of every piece
      */
     getLeftIdx(time){
-        let idx = 0;
-        if(time < this.bounds[0][0]){//if time is before the first piece
-            return -1;
-        }
         for(var n = 1; n < this.bounds.length; n++){
             if(time < this.bounds[n][0]){//if time is before left bound
-                return idx;
+                return n-1;
             }
-            idx++;
         }
-        return idx;//the current time is before every piece
+        return this.bounds.length - 1;//the current time is after every piece
     }
     //
     /**
@@ -428,7 +461,7 @@ export default class Profile{
                 time = this.bounds[leftIdx][1];//return the value at the right bound of the left applicable piece
             }
         }
-        console.log(`calc in ${curIdx}`);
+        //console.log(`calc in ${curIdx}`);
         if(power >= this.pieces[curIdx].paras.length){
             return [0, 0];
         }else{
@@ -609,9 +642,8 @@ export class Piece{
         //
         if(crosses == 0){//no place where x crosses the visible boundary
             if(reFunc.terms.length == 1 && inBounds(reFunc.terms[0].coef, this.command.scaleY.domain()[0], this.command.scaleY.domain()[1])){
-                vals.forEach(val => {
-                    vals.push([this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]]);
-                });
+                vals.push(this.command.scaleX.domain()[0]);
+                vals.push(this.command.scaleX.domain()[1]);
             }else{
                 return [];
             }
@@ -645,7 +677,9 @@ export class Piece{
                 visible = !visible;
             });
         }
-        console.log(ranges);
+        if(ranges.length == 0){
+            return [];
+        }
         //
         var newRanges = ranges.slice();
         for(var i = 0; i < ranges.length && ranges[i][1] < this.command.scaleX.domain()[0]; i++){
