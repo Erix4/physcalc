@@ -143,8 +143,14 @@ export default class Profile{
             this.command.time = t2 - .1;
         }
         //START HERE--------------------------BOZO------------------
-        this.setOrigin(this.bounds[idx][0], idx);//this did to break
-        this.setValTime(0, this.bounds[idx][0], ...this.calc(0, this.bounds[idx][0], idx));
+        console.log(`setting origin in index ${idx} to ${this.bounds[idx][0]}`);
+        if(isFinite(this.bounds[idx][0])){//if piece has a left bound
+            this.setOrigin(this.bounds[idx][0], idx);//set origin to realign values
+            this.setValTime(0, this.bounds[idx][0], ...this.calc(0, this.bounds[idx][0], idx));
+        }else{
+            this.setOrigin(this.bounds[idx][1]-.1, idx);//set origin slightly to the left of the right bound
+            this.setValTime(0, this.bounds[idx][1]-.1, ...this.calc(0, this.bounds[idx][1]-.1, idx));
+        }
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated

@@ -105,7 +105,7 @@ export default class Object{
         this.nets = [];
         this.comps = [];//redo comp listing for better illustration
         for(var n = 1; n <= this.depth; n++){//make an arrow for every para except position
-            this.nets.push(new netArrow(command, this, n, 0));
+            this.nets.push(new netArrow(command, this, n));
             var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
             //
             let compPower = [];
@@ -156,11 +156,12 @@ export default class Object{
      * Update all internal values by function
      */
     update(){
-        if(this.profile.getCurIdx(this.command.time) != this.piece){
+        if(this.profile.getValIdx(this.command.time) != this.piece){
             this.piece = this.profile.getValIdx(this.command.time);
             this.repieceArrows();
             if(this == this.command.selected){
                 this.command.props.renderEqs();
+                console.log(`new piece detected, rerendering equations`);
             }
         }
         //
@@ -182,12 +183,11 @@ export default class Object{
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
             case 1:
-                this.px = this.command.time;
+                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[0];
-                console.log(`py: ${this.py} vs xS: ${this.xS[0]}`);
                 break;
             case 2:
-                this.px = this.command.time;
+                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
         }
@@ -380,7 +380,7 @@ export default class Object{
         //
         console.log(`depth: ${curPiece.paras.length}`);
         while(this.nets.length < curPiece.paras.length - 1){//while the current piece is deeper than the number of net vectors
-            this.nets.push(new netArrow(this.command, this, this.nets.length + 1, curPiece));//add a new net vector
+            this.nets.push(new netArrow(this.command, this, this.nets.length + 1));//add a new net vector
             /*let compPower = [];
             for(var a in curPiece.comps[this.nets.length]){
                 compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
@@ -639,12 +639,10 @@ export default class Object{
 }
 
 class netArrow{
-    constructor(command, obj, depth, pieceIdx){
+    constructor(command, obj, depth){
         this.command = command;
         this.obj = obj;
         this.depth = depth;
-        this.pIdx = pieceIdx;
-        console.log(`new arrow at index ${pieceIdx}`);
         //
         this.profile = obj.profile;
         //
@@ -655,7 +653,7 @@ class netArrow{
     }
     //
     update(){
-        this.pos = this.profile.calc(this.depth, this.command.time, this.pIdx);
+        this.pos = this.profile.calc(this.depth, this.command.time);
         //
         this.self.sx = this.obj.px;
         this.self.sy = this.obj.py;
