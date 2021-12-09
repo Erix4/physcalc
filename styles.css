@@ -438,9 +438,8 @@ i{
 .expandText{
     font-family: 'heavitas';
     font-size: 80%;
-    width: auto;
-    display: inline;
-    margin: 0;
+    margin-top: auto;
+    margin-bottom: auto;
     padding: 0;
 }
 
