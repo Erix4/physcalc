@@ -70,11 +70,11 @@ export default class Command{
         console.log(`Distance: ${this.func.calc(2.47)}`);
         console.log(`------`);
         //
-        //this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
-        //this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
-        //this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
-        //this.prof.newPiece([1, 0], [2, 4], 1, 1);
-        //this.prof.draw(0, 500);
+        this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
+        this.prof.draw(0, 500);
+        this.prof.newPiece([1, 0], [3.5, 3], 0, 0);
+        this.prof.newPiece([1, 0], [-1, 2, 4], .5, 0);
+        this.prof.newPiece([1, 0], [2, 4], 1, 1);
         //
         //this.prof2 = new Profile(this, 2, [1, 0], [-1, 4], 'blue');
         //this.prof2.draw(0, 500);
@@ -84,6 +84,11 @@ export default class Command{
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);
+        this.newObject((this.scaleX.range()[1] - this.scaleX.range()[0]) / 2, (this.scaleY.range()[0] - this.scaleY.range()[1]) / 2);
+        this.input.moveState = 0;
+        this.drawGrid();
+        this.spawnExtremes([this.objects[0]]);
+        this.toggleVectors(1);
     }
     //
     //#region View Control
@@ -205,6 +210,7 @@ export default class Command{
         this.objects.forEach(obj => {
             obj.draw(this.input);
         });
+        //this.prof.draw(0, 500);
     }
     //
     /**
@@ -531,6 +537,8 @@ export default class Command{
             });
             this.sels = [];
             this.selObs = [];
+            this.props.update();
+            this.props.diffObj();
         }else if(!this.input.shifting){
             this.sels.forEach(sell => {
                 sell.remove();
@@ -541,7 +549,7 @@ export default class Command{
                     .attr("cy", this.scaleY(obj.py))];
             this.selObs = [obj];
             this.selected = obj;
-            this.props.update(this.selected);
+            this.props.diffObj(obj);
             obj.raise();
         }
     }

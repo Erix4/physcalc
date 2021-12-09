@@ -46,8 +46,11 @@ export default class Object{
         this.toBeDeleted = false;
         this.type = type;//0 = as projectile, 1 = in free fall, 2 = at rest, 3 = at position/default after changes
         //
+        //insert div
+        this.pointDiv = d3.select(`#pointLabels`).append("div").attr("class", "objectPoints").attr("value", `${this.id}`);
+        //
         this.hue = 35 * this.id;//0 = red
-        this.color = `hsl(${this.hue}, 100%, 50%`;
+        this.color = `hsl(${this.hue}, 100%, 50%)`;
         //
         this.gravity = command.gravity;
         //
@@ -67,7 +70,7 @@ export default class Object{
         const vx = 5;//starting values, not used later
         const vy = 5;
         const ax = 0;
-        const ay = 0;
+        const ay = command.gravity;
         //
         this.profile;
         switch(command.viewType){
@@ -87,7 +90,7 @@ export default class Object{
                 break;
         }
         this.profile = new Profile(this.command, this.depth, [ax / 2, vx, this.px], [ay / 2, vy, this.py], this.color);
-        this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
+        //this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
         this.extremes = [];
         this.points = [];//svg points that illustrate extremes
@@ -153,17 +156,20 @@ export default class Object{
      * Update all internal values by function
      */
     update(){
-        if(this.command.time < this.profile.bounds[this.piece][0]){
-            this.piece--;
-            this.respawnArrows();
-        }else if(this.command.time > this.profile.bounds[this.piece][1]){
-            this.piece++;
-            this.respawnArrows();
+        if(this.profile.getCurIdx(this.command.time) != this.piece){
+            this.piece = this.profile.getValIdx(this.command.time);
+            this.repieceArrows();
+            if(this == this.command.selected){
+                this.command.props.renderEqs();
+            }
         }
         //
         for(var n = 0; n <= this.depth; n++){
-            this.xS[n] = this.profile.calc(n, this.command.time)[0];
-            this.yS[n] = this.profile.calc(n, this.command.time)[1];
+            //this.xS[n] = this.profile.calc(n, this.command.time)[0];
+            //this.yS[n] = this.profile.calc(n, this.command.time)[1];
+            let pos = this.getVals(n);
+            this.xS[n] = pos[0];
+            this.yS[n] = pos[1];
         }
         if(this.lock){
             this.setValue(0, this.px, this.py);//resolve function to shift the time
@@ -178,6 +184,7 @@ export default class Object{
             case 1:
                 this.px = this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[0];
+                console.log(`py: ${this.py} vs xS: ${this.xS[0]}`);
                 break;
             case 2:
                 this.px = this.command.time;
@@ -217,7 +224,7 @@ export default class Object{
      * @param {Number} [time] the time at which to calculate
      * @returns the x and y values in an array
      */
-    getVals(power, time){
+    getVals(power=0, time){
         if(!time && time != 0){
             time = this.command.time;
         }
@@ -265,7 +272,8 @@ export default class Object{
      * Draw the function of the object
      */
     draw(){
-        switch(this.command.viewType){
+        this.profile.draw(0, 300);
+        /*switch(this.command.viewType){
             case 0:
                 this.profile.draw(0, 300);
                 break;
@@ -275,7 +283,7 @@ export default class Object{
                     if(!this.isStaticX(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }*/
+                }
                 break;
             case 2:
                 this.profile.pieces[this.piece].paras[0].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
@@ -283,9 +291,9 @@ export default class Object{
                     if(!this.isStaticY(n)){//check if function is just zero
                         this.profile.pieces[this.piece].paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
                     }
-                }*/
+                }
                 break;
-        }
+        }*/
     }
     //
     /**
@@ -372,7 +380,7 @@ export default class Object{
         //
         console.log(`depth: ${curPiece.paras.length}`);
         while(this.nets.length < curPiece.paras.length - 1){//while the current piece is deeper than the number of net vectors
-            this.nets.push(new netArrow(this.command, this, this.nets.length + 1));//add a new net vector
+            this.nets.push(new netArrow(this.command, this, this.nets.length + 1, curPiece));//add a new net vector
             /*let compPower = [];
             for(var a in curPiece.comps[this.nets.length]){
                 compPower.splice(0, 0, new compArrow(this.command, this, this.nets.length, a, 0));//insert new comp arrow at beginning of power list
@@ -380,6 +388,16 @@ export default class Object{
             //this.comps.push(compPower);
         }
         console.log(this.nets);
+    }
+    //
+    repieceArrows(piece){
+        if(!piece && piece != 0){
+            piece = this.piece;
+        }
+        //
+        this.nets.forEach(net => {
+            net.pIdx = piece;
+        });
     }
     //
     /**
@@ -399,6 +417,7 @@ export default class Object{
      * remove and respawn extreme points
      */
     spawnExtremes(){
+        this.pointDiv.html("");
         switch(this.command.viewType){
             case 0:
                 this.extremes = this.profile.getExtremes();
@@ -407,9 +426,10 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
                         .attr("cy", Math.round(this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));//
+                    //
                 }
                 while(this.points.length < this.extremes.length){//add points until there are the same name number
-                    this.points.push(this.svg.append("circle").style("fill", this.color)
+                    this.points.push(this.svg.append("circle").style("fill", this.color).attr("val", this.extremes[n])
                         .attr("r", 6)
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1])));
@@ -479,13 +499,30 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        let pointLabel = this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`);
+                        //console.log(this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`));
+                        pointLabel
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(pointLabel.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(pointLabel.style('height'))) - 10}px`);//move point
+                    }
                 }
+                //
                 break;
             case 1:
                 for(var n = 0; n < this.points.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[0]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`)
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(this.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(this.style('height'))) - 10}px`);//move point
+                    }
                 }
                 break;
             case 2:
@@ -493,6 +530,13 @@ export default class Object{
                     this.points[n].attr("val", this.extremes[n])
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
                         .attr("cy", this.command.scaleY(this.profile.calc(0, this.extremes[n])[1]));//
+                    //
+                    if(this.points[n].style('fill') == 'white'){//if point selected
+                        let self = this;
+                        this.pointDiv.select(`.pointLabel[val='${self.points[n].attr("val")}']`)
+                            .style("left", `${self.points[n].attr("cx") - (parseInt(this.style('width')) / 2)}px`)
+                            .style("top", `${self.points[n].attr("cy") - (parseInt(this.style('height'))) - 10}px`);//move point
+                    }
                 }
                 break;
         }
@@ -589,6 +633,7 @@ export default class Object{
         this.command.drawGrid();
         this.command.drawTimeline();
         this.command.select();
+        this.command.props.renderEqs();
     }
     //
 }
@@ -599,11 +644,12 @@ class netArrow{
         this.obj = obj;
         this.depth = depth;
         this.pIdx = pieceIdx;
+        console.log(`new arrow at index ${pieceIdx}`);
         //
         this.profile = obj.profile;
         //
         this.pos = this.profile.calc(depth, command.time);
-        console.log(this.pos);
+        //console.log(this.pos);
         this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(${240 - (depth * 20)}, 100%, 50%)`);
         this.command.input.newArrow(this);
     }

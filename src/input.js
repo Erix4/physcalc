@@ -56,28 +56,114 @@ export default class Input{
         this.tX = 0;
         this.tY = 0;
         //
-        let canox = parseInt(d3.select("#leftcolumn").style("width"));
+        let canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
         let canoy = parseInt(d3.select("#header").style("height"));
         //
         //#region resizing
         //
+        let headerHeight = parseFloat(d3.select('#header').style('height'));//initial state
+        let columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+        let screenRatio = window.innerWidth / window.innerHeight;
+        console.log(columnWidth);
+        const RATIOTHRESHOLD = 0.9;
+        //
+        //adjust header font-size and hide field by screen ratio
+        if(screenRatio > RATIOTHRESHOLD){//horizontal
+            d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
+            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+        }else{//vertical
+            d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+            d3.select('#leftcolumn').style('width', '100%');
+            d3.select('#fieldcolumn').style('display', 'none');
+            d3.select('#lefthandle').style('display', 'none');
+            columnWidth = window.innerWidth;
+        }
+        //
+        d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);//adjust left column font size
+        fitWidth(columnWidth);//fit the input fields to the width of the left column
+        fitSolve(columnWidth);
+        //
         window.addEventListener("resize", event => {
+            console.log("resize event");
+            if (screen.width == window.innerWidth && screen.height == window.innerHeight) {
+                console.log("full screen");
+             }             
             command.resize();
+            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+            canoy = parseInt(d3.select("#header").style("height"));
+            //
+            headerHeight = parseFloat(d3.select('#header').style('height'));
+            screenRatio = window.innerWidth / window.innerHeight;
+            if(screenRatio > RATIOTHRESHOLD){//horizontal
+                d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '25%');
+                d3.select('#fieldcolumn').style('display', 'flex');
+                d3.select('#lefthandle').style('display', 'block');
+                columnWidth = window.innerWidth * 0.25;
+            }else{//vertical
+                d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '100%');
+                d3.select('#fieldcolumn').style('display', 'none');
+                d3.select('#lefthandle').style('display', 'none');
+                columnWidth = window.innerWidth;
+            }
+            d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
+            d3.select('#leftcolumn').style('width', `${columnWidth}px`);
+            d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
+            fitWidth(columnWidth);
+            fitSolve(columnWidth);
         });
+        //
+        ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "msfullscreenchange"].forEach(
+            eventType => document.addEventListener(eventType, event => {
+            console.log("Full screen detected");
+            command.resize();
+            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+            canoy = parseInt(d3.select("#header").style("height"));
+            //
+            headerHeight = parseFloat(d3.select('#header').style('height'));
+            screenRatio = window.innerWidth / window.innerHeight;
+            if(screenRatio > RATIOTHRESHOLD){//horizontal
+                d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '25%');
+                d3.select('#fieldcolumn').style('display', 'flex');
+                d3.select('#lefthandle').style('display', 'block');
+                columnWidth = window.innerWidth * 0.25;
+            }else{//vertical
+                d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#leftcolumn').style('width', '100%');
+                d3.select('#fieldcolumn').style('display', 'none');
+                d3.select('#lefthandle').style('display', 'none');
+                columnWidth = window.innerWidth;
+            }
+            d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
+            d3.select('#leftcolumn').style('width', `${columnWidth}px`);
+            d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
+            fitWidth(columnWidth);
+            fitSolve(columnWidth);
+        }));
+          
         //
         //#endregion
         //
         document.addEventListener("wheel", event => {
-            if(mY < this.command.scrH){
-                if(event.shiftKey){
-                    command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
+            if(event.clientX > canox){
+                if(mY < this.command.scrH){
+                    if(event.shiftKey){
+                        command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    }else{
+                        command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    }
                 }else{
-                    command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
+                    command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
                 }
-            }else{
-                command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
             }
-        })
+        });
         //
         //#region key events
         //
@@ -85,6 +171,16 @@ export default class Input{
             switch(event.key){
                 case "a":
                     if(!adding){
+                        if(this.moveState == 3){//currently adding object
+                            if(this.command.viewType == 0 && this.command.vectorMode != -1){
+                                this.command.toggleVectors(1);
+                            }else if(this.command.vectorMode == -1){
+                                this.active.toggleVectors(-1);
+                            }
+                            this.moveState = 0;
+                            this.command.drawGrid();
+                            this.command.spawnExtremes([this.command.selected]);
+                        }
                         command.newObject(mX, mY);
                         adding = true;
                     }
@@ -105,6 +201,7 @@ export default class Input{
                     }
                     break;
                 case " ":
+                    event.preventDefault();
                     command.running = !command.running;
                     command.rate = 1;
                     if(command.running){
@@ -219,16 +316,19 @@ export default class Input{
             }
         });
         //
+        d3.select("#lefthandle").on("mousedown", function(){//start resizing the left column
+            input.moveState = 8;
+        });
+        //
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            emy -= parseInt(d3.select("#header").style("height"));
-            //console.log(this.moveState);
+            emx -= canox;
+            emy -= canoy;
             //
             switch(this.moveState){
                 case 1://field move
-                    if(this.shifting){
+                    if(event.shiftKey){
                         this.command.dragSelect(stX, stY, emx, emy);//drag select
                     }else{
                         this.command.shiftView(emx - mX, emy - mY);//move field
@@ -259,18 +359,38 @@ export default class Input{
                     this.active.reval(emx, emy);
                     break;
                 case 5://set the time via timeline
-                    if(this.shifting){
-                        //
+                    if(event.shiftKey){
+                        command.timeline.shiftPos(emx - mX);
                     }else{
                         command.setTime(command.timeline.timeX.invert(event.clientX));
                     }
                     break;
                 case 6://retime an object via timeline extremes
-                    this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
-                    command.updateGrid();
-                    command.drawGrid();
-                    command.moveGrid();
-                    command.timeline.movePoints();
+                    if(event.shiftKey){
+                        this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
+                        command.updateGrid();
+                        command.drawGrid();
+                        command.moveGrid();
+                        command.timeline.movePoints();
+                        if(command.viewType != 0){
+                            command.moveExtremes();
+                        }
+                    }
+                    break;
+                case 7:
+                    break;//do nothing
+                case 8://resize left column
+                    let newX = event.clientX;
+                    if(newX - 130 > getExtra() && window.innerWidth - newX > getField()){
+                        d3.select('#leftcolumn').style('width', `${newX}px`);
+                        d3.select('#fieldcolumn').style('width', `${window.innerWidth - newX}px`);
+                        //initalX = newX;
+                        columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+                        fitWidth(columnWidth);
+                        fitSolve(columnWidth);
+                        command.resize();
+                        canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+                    }
                     break;
                 default://regular mouse movement
                     //command.drawGrid();
@@ -284,8 +404,10 @@ export default class Input{
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
-                if(this.command.viewType == 0){
+                if(this.command.viewType == 0 && this.command.vectorMode != -1){
                     this.command.toggleVectors(1);
+                }else if(this.command.vectorMode == -1){
+                    this.active.toggleVectors(-1);
                 }
                 this.moveState = 0;
                 this.command.drawGrid();
@@ -296,6 +418,7 @@ export default class Input{
                         this.command.select();
                         this.active = null;
                         this.command.selected = null;
+                        this.command.props.update();
                         break;
                     case 2:
                         this.command.select(this.command.selected);
@@ -394,14 +517,16 @@ export default class Input{
         //
         var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
-            console.log("drag entered");
-            d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
-            e.stopPropagation();
-            e.preventDefault();
+            if(window.getSelection().anchorNode == null){
+                d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
+                e.stopPropagation();
+                e.preventDefault();
+            }
         }, false);
         dropbox.addEventListener("dragleave", e => {
             console.log("drag left");
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
+            fake = false;
         }, false);
         dropbox.addEventListener("dragover", e => {
             e.stopPropagation();
@@ -454,6 +579,7 @@ export default class Input{
     newObjPoint(obj, point){
         var input = this;
         let color = point.style("fill");
+        let pointLabel = null;
         point.on("mouseenter", function(){
             point.attr("r", 7);
         });
@@ -465,8 +591,22 @@ export default class Input{
         point.on("mousedown", function(){
             if(point.style("fill") == "white"){
                 point.style("fill", color);
+                let labell = obj.pointDiv.selectAll(`.pointLabel[val='${point.attr("val")}']`).nodes();
+                if(labell.length > 0){
+                    d3.select(labell[0]).remove();
+                }
             }else{
                 point.style("fill", "white");
+                ////<div class="pointLabel"><p class="text">\(1.23, 4.56\)</p></div>
+                console.log(parseInt(obj.pointDiv.style('width')) / 2);
+                let pos = obj.profile.calc(0, parseFloat(point.attr("val")));
+                pointLabel = obj.pointDiv.append("div").attr("class", "pointLabel").attr("val", point.attr("val"));
+                pointLabel
+                    .append("p").attr("class", "text")
+                    .text(`${round(pos[0], 3)}, ${round(pos[1], 3)}`);
+                pointLabel
+                    .style("left", `${point.attr("cx") - (parseInt(pointLabel.style('width')) / 2)}px`)
+                    .style("top", `${point.attr("cy") - (parseInt(pointLabel.style('height'))) - 10}px`);
             }
             input.moveState = 2;
             input.command.select(obj);
@@ -518,79 +658,6 @@ export default class Input{
         });
     }
     //
-    props(command, self){//move this to the props file
-        var input = this;
-        //
-        self.t.on("input", function(){
-            if(isNumeric(this.value)){
-                command.setTime(parseFloat(this.value), true);
-            }
-        });
-        //
-        self.posx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(0, parseFloat(this.value), command.selected.py);
-                command.objPosChange([command.selected], true);
-                input.command.props.renderEqs();
-            }
-        });
-        //
-        self.posy.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(0, command.selected.px, parseFloat(this.value));
-                command.objPosChange([command.selected], true);
-                input.command.props.renderEqs();
-            }
-        });
-        //
-        self.velx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(1, parseFloat(this.value), parseFloat(self.vely.property("value")));
-                input.valueUpdate(1);
-            }
-        });
-        //
-        self.vely.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(1, parseFloat(self.velx.property("value")), parseFloat(this.value));
-                input.valueUpdate(1);
-            }
-        });
-        //
-        self.accelx.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(2, parseFloat(this.value), parseFloat(self.accely.property("value")));
-                input.valueUpdate(2);
-            }
-        });
-        //
-        self.accely.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(2, parseFloat(self.accelx.property("value")), parseFloat(this.value));
-                input.valueUpdate(2);
-            }
-        });
-        //
-        self.jerkx.on("input", function(){
-            if(isNumeric(this.value)){
-                console.log(`Val: ${this.value}, parsed: ${parseFloat(this.value)}`);
-                command.selected.setValue(3, parseFloat(this.value), parseFloat(self.jerky.property("value")));
-                input.valueUpdate(3);
-            }
-        });
-        //
-        self.jerky.on("input", function(){
-            if(isNumeric(this.value)){
-                command.selected.setValue(3, parseFloat(self.jerkx.property("value")), parseFloat(this.value));
-                input.valueUpdate(3);
-            }
-        });
-        //
-        self.calcB.on("mousedown", function(){
-            console.log("Hello!");
-        });
-    }
-    //
     fieldClick(elem){
         this.propsState = true;
         this.propActive = elem;
@@ -607,8 +674,47 @@ export default class Input{
     }
 }
 
+function round(number, places){
+    return Math.round(Math.pow(10, places) * number) / Math.pow(10, places);
+}
+
 function isNumeric(str) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
            !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+function getWidth(id){//get width of any element, including margins
+    let elem = d3.select(id);
+    return parseFloat(elem.style('width')) + parseFloat(elem.style('margin-left')) + parseFloat(elem.style('margin-right'));
+}
+
+function getExtra(){//get the width of the non-field elements of the values section
+    return getWidth('.expandCompIcon') + (2 * getWidth('.propParaLabel')) + (2 * getWidth('.propdrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getCalc(){//get the width of the non-field elements of the solver section
+    return (2 * getWidth('.checkbox')) + (2 * getWidth('.readCalcLabel')) + (2 * getWidth('.readCalcDrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getField(){//get the width of the field
+    if(d3.select('#settings').style('display') == 'none'){
+        return getWidth('#leftfield') + 10;
+    }else{
+        return parseFloat(d3.select('#settings').style('width')) + getWidth('#leftfield') + 10;
+    }
+}
+
+function fitWidth(columnWidth){//fit the input fields to the width of the left column
+    let labelWidth = getExtra();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.fitWidth').style('width', `${fieldWidth}px`);
+}
+
+function fitSolve(columnWidth){//fit the input fields in the solve section
+    let labelWidth = getCalc();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.solveInput').style('width', `${fieldWidth}px`);
 }

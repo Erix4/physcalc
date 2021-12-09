@@ -20,6 +20,7 @@ body{
     width: 100%;
     height: 100%;
     position: absolute;
+    overscroll-behavior-y: none;
 }
 
 #getFile{
@@ -46,16 +47,16 @@ body{
 }
 
 .checkbox > input {
-    height: 1.3em;
-    width: 1.3em;
+    height: 1em;
+    width: 1em;
     -webkit-appearance: none;
     -moz-appearance: none;
     -o-appearance: none;
     appearance: none;
-    border: 4px solid #34495E;
+    border: .2em solid white;
+    outline: .25em solid black;
     border-radius: 4px;
-    outline: none;
-    background-color: #41B883;
+    background-color: white;
     cursor: pointer;
 }
 
@@ -64,7 +65,7 @@ body{
 }
 
 .checkbox > input:hover{
-    border: 4px solid white;
+    background-color: #41B883;
 }
 
 #fullDisplay{
@@ -161,6 +162,7 @@ i{
     bottom: 0;
     display: flex;
     background-color: black;
+    overflow: hidden;
 }
 
 /*#region: leftcolumn*/
@@ -172,6 +174,7 @@ i{
     left: 0;
     overflow-x: hidden;
     position: relative;
+    z-index: 2;
 }
 
 .container{
@@ -234,6 +237,10 @@ i{
 .tab:hover{
     background-color: #ff6f59;
     transition: .2s;
+}
+
+.selt{
+    background-color: #254441;
 }
 
 .tabText{
@@ -678,6 +685,25 @@ i{
     z-index: 1;
 }
 
+#pointLabels{
+    z-index: 1;
+}
+
+.pointLabel{
+    background-color: white;
+    border-radius: .2em;
+    height: fit-content;
+    padding: .3em;
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid black;
+}
+
+.pointLabel p{
+    font-size: 120%;
+    font-family: "LatinMs";
+}
+
 /*#region: left field*/
 
 #leftfield{
@@ -773,15 +799,18 @@ i{
 .settingText{
     font-size: 200%;
     margin-top: .2em;
+    color: white;
 }
 
 #settings{
     margin-left: auto;
-    background-color: #fcba03;
+    background-color: #254441;
     padding-right: 15px;
     padding-left: 10px;
     display: none;
     z-index: 1;
+    color: white;
+    font-size: 120%;
 }
 
 .settingLine{
@@ -797,6 +826,8 @@ i{
     padding: 0;
     margin: 0;
     z-index: 1;
+    font-size: 140%;
+    margin-top: -.3em;
 }
 
 .settingScale{
@@ -814,12 +845,9 @@ label.settingToggle{
 label.settingToggle > input {
     height: 1.3em;
     width: 1.3em;
-    border: 3px solid black;
-    background-color: white;
 }
 
 label.settingToggle > input:checked {
-    background-color: gray;
 }
 
 p.settingToggle{
@@ -830,12 +858,17 @@ p.settingToggle{
     margin-bottom: auto;
 }
 
+.settingToggle.text{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+
 #squareButton{
     margin-top: .6em;
 }
 
 .scaleButton{
-    background-color: orangered;
+    background-color: #76cab8;
     width: fit-content;
     border: .2em solid black;
     border-radius: .4em;
@@ -846,7 +879,7 @@ p.settingToggle{
 }
 
 .scaleButton:hover{
-    background-color: darkred;
+    background-color: #ff6f59;
     transition: .2s;
 }
 
@@ -863,10 +896,15 @@ p.settingToggle{
     position: relative;
 }
 
-.time{
+#timeline{
     width: 100%;
     height: 75%;
     top: 25%;
+}
+
+.time{
+    width: 100%;
+    height: 100%;
     position: absolute;
 }
 
@@ -999,6 +1037,10 @@ p.settingToggle{
 
 .range option{
     font-size: 100%;
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:before {
+    background-color: 'orange';
 }
 
 /*#endregion*/

@@ -37,13 +37,13 @@
             </div>
         </div>
         <div id="interface">
-            <div data-simplebar id="leftcolumn">
+            <div id="leftcolumn">
                 <div id="propHead" class="container">
                     <h2 id="propTitle" class="text noSelect">An object</h2>
                 </div>
                 <div id="tabContainer">
                     <div id="tabs">
-                        <div class="tab" val="1">
+                        <div class="selt tab" val="1">
                             <p class="tabText text">1</p>
                         </div>
                         <div id="addTab" class="tab"><i id="tabIcon" class="fas fa-plus"></i></div>
@@ -66,10 +66,10 @@
                         <img class="sel discIcon" src="/assets/infinity-solid.svg"/>
                     </div>
                     <select class="tabDrop">
-                        <option>mm</option>
-                        <option>cm</option>
-                        <option selected="selected">m</option>
-                        <option>km</option>
+                        <option>ms</option>
+                        <option selected="selected">s</option>
+                        <option>min</option>
+                        <option>hr</option>
                     </select>
                 </div>
                 <div class="expand"
@@ -191,10 +191,10 @@
                                 <div class="valueContents overfold">
                                     <div class="labelLine">
                                         <p class="propLabel text">Jerk</p>
-                                        <!--<div class="undoButton">
-                                            <i class="undo fas fa-undo-alt"></i>
-                                        </div>-->
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -226,6 +226,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Snap</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -257,6 +260,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Crackle</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -288,6 +294,9 @@
                                     <div class="labelLine">
                                         <p class="propLabel text">Pop</p>
                                         <div class="toggles">
+                                            <div class="toggleButton undoButton">
+                                                <i class="toggleIcon undo fas fa-undo-alt"></i>
+                                            </div>
                                             <div class="toggleButton">
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
@@ -338,8 +347,8 @@
                                 </select>
                             </div>
                             <div class="eq" id="math">\(\)</div>
-                            <div class="eq text" id="xeq">\(x(t)=?\)</div>
-                            <div class="eq text" id="yeq">\(y(t)=?\)</div>
+                            <div class="eq text" id="xeq">\(-\)</div>
+                            <div class="eq text" id="yeq">\(-\)</div>
                         </div>
                         <div class="expand">
                             <div id="valueExpand" class="subPropExpand propExpand">
@@ -348,10 +357,10 @@
                             </div>
                             <div id="valueContentsMore" class="propContents">
                                 <div class="overfold">
-                                    <p class="propLabel text">Eq 3</p>
-                                    <p class="propLabel text">Eq 4</p>
-                                    <p class="propLabel text">Eq 5</p>
-                                    <p class="propLabel text">Eq 6</p>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
+                                    <div class="eq text">\(-\)</div>
                                 </div>
                             </div>
                         </div>
@@ -367,8 +376,9 @@
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">Solve: </p>
                                 <select id="eqUnits" class="propdrop">
-                                    <option selected="selected">for motion</option>
                                     <option>for point</option>
+                                    <option selected="selected">for motion</option>
+                                    <option>without time</option>
                                 </select>
                             </div>
                             <div class="solver labelLine">
@@ -529,6 +539,7 @@
             <div id="fieldcolumn">
                 <canvas id="fieldCanvas" class="fill"></canvas>
                 <svg id="fieldSVG" class="fill"></svg>
+                <div id="pointLabels"></div>
                 <div id="leftfield">
                     <div id="timeValue">
                         <p id="timeText" class="text">time = </p>
@@ -553,7 +564,7 @@
                     <div class="settingLine">
                         <label class="settingToggle checkbox"><input type="checkbox" checked="checked"/></label>
                         <p class="settingToggle text">Gravity:</p>
-                        <input class="settingField propField" type="number" value="10">
+                        <input id="gravitySet" class="settingField propField" type="number" value="-9.81">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -617,9 +628,9 @@
                     <p class="text">Normalize</p>
                 </div>
                 <div id="timeRange" class="range cutout">
-                    <div class="leftRange rangeButton"><input value="-10" class="rangeField field" type="number"/></div>
-                    <div class="leftRange rangeButton"><input value="0" class="rangeField field" type="number"/></div>
-                    <div class="rangeButton"><input value="10" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="-5" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input id="timeBarTime" value="0" class="rangeField field" type="number"/></div>
+                    <div class="rangeButton"><input value="5" class="rangeField field" type="number"/></div>
                 </div>
                 <select class="range cutout propdrop">
                     <option>ms</option>
@@ -628,8 +639,10 @@
                     <option>hr</option>
                 </select>
             </div>
-            <canvas id="timeCanvas" class="time"></canvas>
-            <svg id="timeSVG" class="time"></svg>
+            <div data-simplebar id="timeline">
+                <canvas id="timeCanvas" class="time"></canvas>
+                <svg id="timeSVG" class="time"></svg>
+            </div>
         </div>
     </div>
     <script src="/index.js"></script>
