@@ -350,8 +350,11 @@ export default class Profile{
                     return true;
                 }
             }));
-            this.bounds[idx].forEach(bound => {
-                if(Math.abs(bound) != Infinity){//only push piece bound if it exists (function doesn't go to infinity)
+            this.bounds[idx].forEach((bound, i) => {
+                if(Math.abs(bound) != Infinity && !extrs.includes(bound)){//only push piece bound if it exists (function doesn't go to infinity)
+                    if(i == 1){
+                        bound -= .001;
+                    }
                     extrs.push(bound);
                 }
             });

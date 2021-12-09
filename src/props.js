@@ -294,10 +294,9 @@ export default class Props{
                     //
                     selected.profile.newSplitPiece();
                     selected.update();
-                    console.log(selected.getVals());
                     self.command.drawGrid();
+                    self.command.spawnExtremes([selected]);
                     self.tabEvents();
-                    console.log(selected.piece);
                     self.updateTabs();
                 }
             }
@@ -313,20 +312,24 @@ export default class Props{
                         //
                         self.command.selected.update();
                         self.command.drawGrid();
+                        self.command.spawnExtremes([self.selected]);
                         self.updateTabs();
                         return;
                     }
                     self.selected.profile.bounds[pIdx][0] = self.command.time;
+                    self.command.spawnExtremes([self.selected]);
                 }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
                     if(isFinite(bounds[1])){//right bound is already a number
                         self.selected.profile.bounds[pIdx][1] = Infinity;
                         //
                         self.command.selected.update();
                         self.command.drawGrid();
+                        self.command.spawnExtremes([self.selected]);
                         self.updateTabs();
                         return;
                     }
                     self.selected.profile.bounds[pIdx][1] = self.command.time;
+                    self.command.spawnExtremes([self.selected]);
                 }
                 self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
                 if(self.selected.profile.junctions[pIdx-1+i] == 0){
@@ -349,6 +352,7 @@ export default class Props{
                 console.log('calling left field input');
                 self.selected.profile.reLeftBoundPiece(self.selected.piece, parseFloat(this.value));
                 self.command.objPosChange([self.command.selected], true);
+                self.command.spawnExtremes([self.selected]);
             }
         });
         d3.select('.tabField:nth-child(4)').on('input', function(){
@@ -356,6 +360,7 @@ export default class Props{
                 console.log('calling right field input');
                 self.selected.profile.reRightBoundPiece(self.selected.piece, parseFloat(this.value));
                 self.command.objPosChange([self.command.selected], true);
+                self.command.spawnExtremes([self.selected]);
             }
         });
     }
