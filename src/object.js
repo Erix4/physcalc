@@ -155,7 +155,25 @@ export default class Object{
     /**
      * Update all internal values by function
      */
-    update(){
+    update(bypass=false){
+        /*if(this.lock && !bypass){
+            if(isFinite(this.profile.bounds[this.piece][0])){
+                this.profile.reLeftBoundPiece(this.piece, this.profile.bounds[this.piece][0] + (this.command.time - this.lastTime));
+            }
+            if(isFinite(this.profile.bounds[this.piece][1])){
+                this.profile.reRightBoundPiece(this.piece, this.profile.bounds[this.piece][1] + (this.command.time - this.lastTime));
+            }
+            this.setValue(0, this.px, this.py);//resolve function to shift the time
+            this.command.retimeExtremes([this]);
+        }
+        this.lastTime = this.command.time;*/
+        //
+        for(var n = 0; n <= this.depth; n++){
+            let pos = this.getVals(n);
+            this.xS[n] = pos[0];
+            this.yS[n] = pos[1];
+        }
+        //
         if(this.profile.getValIdx(this.command.time) != this.piece){
             this.piece = this.profile.getValIdx(this.command.time);
             this.repieceArrows();
@@ -163,18 +181,6 @@ export default class Object{
                 this.command.props.renderEqs();
                 console.log(`new piece detected, rerendering equations`);
             }
-        }
-        //
-        for(var n = 0; n <= this.depth; n++){
-            //this.xS[n] = this.profile.calc(n, this.command.time)[0];
-            //this.yS[n] = this.profile.calc(n, this.command.time)[1];
-            let pos = this.getVals(n);
-            this.xS[n] = pos[0];
-            this.yS[n] = pos[1];
-        }
-        if(this.lock){
-            this.setValue(0, this.px, this.py);//resolve function to shift the time
-            this.command.retimeExtremes([this]);
         }
         //
         switch(this.command.viewType){

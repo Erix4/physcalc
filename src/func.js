@@ -143,7 +143,7 @@ export default class Profile{
             this.command.time = t2 - .1;
         }
         //START HERE--------------------------BOZO------------------
-        console.log(`setting origin in index ${idx} to ${this.bounds[idx][0]}`);
+        //console.log(`setting origin in index ${idx} to ${this.bounds[idx][0]}`);
         if(isFinite(this.bounds[idx][0])){//if piece has a left bound
             this.setOrigin(this.bounds[idx][0], idx);//set origin to realign values
             this.setValTime(0, this.bounds[idx][0], ...this.calc(0, this.bounds[idx][0], idx));
@@ -151,6 +151,28 @@ export default class Profile{
             this.setOrigin(this.bounds[idx][1]-.1, idx);//set origin slightly to the left of the right bound
             this.setValTime(0, this.bounds[idx][1]-.1, ...this.calc(0, this.bounds[idx][1]-.1, idx));
         }
+    }
+    //
+    shiftAllPieces(ct){
+        this.pieces.forEach((piece, idx) => {
+            let bound = this.bounds[idx];
+            if(isFinite(bound[0])){
+                this.setOrigin(bound[0], idx);
+                piece.setValTime(0, bound[0] + ct, ...this.calc(0, bound[0], idx));
+                this.bounds[idx][0] += ct;
+            }else if(isFinite(bound[1])){
+                this.setOrigin(bound[1] - .1, idx);
+                piece.setValTime(0, bound[1] - .1 + ct, ...this.calc(0, bound[1] - .1, idx));
+            }else{
+                console.log(`shifting time ${ct} to ${this.calc(0, 0, idx)}`);
+                this.setOrigin(0, idx);
+                piece.setValTime(0, ct, ...this.calc(0, 0, idx));//no piece specified, just move from 0
+            }
+            //
+            if(isFinite(bound[1])){
+                this.bounds[idx][1] += ct;
+            }
+        });
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated
@@ -191,7 +213,6 @@ export default class Profile{
                 //
                 doms.forEach(dom => {//for every domain
                     reFunc.steps = divier;
-                    console.log(reFunc);
                     reFunc.draw(this.command, dom[0], dom[1]);//draw the given power for this piece at this domain
                 });
             });
@@ -273,7 +294,7 @@ export default class Profile{
      * @param {Boolean} [propogator] whether to propagate the set values to other depths
      */
     setValTime(power, t, x, y, propagator = true, alignPower = 0){
-        console.log(`setting values`);
+        //console.log(`setting values`);
         let curIdx = this.getLeftIdx(t);
         if(curIdx == -1){//time is left of every piece
             curIdx = 0;//set calc index to the last one
@@ -352,9 +373,6 @@ export default class Profile{
             }));
             this.bounds[idx].forEach((bound, i) => {
                 if(Math.abs(bound) != Infinity && !extrs.includes(bound)){//only push piece bound if it exists (function doesn't go to infinity)
-                    if(i == 1){
-                        bound -= .001;
-                    }
                     extrs.push(bound);
                 }
             });
@@ -691,17 +709,17 @@ export class Piece{
         }
         //
         var newRanges = ranges.slice();
-        for(var i = 0; i < ranges.length && ranges[i][1] < this.command.scaleX.domain()[0]; i++){
+        for(var i = 0; i < ranges.length && ranges[i][1] < this.command.scaleX.domain()[0]; i++){//delete all sets of ranges to the right of the screen
             newRanges.splice(0, 1);
         }
-        if(newRanges[0][0] < this.command.scaleX.domain()[0]){
+        if(newRanges.length > 0 && newRanges[0][0] < this.command.scaleX.domain()[0]){
             newRanges[0][0] = this.command.scaleX.domain()[0];
         }
         //
-        for(var i = ranges.length - 1; i >= 0 && ranges[i][0] > this.command.scaleX.domain()[1]; i--){
+        for(var i = ranges.length - 1; i >= 0 && ranges[i][0] > this.command.scaleX.domain()[1]; i--){//delete all sets of ranges to the left of the screen
             newRanges.pop();
         }
-        if(newRanges[newRanges.length - 1][1] > this.command.scaleX.domain()[1]){
+        if(newRanges.length > 0 && newRanges[newRanges.length - 1][1] > this.command.scaleX.domain()[1]){
             newRanges[newRanges.length - 1][1] = this.command.scaleX.domain()[1];
         }
         //

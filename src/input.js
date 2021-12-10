@@ -53,6 +53,8 @@ export default class Input{
         var mX = 0;
         var mY = 0;
         //
+        var mT = null;//time mouse was pressed
+        //
         this.tX = 0;
         this.tY = 0;
         //
@@ -224,9 +226,9 @@ export default class Input{
                     }
                     break;
                 case "l":
-                    this.command.selObs.forEach(obj => {
+                    /*this.command.selObs.forEach(obj => {
                         obj.toggleLock();
-                    })
+                    });*/
                     break;
                 case "Enter":
                     if(this.propsState){
@@ -299,6 +301,7 @@ export default class Input{
             //
             mX = emx;
             mY = emy;
+            mT = new Date();
         });
         //
         command.svg.on("mousedown", function(){
@@ -366,8 +369,11 @@ export default class Input{
                     }
                     break;
                 case 6://retime an object via timeline extremes
-                    if(event.shiftKey){
-                        this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
+                    if(new Date - mT > 300){//if mouse has been held long enough (so no accidents)
+                        //this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
+                        this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
+                        //this.command.selected.profile.reBoundLeftPiece()
+                        command.props.retime();
                         command.updateGrid();
                         command.drawGrid();
                         command.moveGrid();
@@ -391,6 +397,10 @@ export default class Input{
                         command.resize();
                         canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
                     }
+                    break;
+                case 9:
+                    this.command.shiftPos(0, emx - mX, emy - mY, [this.active], this.propActive);//move object
+                    this.command.objPosChange([this.active]);//update corresponding displays
                     break;
                 default://regular mouse movement
                     //command.drawGrid();
@@ -608,7 +618,10 @@ export default class Input{
                     .style("left", `${point.attr("cx") - (parseInt(pointLabel.style('width')) / 2)}px`)
                     .style("top", `${point.attr("cy") - (parseInt(pointLabel.style('height'))) - 10}px`);
             }
-            input.moveState = 2;
+            input.moveState = 9;
+            input.active = obj;
+            input.propActive = parseFloat(point.attr("val"));
+            obj.profile.setOrigin(input.propActive);
             input.command.select(obj);
             input.timeline.colorPoints(input.command.findIdxs([obj]));
         });

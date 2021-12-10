@@ -271,34 +271,36 @@ export default class Props{
         //
         d3.selectAll('.tab').on('click', function(d, i){
             let selected = self.command.selected;
-            if(this.attributes.id==null){//not the add tab
+            if(this.attributes.id==null && selected != null){//not the add tab
                 if(selected.profile.bounds.length > 1){
                     if(i == 0){
                         console.log(`setting to ${selected.profile.bounds[0][1]-1}`);
+                        self.command.time = selected.profile.bounds[0][1]-.1;
+                        selected.update(true);//bypass lock if necessary
                         self.command.setTime(selected.profile.bounds[0][1]-.1);
                     }else{
                         console.log(`setting to ${selected.profile.bounds[i][0]}`);
+                        self.command.time = selected.profile.bounds[i][0];
+                        selected.update(true);
                         self.command.setTime(selected.profile.bounds[i][0]);
                     }
                 }
-            }else{//is the add tab
-                if(selected != null){
-                    self.tabNum++;
-                    console.log(`add tab`);
-                    let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
-                    newTab.append('p').attr('class', 'tabText text').text(self.tabNum);
-                    d3.select(this).raise();
-                    if(self.tabNum == 10){
-                        d3.select(this).style('display', 'none');
-                    }
-                    //
-                    selected.profile.newSplitPiece();
-                    selected.update();
-                    self.command.drawGrid();
-                    self.command.spawnExtremes([selected]);
-                    self.tabEvents();
-                    self.updateTabs();
+            }else if(selected != null){
+                self.tabNum++;
+                console.log(`add tab`);
+                let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
+                newTab.append('p').attr('class', 'tabText text').text(self.tabNum);
+                d3.select(this).raise();
+                if(self.tabNum == 10){
+                    d3.select(this).style('display', 'none');
                 }
+                //
+                selected.profile.newSplitPiece();
+                selected.update();
+                self.command.drawGrid();
+                self.command.spawnExtremes([selected]);
+                self.tabEvents();
+                self.updateTabs();
             }
         });
         //

@@ -47,6 +47,7 @@ export default class Timeline{
         let rt = lf + this.scale;
         //
         this.timeX = d3.scaleLinear().domain([lf, rt]).range([0, this.scrW]);
+        this.conTime = d3.scaleLinear().domain([0, this.scrW]).range([0, this.scale]);
     }
     //
     /**

@@ -365,33 +365,41 @@ export default class Command{
      * @param {Number} cx         change in x in pixels
      * @param {Number} cy         change in y in pixels
      * @param {Array<Object} objs list of objects to shift
+     * @param {Number} [time]     time to shift position at
      */
-    shiftPos(power, cx, cy, objs){
+    shiftPos(power, cx, cy, objs, time){
+        if(arguments.length < 5){
+            time = this.time;
+        }
+        //console.log(`shifting position at time ${time} with ${cx}, ${cy}`);
         switch(this.viewType){
             case 0:
                 objs.forEach(obj => {
-                    let x = this.scaleX.invert(this.scaleX(obj.xS[power]) + cx);
-                    let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
-                    this.setPos(power, x, y, obj);
+                    let curPos = obj.getVals(power, time);
+                    let x = this.scaleX.invert(this.scaleX(curPos[0]) + cx);
+                    let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
+                    obj.setValueTime(power, time, x, y, obj);
                 });
                 break;
             case 1:
-                var t = this.scaleX.invert(this.scaleX(this.time) + cx);
+                var t = this.scaleX.invert(this.scaleX(time) + cx);
                 objs.forEach(obj => {
-                    let x = this.scaleY.invert(this.scaleY(obj.xS[power]) + cy);
-                    let y = obj.yS[power];
+                    let curPos = obj.getVals(power, time);
+                    let x = this.scaleY.invert(this.scaleY(curPos[0]) + cy);
+                    let y = curPos[1];
                     obj.setValueTime(power, t, x, y);
                 });
-                this.setTime(t);
+                this.setTime(this.time + (t - time));
                 break;
             case 2:
-                var t = this.scaleX.invert(this.scaleX(this.time) + cx);
+                var t = this.scaleX.invert(this.scaleX(time) + cx);
                 objs.forEach(obj => {
-                    let x = obj.xS[power];
-                    let y = this.scaleY.invert(this.scaleY(obj.yS[power]) + cy);
+                    let curPos = obj.getVals(power, time);
+                    let x = curPos[0];
+                    let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
                     obj.setValueTime(power, t, x, y);
                 });
-                this.setTime(t);
+                this.setTime(this.time + (t - time));
                 break;
         }
     }
