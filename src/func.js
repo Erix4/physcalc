@@ -366,8 +366,8 @@ export default class Profile{
         var extrs = new Set();//guaruntee no duplicates
         //
         this.pieces.forEach((piece, idx) => {
-            piece.getExtremes().filter(extr => this.bounds[idx][0] < extr && extr < this.bounds[idx][1]).forEach(extr => extrs.add(extr));
-            this.bounds[idx].filter(bound => Math.abs(bound) != Infinity).forEach(bound => extrs.add(bound));
+            piece.getExtremes().filter(extr => this.bounds[idx][0] < extr && extr < this.bounds[idx][1]).forEach(extr => extrs.add(round(extr, 10)));
+            this.bounds[idx].filter(bound => Math.abs(bound) != Infinity).forEach(bound => extrs.add(round(bound, 10)));//round to ten digits to rectify floating point errors
         });
         //
         return Array.from(extrs);
@@ -1582,7 +1582,7 @@ function factorial(num, len){//basically (num)!/(num - len)!, and 0! = 1, so fac
 }
 
 function round(num, digits){
-    return Math.round(num * digits) / digits;
+    return Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
 }
 
 class Term{//single coefficient and power of input (i.e. 4*x^3)

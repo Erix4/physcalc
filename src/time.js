@@ -221,6 +221,7 @@ export default class Timeline{
         //
         objIs.forEach(id => {
             this.command.objects[id].extremes = this.command.objects[id].profile.getExtremes();
+            console.log(this.command.objects[id].extremes);
             this.timePoints[id].forEach((point, n) => {
                 point.attr("val", this.command.objects[id].extremes[n]).attr("cx", this.timeX(this.command.objects[id].extremes[n]));//convert time of extreme to x in pixels
             });
