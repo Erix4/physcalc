@@ -45,7 +45,6 @@ export default class Command{
         this.grid.calcSize();//get scales and things
         //
         this.timeline = new Timeline(this, document.getElementById('timeCanvas'), d3.select("#timeSVG"), 10);
-        console.log(this.time.scrH);
         //
         this.input = new Input(this);
         this.props = new Props(this);

@@ -34,12 +34,17 @@ export default class Timeline{
         this.tri = this.svg.append("polygon").style("fill", "#47a3ff");
         this.move();
         //console.log(`Domain: ${this.timeX.domain()[0]} to ${this.timeX.domain()[1]}, Range: ${this.timeX.range()[0]} to ${this.timeX.range()[1]}`);
+        //
+        let self = this;
+        d3.select('#norm').on('click', function(){
+            self.normalize();
+        });
     }
     //
     /**
      * Recalculate time scale (timeX)
      */
-    calcSize(){
+    calcSize(setProps = true){
         this.scrW = parseInt(this.svg.style("width"));//return screen width in pixels
         this.scrH = parseInt(this.svg.style("height"));//return screen height in pixels
         //
@@ -48,6 +53,79 @@ export default class Timeline{
         //
         this.timeX = d3.scaleLinear().domain([lf, rt]).range([0, this.scrW]);
         this.conTime = d3.scaleLinear().domain([0, this.scrW]).range([0, this.scale]);
+        //
+        if(setProps){
+            d3.select('#leftTimeBound').property('value', lf.toFixed(3));
+            d3.select('#rightTimeBound').property('value', rt.toFixed(3));
+        }
+    }
+    //
+    /**
+     * resize the timeline by changing one or more of the edges
+     * @param {Number} [left]  the left boundary to change
+     * @param {Number} [right] the right boundary to change
+     */
+    setSizeByEdge({left, right, setProps = false}={}){
+        console.log(`resizing`);
+        if(left == null){
+            left = this.timeX.domain()[0];
+        }else if(right == null){
+            right = this.timeX.domain()[1];
+        }
+        //
+        this.scale = right - left;
+        this.cx = left + (this.scale / 2);
+        this.calcSize(setProps);
+        //
+        while(this.getGridRes() < this.gridMin){
+            this.res *= 4;
+            this.superRes *= 4;
+        }
+        while(this.getGridRes() > this.gridMax){
+            this.res /= 4;
+            this.superRes /= 4;
+        }
+    }
+    //
+    normalize(){
+        var extrs = [];
+        this.timePoints.forEach(obj => {
+            obj.forEach(point => {
+                extrs.push(parseFloat(point.attr('val')));
+            });
+        });
+        //
+        var values = extrs.slice();
+        //
+        values.sort( function(a, b) {
+            return a - b;
+        });
+        //
+        /* Then find a generous IQR. This is generous because if (values.length / 4) 
+        * is not an int, then really you should average the two elements on either 
+        * side to find q1.
+        */     
+        var q1 = values[Math.floor(((values.length - 1) / 4))];
+        // Likewise for q3. 
+        console.log(`${((values.length - 1) * (3 / 4))} to ${Math.ceil((values.length * (3 / 4)))}`);
+        var q3 = values[Math.ceil(((values.length - 1) * (3 / 4)))];
+        var iqr = q3 - q1;
+        //
+        // Then find min and max values
+        var maxValue = q3 + iqr*1.5;
+        var minValue = q1 - iqr*1.5;
+
+        // Then filter anything beyond or beneath these values.
+        var filteredValues = values.filter(function(x) {
+            return (x <= maxValue) && (x >= minValue);
+        });
+        //
+        let buffer = (filteredValues[filteredValues.length - 1] - filteredValues[0]) / 4;
+        //
+        this.setSizeByEdge({left: filteredValues[0] - buffer, right: filteredValues[filteredValues.length - 1] + buffer, setProps: true});
+        this.draw();
+        this.move();
+        this.command.retimeExtremes();
     }
     //
     /**
@@ -76,8 +154,8 @@ export default class Timeline{
      * shift the view position of the timeline
      * @param {Number} px 
      */
-    shiftPos(px){//reposition field
-        this.cx -= this.conX(px);
+    shiftPos(cx){//reposition field
+        this.cx -= cx;
         //
         this.calcSize();
     }
@@ -134,7 +212,7 @@ export default class Timeline{
     //
     /**
      * move all the extreme points for certain objects
-     * @param {Array<Number} [objIs] list of indexs of objects
+     * @param {Array<Number;} [objIs] list of indexs of objects
      */
     movePoints(objIs){
         if(!objIs){

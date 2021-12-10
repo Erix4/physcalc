@@ -314,7 +314,9 @@ export default class Input{
         //
         this.timeline.svg.on("mousedown", function(){
             if(input.moveState == 0){
-                command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
+                if(!event.shiftKey){
+                    command.setTime(command.timeline.timeX.invert(d3.mouse(this)[0]));
+                }
                 input.moveState = 5;
             }
         });
@@ -363,7 +365,10 @@ export default class Input{
                     break;
                 case 5://set the time via timeline
                     if(event.shiftKey){
-                        command.timeline.shiftPos(emx - mX);
+                        command.timeline.shiftPos(command.timeline.conTime(emx - mX));
+                        command.drawTimeline();
+                        command.moveTimeline();
+                        command.retimeExtremes();
                     }else{
                         command.setTime(command.timeline.timeX.invert(event.clientX));
                     }
@@ -554,6 +559,34 @@ export default class Input{
             this.command.openState(files[0]);
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
         }, false);
+        //
+        d3.select('#leftTimeBound').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select('#rightTimeBound').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select('#leftTimeBound').on('input', function(){
+            if(isNumeric(this.value)){
+                input.timeline.setSizeByEdge({left: parseFloat(this.value)});
+                command.drawTimeline();
+                command.moveTimeline();
+                command.retimeExtremes();
+            }
+        });
+        //
+        d3.select('#rightTimeBound').on('input', function(){
+            if(isNumeric(this.value)){
+                input.timeline.setSizeByEdge({right: parseFloat(this.value)});
+                command.drawTimeline();
+                command.moveTimeline();
+                command.retimeExtremes();
+            }
+        });
     }
     //
     newPoint(point){

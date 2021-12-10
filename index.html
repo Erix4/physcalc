@@ -625,12 +625,12 @@
                     <div id="stepforward" class="playbackButton"><i class="fas fa-fast-forward"></i></div>
                 </div>
                 <div id="norm" class="range cutout">
-                    <p class="text">Normalize</p>
+                    <p class="text">Rescale</p>
                 </div>
                 <div id="timeRange" class="range cutout">
-                    <div class="leftRange rangeButton"><input value="-5" class="rangeField field" type="number"/></div>
-                    <div class="leftRange rangeButton"><input id="timeBarTime" value="0" class="rangeField field" type="number"/></div>
-                    <div class="rangeButton"><input value="5" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="-5" id="leftTimeBound" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="0" id="timeBarTime" class="rangeField field" type="number"/></div>
+                    <div class="rangeButton"><input value="5" id="rightTimeBound" class="rangeField field" type="number"/></div>
                 </div>
                 <select class="range cutout propdrop">
                     <option>ms</option>

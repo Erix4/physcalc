@@ -973,10 +973,11 @@ p.settingToggle{
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     background-color: #ffa294;
+    cursor: pointer;
 }
 
 #norm:hover{
-    background-color: #555;
+    background-color: #ff6f59;
 }
 
 #timeRange{
@@ -1027,7 +1028,7 @@ p.settingToggle{
 }
 
 .rangeButton:hover{
-    background-color: green;
+    background-color: #ff6f59;
 }
 
 .range.propdrop{

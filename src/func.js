@@ -164,7 +164,7 @@ export default class Profile{
                 this.setOrigin(bound[1] - .1, idx);
                 piece.setValTime(0, bound[1] - .1 + ct, ...this.calc(0, bound[1] - .1, idx));
             }else{
-                console.log(`shifting time ${ct} to ${this.calc(0, 0, idx)}`);
+                //console.log(`shifting time ${ct} to ${this.calc(0, 0, idx)}`);
                 this.setOrigin(0, idx);
                 piece.setValTime(0, ct, ...this.calc(0, 0, idx));//no piece specified, just move from 0
             }
@@ -363,22 +363,14 @@ export default class Profile{
      * @returns {Array<Number>} all extremes of the piecewise function
      */
     getExtremes(){
-        let extrs = [];
+        var extrs = new Set();//guaruntee no duplicates
         //
         this.pieces.forEach((piece, idx) => {
-            extrs.push(...piece.getExtremes().filter(extr => {//get extremes for the piece
-                if(this.bounds[idx][0] < extr && extr < this.bounds[idx][1]){//only get extremes that are within the bounds of the piece
-                    return true;
-                }
-            }));
-            this.bounds[idx].forEach((bound, i) => {
-                if(Math.abs(bound) != Infinity && !extrs.includes(bound)){//only push piece bound if it exists (function doesn't go to infinity)
-                    extrs.push(bound);
-                }
-            });
+            piece.getExtremes().filter(extr => this.bounds[idx][0] < extr && extr < this.bounds[idx][1]).forEach(extr => extrs.add(extr));
+            this.bounds[idx].filter(bound => Math.abs(bound) != Infinity).forEach(bound => extrs.add(bound));
         });
         //
-        return extrs;
+        return Array.from(extrs);
     }
     //
     /**
