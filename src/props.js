@@ -221,17 +221,13 @@ export default class Props{
         for(var n = 0; n < power; n++){
             devs += '\'';
         }
+        console.log(`hello?`);
         if(curPiece.paras.length > power){//para exists
             let mult = this.idxToMult(this.getDropIdx(d3.select('#eqUnitDrop')));
             //
             let curPara = curPiece.paras[power];
             //
-            var xCoefs = curPara.xFunc.getCoefs().reverse();
-            console.log(xCoefs);
-            xCoefs.map(coef => coef * 2);
-            console.log(xCoefs);
-            //
-            var str = this.buildEq(curPara.xFunc.getCoefs().reverse(), `x${devs}`);
+            var str = this.buildEq(curPara.xFunc.getCoefs().reverse().map(coef => coef * mult), `x${devs}`);//get the coefficients, reverse them, and multiply them all
             //
             var math = MathJax.Hub.getAllJax("math")[0];
             MathJax.Hub.Queue(["Text", math, str]);
@@ -240,7 +236,7 @@ export default class Props{
                 d3.select(elemx).html(d3.select("#math").html());
             });
             //
-            str = this.buildEq(curPara.yFunc.getCoefs().reverse(), `y${devs}`);
+            str = this.buildEq(curPara.yFunc.getCoefs().reverse().map(coef => coef * mult), `y${devs}`);
             math = MathJax.Hub.getAllJax("math")[0];
             MathJax.Hub.Queue(["Text", math, str]);
             //
