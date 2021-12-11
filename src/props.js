@@ -15,6 +15,9 @@ export default class Props{
         this.t = d3.select("#timeInput");
         this.tt = d3.select("#timeBarTime");
         //
+        let self = this;
+        //
+        this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         this.fields.forEach(field => {
             d3.select(field).on('click', function(){
@@ -31,16 +34,17 @@ export default class Props{
             input.fieldClick(this);
         });
         //
-        let self = this;
         this.fields.forEach((field, idx) => {
             d3.select(field).on('input', function(){
                 if(isNumeric(this.value)){
+                    let mult = self.idxToMult(self.getDropIdx(d3.select(self.drops[idx])));
+                    //
                     if(idx % 2 == 0){//x field
-                        command.selected.setValue(Math.floor(idx / 2), parseFloat(this.value), parseFloat(d3.select(self.fields[idx+1]).property("value")));
+                        command.selected.setValue(Math.floor(idx / 2), parseFloat(this.value) * mult, parseFloat(d3.select(self.fields[idx+1]).property("value")));
                         command.objPosChange([command.selected], true);
                         self.renderEqs();
                     }else{//y field
-                        command.selected.setValue(Math.floor(idx / 2), parseFloat(d3.select(self.fields[idx-1]).property("value")), parseFloat(this.value));
+                        command.selected.setValue(Math.floor(idx / 2), parseFloat(d3.select(self.fields[idx-1]).property("value")), parseFloat(this.value) * mult);
                         command.objPosChange([command.selected], true);
                         self.renderEqs();
                     }
@@ -49,6 +53,14 @@ export default class Props{
                         self.precision = prc;
                     }
                 }
+            });
+        });
+        //
+        this.drops.forEach((drop, idx) => {
+            d3.select(drop).on('change', function(){
+                drop.blur();
+                let mult = self.idxToMult(self.getDropIdx(d3.select(drop)));
+                d3.select(self.fields[idx]).property("value", (self.selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(self.precision));
             });
         });
         //
@@ -63,6 +75,39 @@ export default class Props{
                 command.setTime(parseFloat(this.value), true);
                 self.t.property("value", parseFloat(this.value).toFixed(3));
             }
+        });
+        //
+        d3.select('#xApply').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        d3.select('#yApply').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select('#applyButton').on('click', function(){
+            var power = self.getDropIdx(d3.select('#applyPower'));
+            //
+            let xField = d3.select('#xApply').property('value');
+            let yField = d3.select('#yApply').property('value');
+            //
+            let xMult = self.idxToMult(self.getDropIdx(d3.select('#xApplyUnit')));
+            let yMult = self.idxToMult(self.getDropIdx(d3.select('#yApplyUnit')));
+            //
+            let x = isNumeric(xField) ? parseFloat(xField) * xMult : 0;
+            let y = isNumeric(yField) ? parseFloat(yField) * yMult : 0;
+            //
+            let selected = self.command.selected;
+            //
+            let stX = selected.xS.length > power ? selected.xS[power] : 0;
+            let stY = selected.yS.length > power ? selected.yS[power] : 0;
+            //
+            selected.setValue(power, stX + x, stY + y);//move object(s)
+            self.command.objPosChange([selected]);//update corresponding displays
+            //
+            d3.select('#xApply').property('value', 0);
+            d3.select('#yApply').property('value', 0);
         });
         //
         d3.select('#gravitySet').on('click', function(){
@@ -108,7 +153,8 @@ export default class Props{
             this.head.text(`Object: ${this.selected.id + 1}`);
             this.head.style('color', `hsl(${this.selected.hue}, 100%, 80%)`);
             this.fields.forEach((field, idx) => {
-                d3.select(field).property("value", selected.getVals(Math.floor(idx / 2))[idx % 2].toFixed(this.precision));
+                let mult = this.idxToMult(this.getDropIdx(d3.select(this.drops[idx])));
+                d3.select(field).property("value", (selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(this.precision));
             });
         }else{
             this.head.text(`No Object`);
@@ -176,7 +222,15 @@ export default class Props{
             devs += '\'';
         }
         if(curPiece.paras.length > power){//para exists
+            let mult = this.idxToMult(this.getDropIdx(d3.select('#eqUnitDrop')));
+            //
             let curPara = curPiece.paras[power];
+            //
+            var xCoefs = curPara.xFunc.getCoefs().reverse();
+            console.log(xCoefs);
+            xCoefs.map(coef => coef * 2);
+            console.log(xCoefs);
+            //
             var str = this.buildEq(curPara.xFunc.getCoefs().reverse(), `x${devs}`);
             //
             var math = MathJax.Hub.getAllJax("math")[0];
@@ -399,6 +453,26 @@ export default class Props{
             //
             d3.selectAll('.tabField').attr('class', (d, i) => junc[i] == 3 ? 'noField tabField' : 'tabField');
         });
+    }
+    //
+    idxToMult(idx){
+        switch(idx){
+            case 0:
+                return .001;//mm
+            case 1:
+                return .01;//cm
+            case 2:
+                return 1;//m
+            case 3:
+                return 1000;//km
+        }
+    }
+    //
+    getDropIdx(drop){
+        let options = drop.selectAll('option').nodes();
+        let idx = 0;
+        while(!d3.select(options[idx]).property('selected')) idx++;
+        return idx;
     }
 }
 

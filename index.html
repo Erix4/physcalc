@@ -339,7 +339,7 @@
                         <div class="eqContents overfold">
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">Units: </p>
-                                <select id="eqUnits" class="propdrop">
+                                <select id="eqUnitDrop" class="eqUnits propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
                                     <option selected="selected">m</option>
@@ -375,7 +375,7 @@
                         <div class="overfold">
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">Solve: </p>
-                                <select id="eqUnits" class="propdrop">
+                                <select id="" class="eqUnits propdrop">
                                     <option>for point</option>
                                     <option selected="selected">for motion</option>
                                     <option>without time</option>
@@ -502,7 +502,7 @@
                         <div class="eqContents overfold">
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">To: </p>
-                                <select id="eqUnits" class="propdrop">
+                                <select id="applyPower" class="eqUnits propdrop">
                                     <option selected="selected">position</option>
                                     <option>velocity</option>
                                     <option>accleration</option>
@@ -514,23 +514,23 @@
                             </div>
                             <div class="apply propInput">
                             <p class="propParaLabel text">x: </p>
-                            <input id="xPos" class="fitWidth propField" type="number" value="0">
-                            <select class="propdrop">
+                            <input id="xApply" class="fitWidth propField" type="number" value="0">
+                            <select id="xApplyUnit" class="propdrop">
                                 <option>mm</option>
                                 <option>cm</option>
                                 <option selected="selected">m</option>
                                 <option>km</option>
                             </select>
                             <p class="propParaLabel text">y: </p>
-                            <input id="yPos" class="fitWidth propField" type="number" value="0">
-                            <select class="propdrop">
+                            <input id="yApply" class="fitWidth propField" type="number" value="0">
+                            <select id="yApplyUnit" class="propdrop">
                                 <option>mm</option>
                                 <option>cm</option>
                                 <option selected="selected">m</option>
                                 <option>km</option>
                             </select>
                         </div>
-                        <div class="bigButton">Apply!</div>
+                        <div id="applyButton" class="bigButton">Apply!</div>
                         </div>
                     </div>
                 </div>
@@ -547,6 +547,16 @@
                         <select id="timeValueDrop" class="propdrop">
                             <option>ms</option>
                             <option selected="selected">s</option>
+                            <option>min</option>
+                            <option>hr</option>
+                        </select>
+                    </div>
+                    <div id="timeValue">
+                        <p id="timeText" class="text">Arrows: </p>
+                        <select id="timeValueDrop" class="propdrop">
+                            <option>None</option>
+                            <option>All</option>
+                            <option selected="selected">Position</option>
                             <option>min</option>
                             <option>hr</option>
                         </select>
