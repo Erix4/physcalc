@@ -33,6 +33,7 @@ export default class Command{
         this.loopStart = loopStart;
         //
         this.vectorMode = 0;//status of vectors, 0 = hidden, 1 = velocity, 2 = acceleration, -1 = both
+        this.highestVector = 2;//power of highest vector
         this.viewType = 0;//type of grid view, 0 = x and y, 1 = x, 2 = y
         //
         this.idCount = 0;
@@ -276,6 +277,11 @@ export default class Command{
         this.spawnExtremes(objs);
     }
     //
+    /**
+     * A list of functions to be executed when object positions are changed
+     * @param {Array<Object>} objs objects to update
+     * @param {Boolean} noProps    whether or not to update the prop numbers (true means don't)
+     */
     objPosChange(objs, noProps=false){
         this.updateGrid(objs, noProps);
         this.moveGrid(objs);
@@ -333,14 +339,45 @@ export default class Command{
         this.timeline.movePoints(this.findIdxs(objs));
     }
     //
+    /**
+     * move all the extreme points on the field
+     */
     moveExtremes(){
         this.objects.forEach(obj => {
             obj.movePoints();
         });
     }
     //
+    /**
+     * delete all the extremes for an object
+     * @param {Object} obj the object to delete the extremes for
+     */
     deleteExtreme(obj){
         this.timeline.deleteExtreme(this.findIdxs([obj])[0]);
+    }
+    //
+    /**
+     * Check the highest non-zero power in the list of objects for arrow purposes
+     */
+    checkArrows(){//add profile function for cleaning up derivatives, otherwise this doesn't work
+        this.objects.forEach(obj => {
+            if(obj.profile.pieces[obj.piece].paras.length - 1 > this.highestVector){
+                this.highestVector = obj.profile.pieces[obj.piece].paras.length - 1;
+            }
+            obj.respawnArrows();
+        });
+        console.log(`highest vector: ${this.highestVector}`);
+        //
+        let arrowOptions = d3.select('#arrowDisplayDrop').selectAll('option').nodes();
+        arrowOptions.slice(0, this.highestVector + 2).forEach(opt => {
+            d3.select(opt).style('display', 'block');
+        });
+        //
+        arrowOptions.slice(this.highestVector + 2).forEach(opt => {
+            d3.select(opt).style('display', 'none');
+        });
+        //
+        //
     }
     //
     /**
@@ -452,6 +489,7 @@ export default class Command{
         this.select(this.input.active);
         this.selected.self.raise();
         this.drawTimeline();
+        this.checkArrows();
     }
     //
     /**

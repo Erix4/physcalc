@@ -1,3 +1,5 @@
+d3.select('#noInternet').style('display', 'none');
+
 let canvas = document.getElementById("fieldCanvas");
 
 let body = d3.select("body");

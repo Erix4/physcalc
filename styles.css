@@ -37,6 +37,11 @@ body{
 }
 
 #noInternet{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 3;
     display: none;
 }
 
@@ -691,6 +696,7 @@ i{
 
 #pointLabels{
     z-index: 1;
+    overflow: hidden;
 }
 
 .pointLabel{
@@ -746,10 +752,13 @@ i{
     border-bottom-right-radius: 0;
 }
 
-#timeValueDrop{
+.leftColumnDrop{
     height: 100%;
     font-size: 120%;
     margin: 0;
+}
+
+#timeValueDrop{
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
 }

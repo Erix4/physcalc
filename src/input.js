@@ -170,6 +170,7 @@ export default class Input{
         //#region key events
         //
         document.addEventListener("keydown", event => {
+            d3.select('#arrowDisplayDrop').node().blur();
             switch(event.key){
                 case "a":
                     if(!adding){
@@ -267,11 +268,14 @@ export default class Input{
                         this.command.toggleVectors(-1);//show both velocity and acceleration
                     }else{
                         let newMode = command.vectorMode + 1;
-                        if(newMode == 3){
+                        if(newMode > command.highestVector){
                             newMode = 0;
                         }
                         this.command.toggleVectors(newMode);
                     }
+                    //
+                    d3.select(d3.select('#arrowDisplayDrop').selectAll('option').nodes()[command.vectorMode+1]).property('selected', 'selected');
+                    //
                     lastKeypressTime = thisKeypressTime;
                     break;
                 case "Enter":
@@ -419,10 +423,8 @@ export default class Input{
         //
         document.addEventListener("mouseup", event => {//this is kinda broken
             if(this.moveState == 3){//position has been confirmed
-                if(this.command.viewType == 0 && this.command.vectorMode != -1){
-                    this.command.toggleVectors(1);
-                }else if(this.command.vectorMode == -1){
-                    this.active.toggleVectors(-1);
+                if(this.command.viewType == 0){
+                    this.command.toggleVectors(this.command.vectorMode);
                 }
                 this.moveState = 0;
                 this.command.drawGrid();
@@ -564,6 +566,7 @@ export default class Input{
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
         }, false);
         //
+        //#region bounding
         d3.select('#leftTimeBound').on('click', function(){
             this.select();
             input.fieldClick(this);
@@ -634,6 +637,17 @@ export default class Input{
             if(isNumeric(this.value) && parseFloat(this.value) > command.scaleY.domain()[0]){
                 command.grid.setSizeByEdge({top: parseFloat(this.value)});
             }
+        });
+        //#endregion
+        //
+        d3.select('#arrowDisplayDrop').on('change', function(){
+            let newSelect = 0;
+            let arrowOptions = d3.select('#arrowDisplayDrop').selectAll('option').nodes();
+            while(d3.select(arrowOptions[newSelect]).property('selected') != true){
+                newSelect++;
+            }
+            //
+            command.toggleVectors(newSelect - 1);
         });
     }
     //

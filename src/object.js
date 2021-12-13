@@ -156,7 +156,7 @@ export default class Object{
      * Update all internal values by function
      */
     update(bypass=false){
-        /*if(this.lock && !bypass){
+        /*if(this.lock && !bypass){//keep this comment
             if(isFinite(this.profile.bounds[this.piece][0])){
                 this.profile.reLeftBoundPiece(this.piece, this.profile.bounds[this.piece][0] + (this.command.time - this.lastTime));
             }
@@ -176,7 +176,7 @@ export default class Object{
         //
         if(this.profile.getValIdx(this.command.time) != this.piece){
             this.piece = this.profile.getValIdx(this.command.time);
-            this.repieceArrows();
+            this.command.checkArrows();
             if(this == this.command.selected){
                 this.command.props.renderEqs();
                 console.log(`new piece detected, rerendering equations`);
@@ -279,27 +279,6 @@ export default class Object{
      */
     draw(){
         this.profile.draw(0, 300);
-        /*switch(this.command.viewType){
-            case 0:
-                this.profile.draw(0, 300);
-                break;
-            case 1:
-                this.profile.pieces[this.piece].paras[0].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-                /*for(var n = 0; n <= this.depth; n++){//draw derivatives
-                    if(!this.isStaticX(n)){//check if function is just zero
-                        this.profile.pieces[this.piece].paras[n].xFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-                    }
-                }
-                break;
-            case 2:
-                this.profile.pieces[this.piece].paras[0].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-                /*for(var n = 0; n <= this.depth; n++){
-                    if(!this.isStaticY(n)){//check if function is just zero
-                        this.profile.pieces[this.piece].paras[n].yFunc.draw(this.command, this.command.scaleX.domain()[0], this.command.scaleX.domain()[1]);
-                    }
-                }
-                break;
-        }*/
     }
     //
     /**
@@ -343,6 +322,7 @@ export default class Object{
      */
     toggleVectors(mode){
         //
+        console.log(`toggling to ${mode} with net length ${this.nets.length}`);
         this.vectorMode = mode;
         /*this.comps.forEach(comp => {
             comp.forEach(arrow => {
@@ -361,7 +341,7 @@ export default class Object{
                     comp.self.show();
                 });
             });*/
-        }else{
+        }else if(mode <= this.nets.length){
             this.updateVectors(mode);
             this.moveVectors(mode);
             //
@@ -375,6 +355,10 @@ export default class Object{
                     arrow.show();
                 });*/
             }
+        }else{
+            this.nets.forEach(net => {
+                net.self.hide();
+            });
         }
     }
     //
@@ -384,7 +368,6 @@ export default class Object{
     respawnArrows(){
         let curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
         //
-        console.log(`depth: ${curPiece.paras.length}`);
         while(this.nets.length < curPiece.paras.length - 1){//while the current piece is deeper than the number of net vectors
             this.nets.push(new netArrow(this.command, this, this.nets.length + 1));//add a new net vector
             /*let compPower = [];
@@ -393,17 +376,7 @@ export default class Object{
             }*/
             //this.comps.push(compPower);
         }
-        console.log(this.nets);
-    }
-    //
-    repieceArrows(piece){
-        if(!piece && piece != 0){
-            piece = this.piece;
-        }
-        //
-        this.nets.forEach(net => {
-            net.pIdx = piece;
-        });
+        this.self.raise();
     }
     //
     /**
@@ -640,6 +613,7 @@ export default class Object{
         this.command.drawTimeline();
         this.command.select();
         this.command.props.renderEqs();
+        this.command.checkArrows();
     }
     //
 }
@@ -670,15 +644,15 @@ class netArrow{
                 this.self.ey = this.pos[1] * this.obj.arrStr;
                 break;
             case 1:
-                var theta = Math.atan(this.pos[0]);//angle of slope in radians, always pointing right
+                var theta = Math.atan(this.pos[0] / this.command.grid.strX);//angle of slope in radians, always pointing right
                 //
-                this.self.ex = -this.command.grid.conY(this.obj.arrLen) * Math.cos(theta);
+                this.self.ex = this.command.grid.conX(this.obj.arrLen) * Math.cos(theta);
                 this.self.ey = -this.command.grid.conY(this.obj.arrLen) * Math.sin(theta);
                 break;
             case 2:
-                var theta = Math.atan(this.pos[1]);//angle of slope in radians, always pointing right
+                var theta = Math.atan(this.pos[1] / this.command.grid.strX);//angle of slope in radians, always pointing right
                 //
-                this.self.ex = -this.command.grid.conY(this.obj.arrLen) * Math.cos(theta);
+                this.self.ex = this.command.grid.conX(this.obj.arrLen) * Math.cos(theta);
                 this.self.ey = -this.command.grid.conY(this.obj.arrLen) * Math.sin(theta);
                 break;
         }
@@ -807,7 +781,7 @@ class Arrow{
             ty2 = 0;
         }else{
             //console.log(`${command.scaleY(ey)} over ${command.scaleX(ex)}`);
-            let theta = atan(command.scaleY(ey), command.scaleX(ex));//FIX SOMETHING HERE FOR ANGLE WHEN GRID IS STRETCHED
+            let theta = atan(command.scaleY(ey), command.scaleX(ex));
             tx1 = this.tailSize * Math.cos(radians(theta + (90 + this.tailAng)));//tail x displacement
             tx2 = this.tailSize * Math.cos(radians(theta - (90 + this.tailAng)));//tail x displacement
             ty1 = this.tailSize * Math.sin(radians(theta + (90 + this.tailAng)));//tail y displacement

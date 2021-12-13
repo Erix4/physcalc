@@ -41,6 +41,7 @@ export default class Grid{
         //
         d3.select('#normalizeButton').on('click', function(){
             self.normalize();
+            //self.resize();//fix this
         });
     }
     //

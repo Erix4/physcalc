@@ -750,9 +750,13 @@ export class Piece{
     }
     //
     setValTime(power, t, x, y, propogator = true){
+        let newD = power >= this.paras.length;
         while(power >= this.paras.length){
             console.log(`New derivatives, set to ${x}, ${y}`);
             this.newDerivatives();
+        }
+        if(newD){
+            this.command.checkArrows();
         }
         //console.log(`setting this piece at power ${power} to ${x}, ${y} at t = ${t}`);
         this.paras[power].setOff(t, x, y);
