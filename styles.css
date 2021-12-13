@@ -61,11 +61,15 @@ body{
 }
 
 .checkbox > input:checked {
-    background-color: white;
+    background-color: #41B883;
+}
+
+.checkbox > input:checked:hover {
+    background-color: #a5cbc3;
 }
 
 .checkbox > input:hover{
-    background-color: #41B883;
+    background-color: lightgray;
 }
 
 #fullDisplay{

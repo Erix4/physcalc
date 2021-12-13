@@ -111,6 +111,7 @@ export default class Props{
         });
         //
         d3.select('#gravitySet').on('click', function(){
+            this.select();
             input.fieldClick(this);
         });
         //
@@ -121,10 +122,51 @@ export default class Props{
                 command.objects.forEach(obj => {
                     if(obj.yS[2] == orGrav){//object still has default gravity
                         obj.setValue(2, 0, command.gravity);
-                        command.objPosChange([command.selected], true);
                         self.renderEqs();
                     }
                 });
+                //
+                command.updateGrid();
+                command.moveGrid();
+                command.drawGrid();
+                command.spawnExtremes();
+            }
+        });
+        //
+        let storeGrav = 9.81;
+        d3.select('#gravityCheck').on('click', function(){
+            console.log(d3.select(this).property('checked'));
+            if(d3.select(this).property('checked')){
+                command.gravity = storeGrav;
+                //
+                command.objects.forEach(obj => {
+                    if(obj.yS[2] == 0){//object still has default gravity
+                        obj.setValue(2, 0, command.gravity);
+                        command.objPosChange([obj], true);
+                        self.renderEqs();
+                    }
+                });
+                //
+                command.updateGrid();
+                command.moveGrid();
+                command.drawGrid();
+                command.spawnExtremes();
+            }else{
+                storeGrav = command.gravity;
+                command.gravity = 0;
+                //
+                command.objects.forEach(obj => {
+                    if(obj.yS[2] == storeGrav){//object still has default gravity
+                        obj.setValue(2, 0, 0);
+                        command.objPosChange([obj], true);
+                        self.renderEqs();
+                    }
+                });
+                //
+                command.updateGrid();
+                command.moveGrid();
+                command.drawGrid();
+                command.spawnExtremes();
             }
         });
         //
@@ -221,7 +263,6 @@ export default class Props{
         for(var n = 0; n < power; n++){
             devs += '\'';
         }
-        console.log(`hello?`);
         if(curPiece.paras.length > power){//para exists
             let mult = this.idxToMult(this.getDropIdx(d3.select('#eqUnitDrop')));
             //

@@ -430,10 +430,14 @@ export default class Input{
             }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
                 switch(this.moveState){
                     case 1:
-                        this.command.select();
-                        this.active = null;
-                        this.command.selected = null;
-                        this.command.props.update();
+                        console.log(`hello?`)
+                        if(!event.shiftKey){//shift click only deselects currently selected items
+                            console.log(`hello!`);
+                            this.command.select();
+                            this.active = null;
+                            this.command.selected = null;
+                            this.command.props.update();
+                        }
                         break;
                     case 2:
                         this.command.select(this.command.selected);
@@ -585,6 +589,50 @@ export default class Input{
                 command.drawTimeline();
                 command.moveTimeline();
                 command.retimeExtremes();
+            }
+        });
+        //
+        d3.select(`#x1Bound`).on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select(`#x2Bound`).on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select(`#y1Bound`).on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select(`#y2Bound`).on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select(`#x1Bound`).on('input', function(){
+            if(isNumeric(this.value) && parseFloat(this.value) < command.scaleX.domain()[1]){
+                command.grid.setSizeByEdge({left: parseFloat(this.value)});
+            }
+        });
+        //
+        d3.select(`#x2Bound`).on('input', function(){
+            if(isNumeric(this.value) && parseFloat(this.value) > command.scaleX.domain()[0]){
+                command.grid.setSizeByEdge({right: parseFloat(this.value)});
+            }
+        });
+        //
+        d3.select(`#y1Bound`).on('input', function(){
+            if(isNumeric(this.value) && parseFloat(this.value) < command.scaleY.domain()[1]){
+                command.grid.setSizeByEdge({bottom: parseFloat(this.value)});
+            }
+        });
+        //
+        d3.select(`#y2Bound`).on('input', function(){
+            if(isNumeric(this.value) && parseFloat(this.value) > command.scaleY.domain()[0]){
+                command.grid.setSizeByEdge({top: parseFloat(this.value)});
             }
         });
     }

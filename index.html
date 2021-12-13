@@ -572,7 +572,7 @@
                         <h2 class="settingText expandText text noSelect">Settings</h2>
                     </div>
                     <div class="settingLine">
-                        <label class="settingToggle checkbox"><input type="checkbox" checked="checked"/></label>
+                        <label class="settingToggle checkbox"><input id="gravityCheck" type="checkbox" checked="checked"/></label>
                         <p class="settingToggle text">Gravity:</p>
                         <input id="gravitySet" class="settingField propField" type="number" value="-9.81">
                         <select class="settingScale propdrop">
@@ -584,9 +584,9 @@
                     </div>
                     <p class="settingToggle text">Field Scale</p>
                     <div class="settingLine">
-                        <input class="settingField propField" type="number" value="-10">
+                        <input id="x1Bound" class="settingField propField" type="number" value="-10">
                         <p class="settingToggle text">	&#60; x &#60;&#160;</p>
-                        <input class="settingField propField" type="number" value="10">
+                        <input id="x2Bound" class="settingField propField" type="number" value="10">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -595,9 +595,9 @@
                         </select>
                     </div>
                     <div class="settingLine">
-                        <input class="settingField propField" type="number" value="-10">
+                        <input id="y1Bound" class="settingField propField" type="number" value="-10">
                         <p class="settingToggle text">	&#60; y &#60;&#160;</p>
-                        <input class="settingField propField" type="number" value="10">
+                        <input id="y2Bound" class="settingField propField" type="number" value="10">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -608,19 +608,19 @@
                     <div class="settingLine"><div id="squareButton" class="scaleButton">
                         <p class="settingToggle text">Square</p>
                     </div></div>
-                    <div class="settingLine"><div class="scaleButton">
-                        <p class="settingToggle text">Normalize</p>
+                    <div class="settingLine"><div id="normalizeButton" class="scaleButton">
+                        <p class="settingToggle text">Rescale</p>
                     </div></div>
                     <div class="settingLine">
-                        <label class="settingToggle checkbox"><input type="checkbox"/></label>
-                        <p class="settingToggle text">Auto-normalize</p>
+                        <label class="settingToggle checkbox"><input id="autoScaleCheck" type="checkbox"/></label>
+                        <p class="settingToggle text">Auto-scale</p>
                     </div>
                     <div class="settingLine">
-                        <label class="settingToggle checkbox"><input type="checkbox"/></label>
+                        <label class="settingToggle checkbox"><input id="timeSnapCheck" type="checkbox"/></label>
                         <p class="settingToggle text">Time Snapping</p>
                     </div>
                     <div class="settingLine">
-                        <label class="settingToggle checkbox"><input type="checkbox" checked="checked"/></label>
+                        <label class="settingToggle checkbox"><input id="criticalCheck" type="checkbox" checked="checked"/></label>
                         <p class="settingToggle text">Critical Points</p>
                     </div>
                 </div>
