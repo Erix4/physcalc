@@ -30,6 +30,7 @@ d3.selectAll('.propExpand').on('click', function(){//expand the corresponding se
         d3.select(this).select('.expandIcon').style('transform', 'rotate(0deg)');
     }
 });
+
 //console.log(d3.select('.tab').style('height'));
 
 //document.getElementById("vt0").style = "background-color: #a5cbc3 !important; color: black;";

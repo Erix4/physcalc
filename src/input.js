@@ -396,13 +396,14 @@ export default class Input{
                     break;//do nothing
                 case 8://resize left column
                     let newX = event.clientX;
-                    if(newX - 130 > getExtra() && window.innerWidth - newX > getField()){
+                    if(newX - (window.innerWidth / 10) > getExtra() && window.innerWidth - newX > getField()){
                         d3.select('#leftcolumn').style('width', `${newX}px`);
                         d3.select('#fieldcolumn').style('width', `${window.innerWidth - newX}px`);
                         //initalX = newX;
                         columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
                         fitWidth(columnWidth);
                         fitSolve(columnWidth);
+                        console.log(`column resize event`);
                         command.resize();
                         canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
                     }
@@ -468,7 +469,7 @@ export default class Input{
                 //input.propActive.select();
             }
             //
-            if(command.autoScale && this.moveState != 1){
+            if(command.autoScale && this.moveState > 1){//this needs to be more picky
                 command.grid.normalize();
             }
             //

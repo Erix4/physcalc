@@ -400,9 +400,6 @@ export default class Object{
         switch(this.command.viewType){
             case 0:
                 this.extremes = this.profile.getExtremes();
-                console.log(`spawning with extremes:`);
-                console.log(this.extremes);
-                console.log(this.points);
                 var n;
                 for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)

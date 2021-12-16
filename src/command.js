@@ -3,7 +3,6 @@ import Input from "./input";
 import Object from "./object";
 import Profile from "./func";
 import Props from "./props";
-import {Para} from "./func";
 import {Func} from "./func";
 import Timeline from "./time";
 

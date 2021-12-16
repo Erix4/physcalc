@@ -594,6 +594,11 @@ export class Piece{
         }//basically, keep making new derivatives until the base functions are constants
     }
     //
+    resolve(xVals, yVals){
+        this.paras[0].resolve(xVals, yVals);
+        this.propagate(0);
+    }
+    //
     newDerivatives(){
         var xCoefs = [];
         let xTerms = this.paras[this.paras.length - 1].xFunc.terms;//get terms of x function of last parametric function
@@ -1067,6 +1072,11 @@ export class Para{
         this.yFunc = (new Func(this.steps, yCoefs));
         this.xFunc.color = color;
         this.yFunc.color = color;
+    }
+    //
+    resolve(xVals, yVals){
+        this.xFunc.resolve(xVals);
+        this.yFunc.resolve(yVals);
     }
     //
     calc(t){

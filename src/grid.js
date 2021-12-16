@@ -79,7 +79,6 @@ export default class Grid{
     }
     //
     square(){
-        this.cx *= this.strX;//keep the center in the current screen position
         this.strX = 1;
         //
         this.calcSize();

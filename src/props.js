@@ -1,3 +1,5 @@
+import {Func} from "./func";
+
 export default class Props{
     constructor(command){
         this.command = command;
@@ -19,12 +21,12 @@ export default class Props{
         //
         this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
-        this.fields.forEach(field => {
-            d3.select(field).on('click', function(){
-                this.select();
-                input.fieldClick(this);
-            });
+        //
+        d3.selectAll('.propField').on('click', function(){
+            this.select();
+            input.fieldClick(this);
         });
+        //
         this.t.on('click', function(){
             this.select();
             input.fieldClick(this);
@@ -66,6 +68,123 @@ export default class Props{
                 //
                 command.runAuto();
             });
+        });
+        //
+        d3.select('#solveType').on('change', function(){//change the solve type
+            let solveIdx = self.getDropIdx(d3.select(this));
+            if(solveIdx == 0){
+                d3.select('#forPoint').style('display', 'block');
+                d3.select('#forMotion').style('display', 'none');
+                d3.select('#withoutTime').style('display', 'none');
+            }else if(solveIdx == 1){
+                d3.select('#forPoint').style('display', 'none');
+                d3.select('#forMotion').style('display', 'block');
+                d3.select('#withoutTime').style('display', 'none');
+            }else{
+                d3.select('#forPoint').style('display', 'none');
+                d3.select('#forMotion').style('display', 'none');
+                d3.select('#withoutTime').style('display', 'block');
+            }
+        });
+        //
+        d3.selectAll('.solveInput').on('click', function(){
+            this.select();
+            input.fieldClick(this);
+        });
+        //
+        d3.select('#forMotion').selectAll('.solveInput').on('input', function(d, i){
+            if(this.value == ""){
+                self.accessIdx(i, d3.select('#forMotion').selectAll('.solveCheck')).property('checked', false);
+            }else if(isNumeric(this.value)){
+                self.accessIdx(i, d3.select('#forMotion').selectAll('.solveCheck')).property('checked', true);
+            }
+        });
+        //
+        d3.select('#forMotion').selectAll('.solveCheck').on('change', function(d, i){
+            if(this.checked && self.accessIdx(i, d3.select('#forMotion').selectAll('.solveInput')).property('value') == ""){
+                self.accessIdx(i, d3.select('#forMotion').selectAll('.solveInput')).property('value', 0);
+            }
+        });
+        //
+        d3.select('#calcButton').on('click', function(){
+            if(command.selected){
+                switch(self.getDropIdx(d3.select('#solveType'))){
+                    case 0:
+                        //
+                        break;
+                    case 1:
+                        let firstProp = d3.select('#forMotion').select('.propInput');
+                        if(firstProp.selectAll('.solveCheck').nodes()[0].checked && firstProp.selectAll('.solveCheck').nodes()[1].checked){
+                            console.log(`confirmed`);
+                            let times = d3.select('#forMotion').selectAll('.timeInput').nodes().map(x => parseFloat(x.value));//get all the times values
+                            let allPoints = d3.select('#forMotion').selectAll('.solveInput').nodes();//get all the points values
+                            let xPoints = allPoints.filter((x, i) => i % 2 == 0);//get all the x points
+                            let yPoints = allPoints.filter((x, i) => i % 2 == 1);//get all the y points
+                            //
+                            let xVals = [[parseFloat(xPoints[0].value), 0, times[0]]];
+                            let yVals = [[parseFloat(yPoints[0].value), 0, times[0]]];
+                            //
+                            let powers = [0, self.getDropIdx(d3.select('#secondType')), self.getDropIdx(d3.select('#thirdType'))];
+                            //
+                            if(d3.selectAll('.solveCheck').nodes()[2].checked){
+                                xVals.push([parseFloat(xPoints[1].value), powers[1], times[1]]);
+                            }else if(d3.selectAll('.solveCheck').nodes()[4].checked && powers[2] == 2){
+                                alert("To solve for x motion with acceleration, you need three points of x data.");
+                                return;
+                            }
+                            //
+                            if(d3.selectAll('.solveCheck').nodes()[3].checked){
+                                yVals.push([parseFloat(yPoints[1].value), powers[1], times[1]]);
+                            }else if(d3.selectAll('.solveCheck').nodes()[5].checked && powers[2] == 2){
+                                alert("To solve for y motion with acceleration, you need three points of y data.");
+                                return;
+                            }
+                            //
+                            if(powers[1] == 0 && times[0] == times[1] && (xVals.length > 1 || yVals.length > 1)){
+                                alert("You can't set the position twice at the same time");
+                                return;
+                            }
+                            //
+                            if(d3.selectAll('.solveCheck').nodes()[4].checked){//this case gaurentees third points of data
+                                xVals.push([parseFloat(xPoints[2].value), powers[2], times[2]]);
+                            }
+                            //
+                            if(d3.selectAll('.solveCheck').nodes()[5].checked){//this case gaurentees third points of data
+                                yVals.push([parseFloat(yPoints[2].value), powers[2], times[2]]);
+                            }
+                            //
+                            if(((powers[2] == 0 && times[0] == times[2] && (xVals.length > 1 || yVals.length > 1)) ||//third point is same as first point
+                                    (powers[2] == powers[1] && times[1] == times[2] && (xVals.length > 2 || yVals.length > 2))) && (//third point is same as second point
+                                    d3.selectAll('.solveCheck').nodes()[4].checked ||//there is data for the third point
+                                    d3.selectAll('.solveCheck').nodes()[5].checked)){
+                                alert("You can't set the position twice at the same time");
+                                return;
+                            }
+                            //
+                            command.selected.profile.pieces[0].resolve(xVals, yVals);//new values don't correctly propagate throughtout the piece
+                            console.log(command.selected.profile.pieces[0]);
+                            command.updateGrid([command.selected]);
+                            command.drawGrid();
+                            command.moveGrid([command.selected]);
+                            command.spawnExtremes([command.selected]);
+                            //
+                            let func = new Func(1000, [1, 1]);
+                            func.resolve(xVals);
+                            console.log(func.getCoefs());
+                            //
+                            func.resolve(yVals);
+                            console.log(func.getCoefs());
+                            //
+                        }else{
+                            console.log(`denied`);
+                            alert("Please specify an initial x and y position.");
+                        }
+                        break;
+                    case 2:
+                        //
+                        break;
+                }
+            }
         });
         //
         this.t.on("input", function(){
@@ -112,6 +231,7 @@ export default class Props{
             //
             d3.select('#xApply').property('value', 0);
             d3.select('#yApply').property('value', 0);
+            command.runAuto();
         });
         //
         d3.select('#gravitySet').on('click', function(){
@@ -134,6 +254,9 @@ export default class Props{
                 command.moveGrid();
                 command.drawGrid();
                 command.spawnExtremes();
+                //command.autoScale = false;
+                //d3.select('#autoScaleCheck').property('checked', false);
+                command.runAuto();
             }
         });
         //
@@ -172,6 +295,7 @@ export default class Props{
                 command.drawGrid();
                 command.spawnExtremes();
             }
+            command.runAuto();
         });
         //
         d3.select('#autoScaleCheck').on('click', function(){
@@ -227,6 +351,7 @@ export default class Props{
             this.head.style('color', `hsl(${this.selected.hue}, 100%, 80%)`);
             this.fields.forEach((field, idx) => {
                 let mult = this.idxToMult(this.getDropIdx(d3.select(this.drops[idx])));
+                console.log(selected.getVals(Math.floor(idx / 2))[idx % 2]);
                 d3.select(field).property("value", (selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(this.precision));
             });
         }else{
@@ -539,10 +664,13 @@ export default class Props{
     }
     //
     getDropIdx(drop){
-        let options = drop.selectAll('option').nodes();
         let idx = 0;
-        while(!d3.select(options[idx]).property('selected')) idx++;
+        while(!this.accessIdx(idx, drop.selectAll('option')).property('selected')) idx++;
         return idx;
+    }
+    //
+    accessIdx(idx, selection){
+        return d3.select(selection.nodes()[idx]);
     }
 }
 

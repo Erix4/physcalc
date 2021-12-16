@@ -375,7 +375,7 @@
                         <div class="overfold">
                             <div class="propInput">
                                 <p id="propLabelUnit" class="propLabel text">Solve: </p>
-                                <select id="" class="eqUnits propdrop">
+                                <select id="solveType" class="eqUnits propdrop">
                                     <option>for point</option>
                                     <option selected="selected">for motion</option>
                                     <option>without time</option>
@@ -423,6 +423,138 @@
                                     <p class="propLabel text">:</p>
                                 </div>
                                 <div class="solver propInput">
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox" checked="true"/></label>
+                                    <p class="readCalcLabel propParaLabel text">x: </p>
+                                    <input id="xPos" class="solveInput propField" type="number" value="0">
+                                    <select class="readCalcDrop propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox" checked="true"/></label>
+                                    <p class="propParaLabel text">y: </p>
+                                    <input id="yPos" class="solveInput propField" type="number" value="0">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                </div>
+                                <div class="solver labelLine">
+                                    <p class="propLabel text">At time</p>
+                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <select id="calcTimeUnits" class="propdrop">
+                                        <option>ms</option>
+                                        <option selected="selected">s</option>
+                                        <option>min</option>
+                                        <option>hrs</option>
+                                    </select>
+                                    <p class="propLabel text">,</p>
+                                    <select id="secondType" class="propdrop">
+                                        <option selected="selected">position</option>
+                                        <option>velocity</option>
+                                    </select>
+                                    <p class="propLabel text">:</p>
+                                </div>
+                                <div class="solver propInput">
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
+                                    <p class="propParaLabel text">x: </p>
+                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
+                                    <p class="propParaLabel text">y: </p>
+                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                </div>
+                                <div class="solver labelLine">
+                                    <p class="propLabel text">At time</p>
+                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <select id="calcTimeUnits" class="propdrop">
+                                        <option>ms</option>
+                                        <option selected="selected">s</option>
+                                        <option>min</option>
+                                        <option>hrs</option>
+                                    </select>
+                                    <p class="propLabel text">,</p>
+                                    <select id="thirdType" class="propdrop">
+                                        <option selected="selected">position</option>
+                                        <option>velocity</option>
+                                        <option>acceleration</option>
+                                    </select>
+                                    <p class="propLabel text">:</p>
+                                </div>
+                                <div class="solver propInput">
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
+                                    <p class="propParaLabel text">x: </p>
+                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                    <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
+                                    <p class="propParaLabel text">y: </p>
+                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="withoutTime">
+                                <div class="solver labelLine">
+                                    <p class="propLabel text">Initial position at time</p>
+                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <select id="calcTimeUnits" class="propdrop">
+                                        <option>ms</option>
+                                        <option selected="selected">s</option>
+                                        <option>min</option>
+                                        <option>hrs</option>
+                                    </select>
+                                    <p class="propLabel text">:</p>
+                                </div>
+                                <div class="propInput">
+                                    <i class="expandCompIcon noSelect fas fa-caret-right"></i>
+                                    <p class="propParaLabel text">X: </p>
+                                    <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                    <p class="propParaLabel text">Y: </p>
+                                    <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                    <select class="propdrop">
+                                        <option>mm</option>
+                                        <option>cm</option>
+                                        <option selected="selected">m</option>
+                                        <option>km</option>
+                                    </select>
+                                </div>
+                                <div class="solver labelLine">
+                                    <select id="calcTimeUnits" class="propdrop">
+                                        <option selected="selected">final position</option>
+                                        <option>initial velocity</option>
+                                    </select>
+                                    <p class="propLabel text">:</p>
+                                </div>
+                                <div class="solver propInput">
                                     <label class="checkbox"><input type="checkbox"/></label>
                                     <p class="readCalcLabel propParaLabel text">x: </p>
                                     <input id="xPos" class="solveInput propField" type="number">
@@ -443,26 +575,17 @@
                                     </select>
                                 </div>
                                 <div class="solver labelLine">
-                                    <p class="propLabel text">At time</p>
-                                    <input id="xPos" class="timeInput propField" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
-                                        <option>ms</option>
-                                        <option selected="selected">s</option>
-                                        <option>min</option>
-                                        <option>hrs</option>
-                                    </select>
-                                    <p class="propLabel text">,</p>
-                                    <select class="propdrop">
-                                        <option selected="selected">position</option>
-                                        <option>velocity</option>
+                                        <option selected="selected">initial velocity</option>
+                                        <option>final velocity</option>
                                     </select>
                                     <p class="propLabel text">:</p>
                                 </div>
                                 <div class="solver propInput">
                                     <label class="checkbox"><input type="checkbox"/></label>
-                                    <p class="propParaLabel text">x: </p>
+                                    <p class="readCalcLabel propParaLabel text">x: </p>
                                     <input id="xPos" class="solveInput propField" type="number">
-                                    <select class="propdrop">
+                                    <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
                                         <option selected="selected">m</option>
@@ -479,27 +602,17 @@
                                     </select>
                                 </div>
                                 <div class="solver labelLine">
-                                    <p class="propLabel text">At time</p>
-                                    <input id="xPos" class="timeInput propField" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
-                                        <option>ms</option>
-                                        <option selected="selected">s</option>
-                                        <option>min</option>
-                                        <option>hrs</option>
-                                    </select>
-                                    <p class="propLabel text">,</p>
-                                    <select class="propdrop">
-                                        <option selected="selected">position</option>
-                                        <option>velocity</option>
+                                        <option selected="selected">final velocity</option>
                                         <option>acceleration</option>
                                     </select>
                                     <p class="propLabel text">:</p>
                                 </div>
                                 <div class="solver propInput">
                                     <label class="checkbox"><input type="checkbox"/></label>
-                                    <p class="propParaLabel text">x: </p>
+                                    <p class="readCalcLabel propParaLabel text">x: </p>
                                     <input id="xPos" class="solveInput propField" type="number">
-                                    <select class="propdrop">
+                                    <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
                                         <option selected="selected">m</option>
@@ -516,9 +629,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="withoutTime">
-                            </div>
-                            <div class="bigButton">Calc!</div>
+                            <div id="calcButton" class="bigButton">Calc!</div>
                         </div>
                     </div>
                 </div>

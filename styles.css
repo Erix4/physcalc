@@ -205,6 +205,14 @@ i{
     font-size: 90%;
 }
 
+#forPoint{
+    display: none;
+}
+
+#withoutTime{
+    display: none;
+}
+
 /*#region: tabs*/
 
 #tabContainer{
