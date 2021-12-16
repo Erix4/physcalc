@@ -153,6 +153,10 @@ export default class Profile{
         }
     }
     //
+    /**
+     * shift all bounds by a given time
+     * @param ct time to shift by
+     */
     shiftAllPieces(ct){
         this.pieces.forEach((piece, idx) => {
             let bound = this.bounds[idx];
@@ -173,6 +177,65 @@ export default class Profile{
                 this.bounds[idx][1] += ct;
             }
         });
+    }
+    //
+    /**
+     * shift the bounds all complete pieces connected to the given piece
+     * @param t  time to start propagating from
+     * @param ct time to shift by
+     */
+    shiftPropagate(t, ct){
+        let curIdx = this.getValIdx(t-ct);
+        //console.log(`prop`)
+        //
+        console.log(`propagating shift from idx ${curIdx}, time ${t-ct} by ${ct}`);
+        //
+        //step 1. change bounds of current piece
+        if(isFinite(this.bounds[curIdx][0])){
+            this.bounds[curIdx][0] += ct;
+        }
+        if(isFinite(this.bounds[curIdx][1])){
+            this.bounds[curIdx][1] += ct;
+        }
+        //
+        //step 2. propagate left
+        var i;
+        for(i = curIdx - 1; i >= 0 && this.junctions[i] != 2; i--){//pieces are to the left and the left juction is continous
+            this.bounds[i][1] += ct;
+            if(isFinite(this.bounds[i][0])){
+                this.bounds[i][0] += ct;
+            }
+        }
+        let pushVal = this.bounds[i+1][0];//left value of leftmost shifted piece
+        while(i >= 0 && this.bounds[i][0] > pushVal){//compress all incomplete pieces to left of the leftmost shifted piece
+            this.bounds[i][0] = pushVal;
+            this.bounds[i][1] = pushVal;
+            i--;
+        }
+        if(i >= 0 && this.bounds[i][1] > pushVal){
+            this.bounds[i][1] = pushVal;
+        }
+        //
+        //step 3. propagate right
+        let len = this.pieces.length - 1;
+        for(i = curIdx + 1; i <= len && this.junctions[i-1] != 2; i++){//pieces are to the left and the left juction is continous
+            this.bounds[i][0] += ct;
+            if(isFinite(this.bounds[i][1])){
+                this.bounds[i][1] += ct;
+            }
+        }
+        pushVal = this.bounds[i-1][1];//left value of leftmost shifted piece
+        while(i <= len && this.bounds[i][1] < pushVal){//compress all incomplete pieces to left of the leftmost shifted piece
+            this.bounds[i][0] = pushVal;
+            this.bounds[i][1] = pushVal;
+            i++;
+        }
+        if(i <= len && this.bounds[i][0] < pushVal){
+            this.bounds[i][0] = pushVal;
+        }
+        //
+        console.log(`left bound of right piece: ${this.bounds[1][0]}`);
+        console.log(`right bound of left piece: ${this.bounds[0][1]}`);
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated
@@ -301,7 +364,7 @@ export default class Profile{
             t = this.bounds[0][0];//set time to the left bound
         }
         //
-        //console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
+        console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
         //
         this.setPieceValTime(power, t, curIdx, x, y, propagator);
         var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];
@@ -367,7 +430,7 @@ export default class Profile{
         //
         this.pieces.forEach((piece, idx) => {
             piece.getExtremes().filter(extr => this.bounds[idx][0] < extr && extr < this.bounds[idx][1]).forEach(extr => extrs.add(round(extr, 10)));
-            this.bounds[idx].filter(bound => Math.abs(bound) != Infinity).forEach(bound => extrs.add(round(bound, 10)));//round to ten digits to rectify floating point errors
+            this.bounds[idx].filter(bound => Math.abs(bound) != Infinity).forEach(bound => extrs.add(round(bound+.0001, 10)));//round to ten digits to rectify floating point errors
         });
         //
         return Array.from(extrs);

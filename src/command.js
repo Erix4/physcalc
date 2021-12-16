@@ -36,13 +36,18 @@ export default class Command{
         this.highestVector = 2;//power of highest vector
         this.viewType = 0;//type of grid view, 0 = x and y, 1 = x, 2 = y
         //
+        this.autoScale = false;
+        this.showExtremes = true;
+        this.timeSnapping = false;
+        //
         this.idCount = 0;
         //
         this.selected = null;
         this.objects = [];
         this.selectedIdxs = [];
         //
-        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, 20);
+        this.defaultScale = 20;
+        this.grid = new Grid(this, this.ctx, this.svg, 0, 0, this.defaultScale);
         this.grid.calcSize();//get scales and things
         //
         this.timeline = new Timeline(this, document.getElementById('timeCanvas'), d3.select("#timeSVG"), 10);
@@ -137,6 +142,15 @@ export default class Command{
     zoomX(c, px, py){
         this.grid.zoomX(c, px, py);
         this.updateView();
+    }
+    //
+    /**
+     * check if auto scaling and scale if true
+     */
+    runAuto(){
+        if(this.autoScale){
+            this.grid.normalize();
+        }
     }
     //
     zoomTimeline(c, px, py){
@@ -315,16 +329,18 @@ export default class Command{
      * @param {Array<Object>} [objs] list of objects to spawn extremes for
      */
     spawnExtremes(objs){
-        if(!objs){
-            objs = this.objects;
+        if(this.showExtremes){
+            if(!objs){
+                objs = this.objects;
+            }
+            //
+            var objIds = [];
+            objs.forEach(obj => {
+                obj.spawnExtremes();
+                objIds.push(obj.idx);
+            });
+            this.timeline.spawnExtremes(objIds);
         }
-        //
-        var objIds = [];
-        objs.forEach(obj => {
-            obj.spawnExtremes();
-            objIds.push(obj.idx);
-        });
-        this.timeline.spawnExtremes(objIds);
     }
     //
     /**
@@ -354,6 +370,26 @@ export default class Command{
      */
     deleteExtreme(obj){
         this.timeline.deleteExtreme(this.findIdxs([obj])[0]);
+    }
+    //
+    /**
+     * delete all extremes for all objects in the field and timeline
+     */
+    deleteAllExtremes(){
+        this.objects.forEach(obj => {
+            obj.points.forEach(point => {
+                point.remove();
+            });
+            obj.points = [];
+            obj.extremes = [];
+        })
+        this.timeline.timePoints.forEach(obj => {
+            obj.forEach(point => {
+                point.remove();
+            });
+            obj.points = [];
+        });
+        this.timeline.timePoints = [];
     }
     //
     /**
@@ -423,6 +459,7 @@ export default class Command{
                     let curPos = obj.getVals(power, time);
                     let x = this.scaleY.invert(this.scaleY(curPos[0]) + cy);
                     let y = curPos[1];
+                    obj.profile.shiftPropagate(t, this.grid.conX(cx));
                     obj.setValueTime(power, t, x, y);
                 });
                 this.setTime(this.time + (t - time));
@@ -434,6 +471,7 @@ export default class Command{
                     let x = curPos[0];
                     let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
                     obj.setValueTime(power, t, x, y);
+                    obj.profile.shiftPropagate(t, this.grid.conX(cx));
                 });
                 this.setTime(this.time + (t - time));
                 break;
@@ -647,7 +685,12 @@ export default class Command{
      * @param {Number} ny new mouse y value in pixels
      */
     dragSelect(sx, sy, nx, ny){
-        this.select();
+        this.sels.forEach(sell => {
+            sell.remove();
+        });
+        this.sels = [];
+        this.selObs = [];
+        //
         if(nx > sx){
             this.dragBox.attr("x", sx).attr("width", nx - sx);
         }else{
@@ -679,6 +722,8 @@ export default class Command{
         //
         this.sels[0].style("stroke", "#47a3ff");
         this.sels[1].style("stroke", "#47d7ff");
+        //
+        this.props.diffObj(obj);
     }
     //#endregion
 }

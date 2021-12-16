@@ -20,6 +20,8 @@ export default class Grid{
         this.scale = scale;//y scale defines as y units across height (ex. 20)
         this.strX = 1;//x stretch multiplies by y scale
         //
+        //this.iqrThres = 1.7;//
+        //
         this.calcSize();
         this.command.canvas.width = this.scrW;
         this.command.canvas.height = this.scrH;
@@ -31,12 +33,7 @@ export default class Grid{
         //
         let self = this;
         d3.select('#squareButton').on('click', function(){
-            self.cx *= self.strX;//keep the center in the current screen position
-            self.strX = 1;
-            //
-            self.calcSize();
-            //
-            self.customResize();
+            self.square();
         });
         //
         d3.select('#normalizeButton').on('click', function(){
@@ -81,23 +78,41 @@ export default class Grid{
         }
     }
     //
+    square(){
+        this.cx *= this.strX;//keep the center in the current screen position
+        this.strX = 1;
+        //
+        this.calcSize();
+        //
+        this.customResize();
+        this.xRes = this.yRes;
+        this.customResize();
+    }
+    //
     normalize(){
         var Xextrs = [];
         var Yextrs = [];
+        var extrs = [];
         //
         this.command.objects.forEach(obj => {
             obj.extremes.forEach(extr => {
                 let pos = obj.getVals(0, extr);
-                Xextrs.push(pos[0]);
-                Yextrs.push(pos[1]);
+                extrs.push([extr, pos[0], pos[1]])
             });
-            //
-            Xextrs.push(obj.xS[0]);
-            Yextrs.push(obj.yS[0]);
+            extrs.push([this.command.time, obj.xS[0], obj.yS[0]]);
         });
         //
-        Xextrs = this.filterOutliers(Xextrs);//filter outliers
-        Yextrs = this.filterOutliers(Yextrs);
+        extrs = this.filterOutliers(extrs);
+        //
+        Xextrs = extrs.map(extr => extr[1]);
+        Yextrs = extrs.map(extr => extr[2]);
+        //
+        const sort = arr => arr.sort(function(a, b) {
+            return a - b;
+        });
+        //
+        Xextrs = sort(Xextrs);
+        Yextrs = sort(Yextrs);
         //
         let left = Xextrs[0];
         let right = Xextrs[Xextrs.length - 1];
@@ -107,31 +122,64 @@ export default class Grid{
         let bufferX = (right - left) / 4;
         let bufferY = (top - bottom) / 4;
         //
-        this.setSizeByEdge({left: left - bufferX, right: right + bufferX, top: top + bufferY, bottom: bottom - bufferY, setProps: true});
+        //add code here to check if either bounds match each other, and if they do then square the scale and center the bounds
+        if(left == right){
+            if(top == bottom){//only one point in lists
+                this.scale = this.command.defaultScale;//set defualt square scale and center the one point
+                this.strX = 1;
+                //
+                this.cx = 0;
+                this.cy = 0;
+                //
+                this.calcSize(true);
+                this.customResize();
+            }else{//only vertical diversity
+                this.scale = (top - bottom) + (2 * bufferY);//set a square scale by the vertical axis
+                this.strX = 1;
+                //
+                this.cx = 0;
+                this.cy = bottom - bufferY + (this.scale / 2);
+                //
+                this.calcSize(true);
+                this.customResize();
+            }
+        }else if(top == bottom){//only horizontal diversity
+            //set a square scale by the horizontal axis
+            this.scale = ((right - left) + (2 * bufferX)) * (this.scrW / this.scrH);
+            this.strX = 1;
+            //
+            this.cx = left + bufferX + (((right - left) + (2 * bufferX)) / 2);
+            this.cy = 0;
+            //
+            this.calcSize(true);
+            this.customResize();
+        }else{
+            this.setSizeByEdge({left: left - bufferX, right: right + bufferX, top: top + bufferY, bottom: bottom - bufferY, setProps: true});
+        }
     }
     //
     filterOutliers(values){
-        values.sort( function(a, b) {
-            return a - b;
+        values.sort(function(a, b) {
+            return a[0] - b[0];
         });
         //
         /* Then find a generous IQR. This is generous because if (values.length / 4) 
         * is not an int, then really you should average the two elements on either 
         * side to find q1.
         */     
-        var q1 = values[Math.floor(((values.length - 1) / 4))];
+        var q1 = values[Math.floor(((values.length - 1) / 4))][0];
         // Likewise for q3. 
-        console.log(`${((values.length - 1) * (3 / 4))} to ${Math.ceil((values.length * (3 / 4)))}`);
-        var q3 = values[Math.ceil(((values.length - 1) * (3 / 4)))];
+        //console.log(`${((values.length - 1) * (3 / 4))} to ${Math.ceil((values.length * (3 / 4)))}`);
+        var q3 = values[Math.ceil(((values.length - 1) * (3 / 4)))][0];
         var iqr = q3 - q1;
         //
         // Then find min and max values
-        var maxValue = q3 + iqr*1.5;
+        var maxValue = q3 + iqr*1.5;//add iqr adjustment
         var minValue = q1 - iqr*1.5;
 
         // Then filter anything beyond or beneath these values.
         var filteredValues = values.filter(function(x) {
-            return (x <= maxValue) && (x >= minValue);
+            return (x[0] <= maxValue) && (x[0] >= minValue);
         });
         //
         return filteredValues;

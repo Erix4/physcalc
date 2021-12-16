@@ -190,6 +190,34 @@ export default class Timeline{
         return this.scrW / (this.scale / this.res);
     }
     //
+    getNearTime(t){
+        var timeSinks = [];
+        //
+        let res = this.res;
+        //
+        let xLeft = this.timeX.domain()[0];//get x left and right (in units)
+        let xRight = this.timeX.domain()[1];
+        //
+        var curX = Math.ceil(xLeft / res) * res;//get first x line position
+        for(var n = 0; n < ((xRight - xLeft) / res); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
+            timeSinks.push(curX);//add every grid line to timeSinks
+            curX += res;//increment by grid line resolution
+        }
+        //
+        this.command.objects.forEach(obj => {
+            obj.extremes.forEach(extr => timeSinks.push(extr));
+        });
+        //
+        let nearTime = timeSinks.reduce((prev, curr) => {
+            return Math.abs(curr - t) < Math.abs(prev - t) ? curr : prev;
+        });
+        //
+        if(nearTime > xLeft && nearTime < xRight && Math.abs(nearTime - t) < (this.scale / 80)){
+            return nearTime;
+        }
+        return t;
+    }
+    //
     /**
      * update cursor position
      */

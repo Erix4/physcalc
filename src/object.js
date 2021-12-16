@@ -396,10 +396,13 @@ export default class Object{
      * remove and respawn extreme points
      */
     spawnExtremes(){
-        this.pointDiv.html("");
+        this.pointDiv.html("");//delete all extreme labels
         switch(this.command.viewType){
             case 0:
                 this.extremes = this.profile.getExtremes();
+                console.log(`spawning with extremes:`);
+                console.log(this.extremes);
+                console.log(this.points);
                 var n;
                 for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
@@ -700,6 +703,7 @@ class compArrow{
         this.profile = obj.profile;
         //
         this.pos = this.profile.calcComp(depth, command.time, idx);
+        console.log(`new arrow with luminance ${55 - (idx * 10)}`);
         this.self = new Arrow(command, 0, 0, 0, 0, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
         this.self.tailSize = 20;
         //

@@ -52,6 +52,8 @@ export default class Props{
                     if(prc > self.precision){
                         self.precision = prc;
                     }
+                    //
+                    command.runAuto();
                 }
             });
         });
@@ -61,6 +63,8 @@ export default class Props{
                 drop.blur();
                 let mult = self.idxToMult(self.getDropIdx(d3.select(drop)));
                 d3.select(self.fields[idx]).property("value", (self.selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(self.precision));
+                //
+                command.runAuto();
             });
         });
         //
@@ -170,6 +174,21 @@ export default class Props{
             }
         });
         //
+        d3.select('#autoScaleCheck').on('click', function(){
+            command.autoScale = d3.select(this).property('checked');
+            command.runAuto();
+        });
+        //
+        d3.select('#criticalCheck').on('click', function(){
+            command.showExtremes = d3.select(this).property('checked');
+            command.deleteAllExtremes();
+            command.spawnExtremes();
+        });
+        //
+        d3.select('#timeSnapCheck').on('click', function(){
+            command.timeSnapping = d3.select(this).property('checked');
+        });
+        //
         this.tabEvents();
         //
         this.calcB = d3.select("#calcB");
@@ -181,6 +200,18 @@ export default class Props{
             command.selected.setValue(i, 0, 0);
             self.update(command.selected);
             command.objPosChange([command.selected]);
+        });
+        //
+        d3.selectAll('.vectorIcon').on('click', function(d, i){
+            //if the index is less the the highestVector, toggle the vector to that index
+            console.log(`click on ${i}`);
+            if(i < command.highestVector + 1){
+                command.toggleVectors(i);
+            }else{
+                command.toggleVectors(-1);
+            }
+            //
+            d3.select(d3.select('#arrowDisplayDrop').selectAll('option').nodes()[command.vectorMode+1]).property('selected', 'selected');
         });
         //
         this.update();
@@ -366,17 +397,17 @@ export default class Props{
                 if(selected.profile.bounds.length > 1){
                     if(i == 0){
                         console.log(`setting to ${selected.profile.bounds[0][1]-1}`);
-                        self.command.time = selected.profile.bounds[0][1]-.1;
+                        self.command.time = selected.profile.bounds[0][1]-.0001;
                         selected.update(true);//bypass lock if necessary
-                        self.command.setTime(selected.profile.bounds[0][1]-.1);
+                        self.command.setTime(selected.profile.bounds[0][1]-.0001);
                     }else{
                         console.log(`setting to ${selected.profile.bounds[i][0]}`);
-                        self.command.time = selected.profile.bounds[i][0];
+                        self.command.time = selected.profile.bounds[i][0]+.0001;
                         selected.update(true);
-                        self.command.setTime(selected.profile.bounds[i][0]);
+                        self.command.setTime(selected.profile.bounds[i][0]+.0001);
                     }
                 }
-            }else if(selected != null){
+            }else if(selected != null){//is the add tab
                 self.tabNum++;
                 console.log(`add tab`);
                 let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);
@@ -387,6 +418,7 @@ export default class Props{
                 }
                 //
                 selected.profile.newSplitPiece();
+                self.command.time += .0001;
                 selected.update();
                 self.command.drawGrid();
                 self.command.spawnExtremes([selected]);
@@ -399,7 +431,7 @@ export default class Props{
             if(self.selected != null){
                 let pIdx = self.selected.piece;
                 let bounds = self.selected.profile.bounds[pIdx];
-                if(pIdx == 0 && i == 0){//leftmost piece
+                if(pIdx == 0 && i == 0){//leftmost piece and left junction
                     if(isFinite(bounds[0])){//left bound is already a number
                         self.selected.profile.bounds[pIdx][0] = -Infinity;
                         //
@@ -411,7 +443,7 @@ export default class Props{
                     }
                     self.selected.profile.bounds[pIdx][0] = self.command.time;
                     self.command.spawnExtremes([self.selected]);
-                }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece
+                }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece and right junction
                     if(isFinite(bounds[1])){//right bound is already a number
                         self.selected.profile.bounds[pIdx][1] = Infinity;
                         //
@@ -427,6 +459,7 @@ export default class Props{
                 self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
                 if(self.selected.profile.junctions[pIdx-1+i] == 0){
                     self.selected.shiftValue(0, 0, 0);
+                    self.command.spawnExtremes([self.selected]);
                 }
                 //
                 self.command.selected.update();

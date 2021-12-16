@@ -374,7 +374,7 @@ export default class Input{
                         command.moveTimeline();
                         command.retimeExtremes();
                     }else{
-                        command.setTime(command.timeline.timeX.invert(event.clientX));
+                        command.setTime(command.timeSnapping ? command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)) : command.timeline.timeX.invert(event.clientX));
                     }
                     break;
                 case 6://retime an object via timeline extremes
@@ -407,7 +407,7 @@ export default class Input{
                         canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
                     }
                     break;
-                case 9:
+                case 9://move object by extreme
                     this.command.shiftPos(0, emx - mX, emy - mY, [this.active], this.propActive);//move object
                     this.command.objPosChange([this.active]);//update corresponding displays
                     break;
@@ -431,19 +431,21 @@ export default class Input{
                 this.command.spawnExtremes([this.command.selected]);
             }else if((mX - Math.ceil(stX) == 0) && (mY - Math.ceil(stY) == 0)){//no movement (y start has to be rounded for some reason)
                 switch(this.moveState){
-                    case 1:
-                        console.log(`hello?`)
+                    case 1://field move
                         if(!event.shiftKey){//shift click only deselects currently selected items
-                            console.log(`hello!`);
                             this.command.select();
                             this.active = null;
                             this.command.selected = null;
                             this.command.props.update();
                         }
                         break;
-                    case 2:
-                        this.command.select(this.command.selected);
-                        this.command.selected.self.raise();
+                    case 2://object move
+                        if(new Date - mT > 300 && command.selObs.length > 1){//long click main selects object
+                            this.command.mainSelect(input.active);
+                        }else{
+                            this.command.select(this.command.selected);
+                            this.command.selected.self.raise();
+                        }
                         break;
                     case 5://only necessary if the time isn't set on the mousedown
                         //command.setTime(command.timeline.timeX.invert(event.clientX));
@@ -464,6 +466,16 @@ export default class Input{
                 input.propsState = false;
             }else if(input.propsState){
                 //input.propActive.select();
+            }
+            //
+            if(command.autoScale && this.moveState != 1){
+                command.grid.normalize();
+            }
+            //
+            if(input.moveState == 1 && event.shiftKey && command.selObs.length == 1){//drag select selected only one object
+                input.shifting = false;
+                console.log(`selecting object ${command.selObs[0].id}`);
+                command.select(command.selObs[0]);
             }
             //
             this.command.dragBox.style("visibility", "hidden");
