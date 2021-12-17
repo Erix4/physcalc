@@ -180,6 +180,20 @@ export default class Profile{
     }
     //
     /**
+     * 
+     * @param {Number} st starting time
+     * @param {Number} cs current shift
+     * @param {Number} t new time
+     */
+    setAllPieces(st, cs, t){
+        let ns = (t - st) - cs;
+        console.log(`start: ${st}, current shift: ${cs}, time: ${t}, new shift: ${ns}`);
+        //
+        this.shiftAllPieces(ns);
+        return cs + ns;
+    }
+    //
+    /**
      * shift the bounds all complete pieces connected to the given piece
      * @param t  time to start propagating from
      * @param ct time to shift by
@@ -234,8 +248,8 @@ export default class Profile{
             this.bounds[i][0] = pushVal;
         }
         //
-        console.log(`left bound of right piece: ${this.bounds[1][0]}`);
-        console.log(`right bound of left piece: ${this.bounds[0][1]}`);
+        //console.log(`left bound of right piece: ${this.bounds[1][0]}`);
+        //console.log(`right bound of left piece: ${this.bounds[0][1]}`);
     }
     //
     reorderPeice(idx, newIdx){//this will be very complicated
@@ -595,8 +609,11 @@ export class Piece{
     }
     //
     resolve(xVals, yVals){
+        this.paras = this.paras.slice(0,1);//delete all paras except for the first one
         this.paras[0].resolve(xVals, yVals);
-        this.propagate(0);
+        while(this.paras[this.paras.length-1].xFunc.terms.length > 1 || this.paras[this.paras.length-1].yFunc.terms.length > 1){//while there are more derivatives
+            this.newDerivatives();//generate new derivatives
+        }
     }
     //
     newDerivatives(){

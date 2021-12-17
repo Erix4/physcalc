@@ -48,10 +48,12 @@ export default class Input{
         this.test = 1;
         var input = this;
         //
-        var stX = 0;
+        var stX = 0;//starting grid position
         var stY = 0;
-        var mX = 0;
+        var mX = 0;//current mouse position
         var mY = 0;
+        var cs = 0;//current shift
+        var stcX = 0;//starting timeline position
         //
         var mT = null;//time mouse was pressed
         //
@@ -302,6 +304,8 @@ export default class Input{
             //
             stX = emx;
             stY = emy;
+            cs = 0;
+            stcX = event.clientX;
             //
             mX = emx;
             mY = emy;
@@ -374,13 +378,18 @@ export default class Input{
                         command.moveTimeline();
                         command.retimeExtremes();
                     }else{
-                        command.setTime(command.timeSnapping ? command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)) : command.timeline.timeX.invert(event.clientX));
+                        command.setTime(command.timeSnapping || event.ctrlKey ? command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)) : command.timeline.timeX.invert(event.clientX));
                     }
                     break;
                 case 6://retime an object via timeline extremes
                     if(new Date - mT > 300){//if mouse has been held long enough (so no accidents)
                         //this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
-                        this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
+                        if(command.timeSnapping){
+                            console.log(`input time: ${command.timeline.timeX.invert(event.clientX)}`);
+                            cs = command.selected.profile.setAllPieces(command.timeline.timeX.invert(stcX), cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)));
+                        }else{
+                            this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
+                        }
                         //this.command.selected.profile.reBoundLeftPiece()
                         command.props.retime();
                         command.updateGrid();
@@ -631,24 +640,32 @@ export default class Input{
         d3.select(`#x1Bound`).on('input', function(){
             if(isNumeric(this.value) && parseFloat(this.value) < command.scaleX.domain()[1]){
                 command.grid.setSizeByEdge({left: parseFloat(this.value)});
+                command.autoScale = false;
+                d3.select('#autoScaleCheck').property('checked', false);
             }
         });
         //
         d3.select(`#x2Bound`).on('input', function(){
             if(isNumeric(this.value) && parseFloat(this.value) > command.scaleX.domain()[0]){
                 command.grid.setSizeByEdge({right: parseFloat(this.value)});
+                command.autoScale = false;
+                d3.select('#autoScaleCheck').property('checked', false);
             }
         });
         //
         d3.select(`#y1Bound`).on('input', function(){
             if(isNumeric(this.value) && parseFloat(this.value) < command.scaleY.domain()[1]){
                 command.grid.setSizeByEdge({bottom: parseFloat(this.value)});
+                command.autoScale = false;
+                d3.select('#autoScaleCheck').property('checked', false);
             }
         });
         //
         d3.select(`#y2Bound`).on('input', function(){
             if(isNumeric(this.value) && parseFloat(this.value) > command.scaleY.domain()[0]){
                 command.grid.setSizeByEdge({top: parseFloat(this.value)});
+                command.autoScale = false;
+                d3.select('#autoScaleCheck').property('checked', false);
             }
         });
         //#endregion

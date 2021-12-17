@@ -199,6 +199,7 @@ export default class Command{
             sel.attr("r", parseInt(this.selObs[idx].self.attr("r")) + pixels(5));
         });
         this.fullReset();
+        this.runAuto();
     }
     //
     /**

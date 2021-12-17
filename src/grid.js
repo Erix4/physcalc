@@ -103,8 +103,20 @@ export default class Grid{
         //
         extrs = this.filterOutliers(extrs);
         //
-        Xextrs = extrs.map(extr => extr[1]);
-        Yextrs = extrs.map(extr => extr[2]);
+        switch(this.command.viewType){
+            case 0:
+                Xextrs = extrs.map(extr => extr[1]);//positions match values
+                Yextrs = extrs.map(extr => extr[2]);
+                break;
+            case 1:
+                Xextrs = extrs.map(extr => extr[0]);//x position is time
+                Yextrs = extrs.map(extr => extr[1]);//y position is x value
+                break;
+            case 2:
+                Xextrs = extrs.map(extr => extr[0]);//x position is time
+                Yextrs = extrs.map(extr => extr[2]);//y position is y value
+                break;
+        }
         //
         const sort = arr => arr.sort(function(a, b) {
             return a - b;
@@ -127,8 +139,8 @@ export default class Grid{
                 this.scale = this.command.defaultScale;//set defualt square scale and center the one point
                 this.strX = 1;
                 //
-                this.cx = 0;
-                this.cy = 0;
+                this.cx = left;
+                this.cy = bottom;
                 //
                 this.calcSize(true);
                 this.customResize();
@@ -136,7 +148,7 @@ export default class Grid{
                 this.scale = (top - bottom) + (2 * bufferY);//set a square scale by the vertical axis
                 this.strX = 1;
                 //
-                this.cx = 0;
+                this.cx = left;
                 this.cy = bottom - bufferY + (this.scale / 2);
                 //
                 this.calcSize(true);
@@ -148,7 +160,7 @@ export default class Grid{
             this.strX = 1;
             //
             this.cx = left + bufferX + (((right - left) + (2 * bufferX)) / 2);
-            this.cy = 0;
+            this.cy = bottom;
             //
             this.calcSize(true);
             this.customResize();
