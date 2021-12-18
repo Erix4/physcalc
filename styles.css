@@ -518,6 +518,7 @@ i{
     font-size: 70%;
     font-weight: 700;
     cursor: default;
+    color: white;
 }
 
 #propLabelUnit{
@@ -624,6 +625,49 @@ i{
     font-size: 80%;
 }
 
+.solver .propParaLabel{
+    font-size: 60%;
+}
+
+.solvedPoint{
+    font-size: 60%;
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #a5cbc3;
+    border-radius: .3em;
+    width: fit-content;
+    border: #172b29 .2em solid;
+    margin-bottom: .3em;
+    padding-left: .2em;
+    padding-right: .2em;
+    cursor: pointer;
+    transition: .2s;
+    color: black;
+}
+
+.solvedPoint:hover{
+    background-color: #76cab8;
+}
+
+.solvedPoint:active{
+    border: white .2em solid;
+    transition: 0;
+}
+
+ul{
+    margin: 0;
+    list-style: none; /* Remove default bullets */
+}
+  
+ul li::before {
+    content: "\2022";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
+    color: #a5cbc3; /* Change the color */
+    font-weight: bold; /* If you want it to be bold */
+    display: inline-block; /* Needed to add space between the bullet and the text */
+    width: 1.5em; /* Also needed for space (tweak if needed) */
+    margin-left: -1.5em; /* Also needed for space (tweak if needed) */
+}
+
 .bigButton{
     background-color: #41B883;
     font-size: 70%;
@@ -674,6 +718,10 @@ i{
     background-color: #172b29;
     cursor: e-resize;
     z-index: 2;
+}
+
+.columnhandle.sel{
+    background-color: #41B883;
 }
 
 .columnhandle:hover{

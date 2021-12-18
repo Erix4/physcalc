@@ -110,6 +110,20 @@ export default class Props{
             if(command.selected){
                 switch(self.getDropIdx(d3.select('#solveType'))){
                     case 0:
+                        let drops = d3.select('#forPoint').selectAll('.propdrop').nodes();
+                        let power = self.getDropIdx(d3.select(drops[0]));
+                        let x = self.getDropIdx(d3.select(drops[1])) == 0;
+                        //
+                        let val;
+                        if(d3.select('#solvePointInput').property('value') == ""){
+                            alert("Please enter a value to check.");
+                            return;
+                        }else{
+                            val = parseFloat(d3.select('#solvePointInput').property('value'));
+                        }
+                        console.log(`power: ${power}, x: ${x}, val: ${val}`);
+                        //
+                        console.log(command.selected.profile.pieces[0].paras[power].yFunc.calcRoots(val));//update to work with multiple pieces and such
                         //
                         break;
                     case 1:
@@ -351,7 +365,7 @@ export default class Props{
             this.head.style('color', `hsl(${this.selected.hue}, 100%, 80%)`);
             this.fields.forEach((field, idx) => {
                 let mult = this.idxToMult(this.getDropIdx(d3.select(this.drops[idx])));
-                console.log(selected.getVals(Math.floor(idx / 2))[idx % 2]);
+                //console.log(selected.getVals(Math.floor(idx / 2))[idx % 2]);
                 d3.select(field).property("value", (selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(this.precision));
             });
         }else{

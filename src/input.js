@@ -331,6 +331,7 @@ export default class Input{
         //
         d3.select("#lefthandle").on("mousedown", function(){//start resizing the left column
             input.moveState = 8;
+            d3.select(this).attr('class', 'columnhandle sel');
         });
         //
         document.addEventListener("mousemove", event => {
@@ -404,6 +405,9 @@ export default class Input{
                 case 7:
                     break;//do nothing
                 case 8://resize left column
+                    if(event.stopPropagation) event.stopPropagation();
+                    if(event.preventDefault) event.preventDefault();
+                    event.cancelBubble=true;
                     let newX = event.clientX;
                     if(newX - (window.innerWidth / 10) > getExtra() && window.innerWidth - newX > getField()){
                         d3.select('#leftcolumn').style('width', `${newX}px`);
@@ -488,6 +492,8 @@ export default class Input{
                 command.select(command.selObs[0]);
             }
             //
+            d3.select('#lefthandle').attr('class', 'columnhandle');
+            //
             this.command.dragBox.style("visibility", "hidden");
             this.command.props.renderEqs();
             this.moveState = 0;
@@ -528,6 +534,14 @@ export default class Input{
             }else{
                 d3.select("#backpl").attr("class", "fas fa-play");
             }
+        });
+        //
+        d3.select("#stepforward").on("mousedown", function(){
+            command.setTime(command.timeline.getNextTime(command.time, true));
+        });
+        //
+        d3.select("#stepback").on("mousedown", function(){
+            command.setTime(command.timeline.getNextTime(command.time, false));
         });
         //
         d3.select("#vt0").on("mousedown", function(){

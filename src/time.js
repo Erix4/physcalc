@@ -218,6 +218,22 @@ export default class Timeline{
         return t;
     }
     //
+    getNextTime(t, before=false){
+        var timeSinks = [];
+        //
+        this.command.objects.forEach(obj => {
+            obj.extremes.forEach(extr => timeSinks.push(extr));
+        });
+        //
+        if(before){
+            timeSinks.sort((a, b) => a - b);
+            return timeSinks.find(x => x > t) == undefined ? t : timeSinks.find(x => x > t);
+        }else{
+            timeSinks.sort((a, b) => b - a);
+            return timeSinks.find(x => x < t) == undefined ? t : timeSinks.find(x => x < t);
+        }
+    }
+    //
     /**
      * update cursor position
      */
