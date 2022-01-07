@@ -389,6 +389,7 @@ export default class Input{
                             console.log(`input time: ${command.timeline.timeX.invert(event.clientX)}`);
                             cs = command.selected.profile.setAllPieces(command.timeline.timeX.invert(stcX), cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)));
                         }else{
+                            //this.command.selected.profile.shiftPropagate(command.timeline.timeX.invert(event.clientX), command.timeline.conTime(emx - mX));
                             this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
                         }
                         //this.command.selected.profile.reBoundLeftPiece()
@@ -790,7 +791,8 @@ export default class Input{
                 input.command.mainSelect(obj);
             }
             input.command.selObs.forEach(obj => {
-                obj.profile.setOrigin(input.command.time);
+                //obj.profile.setOrigin(input.command.time);
+                obj.profile.setRollingOrigin(input.command.time, 0);
             });
         });
         //

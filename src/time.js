@@ -208,7 +208,7 @@ export default class Timeline{
             obj.extremes.forEach(extr => timeSinks.push(extr));
         });
         //
-        let nearTime = timeSinks.reduce((prev, curr) => {
+        let nearTime = timeSinks.reduce((prev, curr) => {//find nearest time sink
             return Math.abs(curr - t) < Math.abs(prev - t) ? curr : prev;
         });
         //

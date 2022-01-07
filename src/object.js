@@ -108,11 +108,11 @@ export default class Object{
             this.nets.push(new netArrow(command, this, n));
             var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
             //
-            let compPower = [];
+            /*let compPower = [];
             for(var a in curPiece.comps[n]){
                 compPower.splice(0, 0, new compArrow(command, this, n, a, 0));//insert new comp arrow at beginning of power list
             }
-            //this.comps.push(compPower);
+            //this.comps.push(compPower);*/
             //
         }
         this.updateVectors();
@@ -322,7 +322,7 @@ export default class Object{
      */
     toggleVectors(mode){
         //
-        console.log(`toggling to ${mode} with net length ${this.nets.length}`);
+        //console.log(`toggling to ${mode} with net length ${this.nets.length}`);
         this.vectorMode = mode;
         /*this.comps.forEach(comp => {
             comp.forEach(arrow => {
@@ -335,7 +335,7 @@ export default class Object{
                 this.updateVectors(power);
                 this.moveVectors(power);
             });
-            this.nets[this.nets.length - 1].self.newColor("#00e3f7");
+            //this.nets[this.nets.length - 1].self.newColor("#00e3f7");
             /*this.comps.forEach(level => {
                 level.forEach(comp => {
                     comp.self.show();
@@ -377,6 +377,8 @@ export default class Object{
             //this.comps.push(compPower);
         }
         this.self.raise();
+        //
+        this.toggleVectors(this.command.vectorMode);
     }
     //
     /**
@@ -416,7 +418,7 @@ export default class Object{
                     this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
                     n++;
                 }
-                while(this.points.length > this.extremes.length){
+                while(this.points.length > this.extremes.length){//remove points that aren't used
                     this.points[this.points.length - 1].remove();
                     this.points.pop();
                 }
@@ -555,7 +557,7 @@ export default class Object{
      */
     setValueTime(power, time, xPos, yPos){
         this.profile.setValTime(power, time, xPos, yPos);
-        this.profile.setOrigin(time);
+        this.profile.setRollingOrigin(time, 0);
     }
     //
     /**
@@ -600,6 +602,7 @@ export default class Object{
             });
         });
         //
+        this.pointDiv.remove();//delete point div
         this.points.forEach(point => {
             point.remove();
         });
@@ -627,7 +630,6 @@ class netArrow{
         this.profile = obj.profile;
         //
         this.pos = this.profile.calc(depth, command.time);
-        //console.log(this.pos);
         this.self = new Arrow(command, obj.px, obj.py, this.pos[0] * obj.arrStr, this.pos[1] * obj.arrStr, `hsl(${240 - (depth * 20)}, 100%, 50%)`);
         this.command.input.newArrow(this);
     }
@@ -700,7 +702,6 @@ class compArrow{
         this.profile = obj.profile;
         //
         this.pos = this.profile.calcComp(depth, command.time, idx);
-        console.log(`new arrow with luminance ${55 - (idx * 10)}`);
         this.self = new Arrow(command, 0, 0, 0, 0, `hsl(132, 100%, ${55 - (idx * 10)}%)`);
         this.self.tailSize = 20;
         //
@@ -766,6 +767,7 @@ class Arrow{
         this.ey = ey;//ending y
         //
         this.color = color;
+        console.log(`setting color to ${this.color}`);
         //
         this.tailSize = 30;
         this.tailAng = 60;

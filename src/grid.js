@@ -316,6 +316,77 @@ export default class Grid{
         this.calcSize();
     }
     //
+    getNearUnits(xPos, yPos, exception){//use exception for setting values (to avoid colliding with extremes)
+        var xSinks = [];
+        var ySinks = [];
+        var dSinks = [];
+        //
+        let yRes = parseFloat(this.yRes);
+        let xRes = parseFloat(this.xRes);
+        //
+        let xLeft = this.command.scaleX.domain()[0];//get x left and right (in units)
+        let xRight = this.command.scaleX.domain()[1];
+        let yBot = this.command.scaleY.domain()[0];//get y top and bottom
+        let yTop = this.command.scaleY.domain()[1];
+        //
+        var curX = Math.ceil(xLeft / xRes) * xRes;//get first x line position
+        for(var n = 0; n < ((xRight - xLeft) / xRes); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
+            xSinks.push(curX);
+            dSinks.push([curX, 0, xSinks.length - 1]);//add every grid line to distanceSinks
+            curX += xRes;//increment by grid line resolution
+        }
+        //
+        var curY = Math.ceil(yBot / yRes) * yRes;//get first x line position
+        for(var n = 0; n < ((yTop - yBot) / yRes); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
+            ySinks.push(curY);//add every grid line to timeSinks
+            dSinks.push([curY, 1, ySinks.length - 1]);//add every grid line to distanceSinks
+            curY += yRes;//increment by grid line resolution
+        }
+        //
+        this.command.objects.forEach(obj => {
+            if(obj != exception){
+                obj.points.forEach((point, n) => {
+                    xSinks.push(parseFloat(point.attr("cx")));
+                    ySinks.push(parseFloat(point.attr("cy")));
+                    dSinks.push([pythagorus(xSinks[xSinks.length - 1], ySinks[ySinks.length - 1]), 2, n])
+                });
+            }
+        });
+        //
+        let nearDist = dSinks.reduce((prev, curr) => {
+            return Math.min(prev[0], curr[0]);
+        });
+        //
+        dSinks.sort(function(a, b) {
+            return a[0] - b[0];
+        });
+        //
+        switch(dSinks[0][1]){
+            case 0://snap to x grid line
+                //
+                if(Math.abs(dSinks[0][0]) < this.scale / 80){
+                    //
+                }
+                //
+                break;
+            case 1://snap to y grid line
+                //
+                break;
+            case 2://snap to extreme point
+                //
+                break;
+        }
+        //
+        if(nearXTime[1] != -1){//if the nearest x coordinate is from a point
+            if()
+        }
+        //
+        if(nearTime > xLeft && nearTime < xRight && Math.abs(nearTime - t) < (this.scale / 80)){
+            return nearTime;
+        }
+        return t;
+    }
+    //
     /**
      * Draw the grid (lines and axis)
      * @param {any} ctx contex of canvas
@@ -436,4 +507,8 @@ function toPlaces(number, places){
 
 function firstDigit(num){
     return Math.floor(num / Math.pow(10, Math.floor(Math.log10(num))));
+}
+
+function pythagorus(a, b){
+    return Math.sqrt(a * a + b * b);
 }

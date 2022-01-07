@@ -123,7 +123,23 @@ export default class Props{
                         }
                         console.log(`power: ${power}, x: ${x}, val: ${val}`);
                         //
-                        console.log(command.selected.profile.pieces[0].paras[power].yFunc.calcRoots(val));//update to work with multiple pieces and such
+                        let para = command.selected.profile.pieces[0].paras[power];
+                        let points = command.selected.profile.calcPointsAtValue(val, power, x);//x ? para.xFunc.calcRoots(val) : para.yFunc.calcRoots(val);
+                        console.log(points);
+                        //
+                        let list = d3.select('.pointList').select('ul');
+                        list.html("");
+                        points.forEach(point => {
+                            list.append('li').attr('class', 'noSelect solvedPoint').attr('val', point).html(`t: ${point.toFixed(3)}`);
+                        });
+                        //
+                        d3.selectAll('.solvedPoint').on('click', function(){
+                            command.setTime(parseFloat(d3.select(this).attr('val')));
+                        });
+                        //
+                        if(points.length == 0){
+                            alert("No points found.");
+                        }
                         //
                         break;
                     case 1:
@@ -175,7 +191,7 @@ export default class Props{
                                 return;
                             }
                             //
-                            command.selected.profile.pieces[0].resolve(xVals, yVals);//new values don't correctly propagate throughtout the piece
+                            command.selected.profile.resolve(command.selected.profile.getValIdx(command.time), xVals, yVals);//new values don't correctly propagate throughtout the piece
                             console.log(command.selected.profile.pieces[0]);
                             command.updateGrid([command.selected]);
                             command.drawGrid();
@@ -336,8 +352,9 @@ export default class Props{
         //
         d3.selectAll('.undoButton').on('click', function(d, i){
             command.selected.setValue(i, 0, 0);
-            self.update(command.selected);
             command.objPosChange([command.selected]);
+            self.renderEqs();
+            self.update(command.selected);
         });
         //
         d3.selectAll('.vectorIcon').on('click', function(d, i){
@@ -368,12 +385,13 @@ export default class Props{
                 //console.log(selected.getVals(Math.floor(idx / 2))[idx % 2]);
                 d3.select(field).property("value", (selected.getVals(Math.floor(idx / 2))[idx % 2] / mult).toFixed(this.precision));
             });
-        }else{
+        }else{//nothing selected
             this.head.text(`No Object`);
             this.head.style('color', `white`);
             this.fields.forEach(field => {
                 d3.select(field).property("value", "");
             });
+            d3.select('.pointList').select('ul').html("");
         }
     }
     //
@@ -394,6 +412,7 @@ export default class Props{
             if(this.tabNum == 10){
                 d3.select('#addTab').style('display', 'none');
             }
+            d3.select('.pointList').select('ul').html("");
             //
             this.updateTabs();
             this.tabEvents();
@@ -401,6 +420,7 @@ export default class Props{
             d3.selectAll('.tabField').property('value', '');
             d3.selectAll('.juncType').selectAll('.discIcon').attr('class', (d,i) => i == 3 ? `sel discIcon` : `discIcon`);
             d3.selectAll('.tabField').attr('class', 'noField tabField');
+            d3.select('.pointList').select('ul').html("");
         }
     }
     //
@@ -491,7 +511,7 @@ export default class Props{
             if(num == 0){
                 continue;
             }
-            if(num >= 0 && n < len){
+            if(num >= 0 && n < len && befores > 0){
                 str += "+";
             }
             if(Math.abs(num) != 1){
@@ -503,12 +523,15 @@ export default class Props{
             if(n > 1){
                 str += `^${n}`;
             }
+            befores++;
         }
-        num = coefs[0];
-        if(num >= 0 && len > 0){
-            str += "+";
+        if(coefs[0] != 0 || len == 0){//if zero is the only coefficient or the coefficient isn't zero
+            num = coefs[0];
+            if(num >= 0 && len > 0){//if the last coefficient is positive and the length is greater than one
+                str += "+";
+            }
+            str += `${round(num, 3)}`;
         }
-        str += `${round(num, 3)}`;
         return str;
     }
     //
@@ -566,7 +589,7 @@ export default class Props{
             }
         });
         //
-        d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable.disable the bounds fields if necessary
+        d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable/disable the bounds fields if necessary
             if(self.selected != null){
                 let pIdx = self.selected.piece;
                 let bounds = self.selected.profile.bounds[pIdx];
@@ -595,8 +618,9 @@ export default class Props{
                     self.selected.profile.bounds[pIdx][1] = self.command.time;
                     self.command.spawnExtremes([self.selected]);
                 }
-                self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;
+                self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;//cycle the junction type
                 if(self.selected.profile.junctions[pIdx-1+i] == 0){
+                    self.selected.profile.setOrigin(self.command.time);
                     self.selected.shiftValue(0, 0, 0);
                     self.command.spawnExtremes([self.selected]);
                 }

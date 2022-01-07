@@ -396,6 +396,7 @@ export default class Command{
      * Check the highest non-zero power in the list of objects for arrow purposes
      */
     checkArrows(){//add profile function for cleaning up derivatives, otherwise this doesn't work
+        this.highestVector = 0;
         this.objects.forEach(obj => {
             if(obj.profile.pieces[obj.piece].paras.length - 1 > this.highestVector){
                 this.highestVector = obj.profile.pieces[obj.piece].paras.length - 1;
@@ -413,7 +414,10 @@ export default class Command{
             d3.select(opt).style('display', 'none');
         });
         //
-        //
+        if(this.vectorMode > this.highestVector){
+            this.vectorMode = this.highestVector;
+            d3.select(d3.select('#arrowDisplayDrop').selectAll('option').nodes()[this.vectorMode+1]).property('selected', 'selected');
+        }
     }
     //
     /**
@@ -426,6 +430,7 @@ export default class Command{
         objs.forEach(obj => {
             idxs.push(obj.idx);
         });
+        console.log(`found idxs: ${idxs}`);
         return idxs;
     }
     //#endregion

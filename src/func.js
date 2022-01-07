@@ -340,6 +340,36 @@ export default class Profile{
         return doms;
     }
     //
+    /**
+     * calculate all the points in time that matches a value
+     * @param {Number} value the value to match
+     * @param {Number} power the power at which to match the value
+     * @param {Boolean} x    whether the matching value is x
+     */
+    calcPointsAtValue(value, power, x){
+        var points = [];
+        //
+        //console.log(`finding ${value} at ${power} with x? ${x}`);
+        //
+        this.pieces.forEach((piece, idx) => {
+            //console.log((x ? piece.paras[power].xFunc.calcRoots(value) : piece.paras[power].yFunc.calcRoots(value)).filter(x => this.bounds[idx][0] < x && x < this.bounds[idx][1]));
+            points.push(...(x ? piece.paras[power].xFunc.calcRoots(value) : piece.paras[power].yFunc.calcRoots(value)).filter(x => this.bounds[idx][0] < x && x < this.bounds[idx][1]));
+        });
+        //
+        return points;
+    }
+    //
+    resolve(pIdx, xVals, yVals){
+        if(pIdx > 0 && this.junctions[pIdx - 1] == 0){//if piece has a left juction and the junction is continuous
+            this.junctions[pIdx - 1] = 1;//set the junction to discontinuous
+        }
+        if(pIdx < this.pieces.length - 1 && this.junctions[pIdx] == 0){//if piece has a right juctino and the junction is continuous
+            this.junctions[pIdx] = 1;//set the junction to discontinuous
+        }
+        //
+        this.pieces[pIdx].resolve(xVals, yVals);
+    }
+    //
     setAllComps(comps, pIdx){
         //
     }
@@ -463,6 +493,32 @@ export default class Profile{
             this.pieces.forEach(piece => {//set the origin at the given power for every piece
                 piece.setOrigin(time, power);
             }); 
+        }
+    }
+    //
+    /**
+     * set the origin in one piece and the origin of surrounding pieces to the junction points
+     * @param {Number} time   time to set the origin to
+     * @param {Number} power  power to set the origin with
+     * @param {Number} [pIdx] index of piece to set the origin in
+     */
+    setRollingOrigin(time, power, pIdx){
+        if(arguments.length < 3){
+            pIdx = this.getValIdx(time);
+        }
+        //
+        this.pieces[pIdx].setOrigin(time, power);
+        //
+        var i = pIdx - 1;
+        while(i >= 0){
+            this.pieces[i].setOrigin(this.bounds[i][1], power);
+            i--;
+        }
+        //
+        i = pIdx + 1;
+        while(i < this.pieces.length){
+            this.pieces[i].setOrigin(this.bounds[i][0], power);
+            i++;
         }
     }
     //
