@@ -22,6 +22,8 @@ export default class Props{
         this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         //
+        console.log(d3.selectAll('.propField').nodes());
+        //
         d3.selectAll('.propField').on('click', function(){
             this.select();
             input.fieldClick(this);
@@ -106,6 +108,16 @@ export default class Props{
             }
         });
         //
+        this.wtFields = d3.selectAll('.propField').nodes().slice(27, 33);
+        d3.selectAll('.propField').nodes().slice(27, 33).forEach((elem, idx) => {
+            //d3.select(elem).style('background-color', 'red');
+            d3.select(elem).on('input', function(){
+                let modIndicator = idx % 2 == 0;
+                //let checIndicator = ;
+                console.log(`detected change on ${idx % 2 == 0 ? 'left' : 'right'}`);
+            });
+        });
+        //
         d3.select('#calcButton').on('click', function(){
             if(command.selected){
                 switch(self.getDropIdx(d3.select('#solveType'))){
@@ -123,7 +135,6 @@ export default class Props{
                         }
                         console.log(`power: ${power}, x: ${x}, val: ${val}`);
                         //
-                        let para = command.selected.profile.pieces[0].paras[power];
                         let points = command.selected.profile.calcPointsAtValue(val, power, x);//x ? para.xFunc.calcRoots(val) : para.yFunc.calcRoots(val);
                         console.log(points);
                         //
@@ -211,6 +222,7 @@ export default class Props{
                         }
                         break;
                     case 2:
+                        //
                         //
                         break;
                 }

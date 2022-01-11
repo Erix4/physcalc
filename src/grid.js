@@ -321,8 +321,8 @@ export default class Grid{
         var ySinks = [];
         var dSinks = [];
         //
-        let yRes = parseFloat(this.yRes);
-        let xRes = parseFloat(this.xRes);
+        let yRes = parseFloat(this.yRes) * this.superRes;
+        let xRes = parseFloat(this.xRes) * this.superRes;
         //
         let xLeft = this.command.scaleX.domain()[0];//get x left and right (in units)
         let xRight = this.command.scaleX.domain()[1];
@@ -332,59 +332,65 @@ export default class Grid{
         var curX = Math.ceil(xLeft / xRes) * xRes;//get first x line position
         for(var n = 0; n < ((xRight - xLeft) / xRes); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
             xSinks.push(curX);
-            dSinks.push([curX, 0, xSinks.length - 1]);//add every grid line to distanceSinks
+            dSinks.push([Math.abs(curX - xPos), 0, xSinks.length - 1]);//add every grid line to distanceSinks
             curX += xRes;//increment by grid line resolution
         }
         //
         var curY = Math.ceil(yBot / yRes) * yRes;//get first x line position
         for(var n = 0; n < ((yTop - yBot) / yRes); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
             ySinks.push(curY);//add every grid line to timeSinks
-            dSinks.push([curY, 1, ySinks.length - 1]);//add every grid line to distanceSinks
+            dSinks.push([Math.abs(curY - yPos), 1, ySinks.length - 1]);//add every grid line to distanceSinks
             curY += yRes;//increment by grid line resolution
         }
         //
-        this.command.objects.forEach(obj => {
-            if(obj != exception){
-                obj.points.forEach((point, n) => {
-                    xSinks.push(parseFloat(point.attr("cx")));
-                    ySinks.push(parseFloat(point.attr("cy")));
-                    dSinks.push([pythagorus(xSinks[xSinks.length - 1], ySinks[ySinks.length - 1]), 2, n])
+        this.command.objects.forEach(obj => {//for every object
+            if(obj != exception){//except the exception
+                obj.points.forEach(point => {//for each extreme point in the object
+                    xSinks.push(this.command.scaleX.invert(parseFloat(point.attr("cx"))));
+                    ySinks.push(this.command.scaleY.invert(parseFloat(point.attr("cy"))));
+                    dSinks.push([Math.abs(pythagorus(xSinks[xSinks.length - 1] - xPos, ySinks[ySinks.length - 1] - yPos)), 2, xSinks.length - 1, ySinks.length - 1]);//add 
                 });
+                xSinks.push(obj.xS[0]);
+                ySinks.push(obj.yS[0]);
+                dSinks.push([Math.abs(pythagorus(xSinks[xSinks.length - 1] - xPos, ySinks[ySinks.length - 1] - yPos)), 2, xSinks.length - 1, ySinks.length - 1]);
             }
-        });
-        //
-        let nearDist = dSinks.reduce((prev, curr) => {
-            return Math.min(prev[0], curr[0]);
         });
         //
         dSinks.sort(function(a, b) {
             return a[0] - b[0];
         });
         //
-        switch(dSinks[0][1]){
-            case 0://snap to x grid line
-                //
-                if(Math.abs(dSinks[0][0]) < this.scale / 80){
-                    //
-                }
-                //
-                break;
-            case 1://snap to y grid line
-                //
-                break;
-            case 2://snap to extreme point
-                //
-                break;
-        }
+        if(dSinks[0][0] < this.scale / 40){//grid line is within snapping range
+            switch(dSinks[0][1]){
+                case 0://snap to x grid line
+                    if(dSinks[1][0] < this.scale / 40){//next closest point is within snapping range
+                        if(dSinks[1][1] == 2){//next closest point is an extreme
+                            //return [xSinks[dSinks[0][2]], yPos];//snap only to x grid line
+                            return [xSinks[dSinks[1][2]], ySinks[dSinks[1][3]]];
+                        }else{//next closest point is a y grid line
+                            return [xSinks[dSinks[0][2]], ySinks[dSinks[1][2]]];//snap to x and y grid line
+                        }
+                    }else{
+                        return [xSinks[dSinks[0][2]], yPos];//snap only to x grid line
+                    }
+                case 1://snap to y grid line
+                    if(dSinks[1][0] < this.scale / 40){//next closest point is within snapping range
+                        if(dSinks[1][1] == 2){//next closest point is an extreme
+                            //return [xPos, ySinks[dSinks[0][2]]];//snap only to x grid line
+                            return [xSinks[dSinks[1][2]], ySinks[dSinks[1][3]]];
+                        }else{//next closest point is a y grid line
+                            return [xSinks[dSinks[1][2]], ySinks[dSinks[0][2]]];//snap to x and y grid line
+                        }
+                    }else{
+                        return [xPos, ySinks[dSinks[0][2]]];//snap only to x grid line
+                    }
+                case 2://snap to extreme point
+                    return [xSinks[dSinks[0][2]], ySinks[dSinks[0][3]]];
+            }
+        }//otherwise, there is no good snapping location
+        console.log('no good snapping location');
         //
-        if(nearXTime[1] != -1){//if the nearest x coordinate is from a point
-            if()
-        }
-        //
-        if(nearTime > xLeft && nearTime < xRight && Math.abs(nearTime - t) < (this.scale / 80)){
-            return nearTime;
-        }
-        return t;
+        return [xPos, yPos];//return given position
     }
     //
     /**

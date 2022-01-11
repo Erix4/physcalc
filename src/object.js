@@ -189,11 +189,13 @@ export default class Object{
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
             case 1:
-                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
+                //this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
+                this.px = this.profile.getValIdx(this.command.time);
                 this.py = this.profile.calc(0, this.command.time)[0];
                 break;
             case 2:
-                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
+                //this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
+                this.px = this.profile.getValIdx(this.command.time);
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
         }

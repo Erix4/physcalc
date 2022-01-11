@@ -455,7 +455,7 @@ export default class Command{
                     let curPos = obj.getVals(power, time);
                     let x = this.scaleX.invert(this.scaleX(curPos[0]) + cx);
                     let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
-                    obj.setValueTime(power, time, x, y, obj);
+                    obj.setValueTime(power, time, x, y);
                 });
                 break;
             case 1:
@@ -480,6 +480,40 @@ export default class Command{
                 });
                 this.setTime(this.time + (t - time));
                 break;
+        }
+    }
+    //
+    /**
+     * set the position of one object and shift all the rest
+     * @param {Number} power      power of position to shift
+     * @param {Number} px         new x position in pixels
+     * @param {Number} py         new y position in pixels
+     * @param {Array<Object} objs list of objects to shift
+     * @param {Number} [time]     time to shift position at
+     */
+    setScreenPos(power, px, py, objs, time){
+        if(arguments.length < 5){
+            time = this.time;
+            this.shiftPos(power, px - this.scaleX(this.selected.px), py - this.scaleY(this.selected.py), objs, time);
+        }else{
+            let ox;
+            let oy;
+            //
+            switch(this.viewType){
+                case 0:
+                    ox = this.selected.profile.calc(0, time)[0];
+                    oy = this.selected.profile.calc(0, time)[1];
+                    break;
+                case 1:
+                    ox = this.selected.profile.getValIdx(time);
+                    oy = this.selected.profile.calc(0, time)[0];
+                    break;
+                case 2:
+                    ox = this.selected.profile.getValIdx(time);
+                    oy = this.selected.profile.calc(0, time)[1];
+                    break;
+            }
+            this.shiftPos(power, px - this.scaleX(ox), py - this.scaleY(oy), objs, time);
         }
     }
     //

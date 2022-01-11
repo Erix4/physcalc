@@ -408,7 +408,7 @@ export default class Profile{
             t = this.bounds[0][0];//set time to the left bound
         }
         //
-        console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
+        //console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
         //
         this.setPieceValTime(power, t, curIdx, x, y, propagator);
         var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];

@@ -349,8 +349,20 @@ export default class Input{
                     }
                     break;
                 case 2://object move
-                    this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);//move object(s)
-                    this.command.objPosChange(this.command.selObs);//update corresponding displays
+                    if(event.ctrlKey){
+                        //console.log('time snapping');
+                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy), this.command.selected);
+                        console.log(pos);
+                        let xPos = this.command.scaleX(pos[0]);
+                        let yPos = this.command.scaleY(pos[1]);
+                        console.log(`xPos: ${xPos}, yPos: ${yPos}`);
+                        //
+                        this.command.setScreenPos(0, xPos, yPos, this.command.selObs);//move object(s)
+                        this.command.objPosChange(this.command.selObs);//update corresponding displays
+                    }else{
+                        this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);//move object(s)
+                        this.command.objPosChange(this.command.selObs);//update corresponding displays
+                    }
                     break;
                 case 3://set initial object value
                     switch(this.command.viewType){
@@ -423,8 +435,20 @@ export default class Input{
                     }
                     break;
                 case 9://move object by extreme
-                    this.command.shiftPos(0, emx - mX, emy - mY, [this.active], this.propActive);//move object
-                    this.command.objPosChange([this.active]);//update corresponding displays
+                    if(event.ctrlKey){
+                        //console.log('time snapping');
+                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy), this.command.selected);
+                        console.log(pos);
+                        let xPos = this.command.scaleX(pos[0]);
+                        let yPos = this.command.scaleY(pos[1]);
+                        console.log(`xPos: ${xPos}, yPos: ${yPos}`);
+                        //
+                        this.command.setScreenPos(0, xPos, yPos, [this.active], this.propActive);//move object(s)
+                        this.command.objPosChange([this.active]);//update corresponding displays
+                    }else{
+                        this.command.shiftPos(0, emx - mX, emy - mY, [this.active], this.propActive);//move object
+                        this.command.objPosChange([this.active]);//update corresponding displays
+                    }
                     break;
                 default://regular mouse movement
                     //command.drawGrid();
