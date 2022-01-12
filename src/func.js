@@ -1,13 +1,12 @@
 /**
  * The piece and profile classes should have an adaptive depth which changes depending on the length of terms
- *      - for terms without converging derivatives, set depth to convergence of convergin terms
+ *      - for terms without converging derivatives, set depth to convergence of converging terms
  */
 
 export default class Profile{
     constructor(command, depth, xCoefs, yCoefs, color){
         this.command = command;
         this.color = color;
-        this.depth = depth;
         //
         this.pieces = [new Piece(command, xCoefs, yCoefs, color)];//list of pieces in piecewise equation
         //
@@ -349,11 +348,20 @@ export default class Profile{
     calcPointsAtValue(value, power, x){
         var points = [];
         //
-        //console.log(`finding ${value} at ${power} with x? ${x}`);
+        let verts = [];
         //
         this.pieces.forEach((piece, idx) => {
-            //console.log((x ? piece.paras[power].xFunc.calcRoots(value) : piece.paras[power].yFunc.calcRoots(value)).filter(x => this.bounds[idx][0] < x && x < this.bounds[idx][1]));
+            if(piece.paras.length > power + 2 && (x ? piece.paras[power + 2].xFunc : piece.paras[power + 2].yFunc).terms[0].coef != 0){//if this piece has more than 2 powers and acceleraetion isn't zero
+                verts.push(...((x ? piece.paras[power + 1].xFunc : piece.paras[power + 1].yFunc).calcRoots(0)).filter(x => this.bounds[idx][0] < x && x < this.bounds[idx][1]));
+            }
             points.push(...(x ? piece.paras[power].xFunc.calcRoots(value) : piece.paras[power].yFunc.calcRoots(value)).filter(x => this.bounds[idx][0] < x && x < this.bounds[idx][1]));
+        });
+        //
+        verts.forEach(v => {
+            console.log(`checking ${this.calc(power, v)[x ? 0 : 1]} vs ${value}`);
+            if(numSimilar(this.calc(power, v)[x ? 0 : 1], value)){
+                points.push(v);
+            }
         });
         //
         return points;
@@ -646,6 +654,18 @@ export default class Profile{
         }
         //
         return this.pieces[curIdx].comps[power][idx].calc(time);//return the value of the applicable piece
+    }
+    //
+    loadPieces(pieces, bounds, junctions){
+        //format: [pieces: [powers: [comps: [xfunc, yfunc]], [] ], [] ]
+        let newPieces = [];
+        pieces.forEach(piece => {
+            newPieces.push(new Piece(this.command, piece[0][0][0], piece[0][0][1], this.color));//for now, powers and comps can be ignored because comps aren't used
+        });
+        //
+        this.pieces = newPieces;
+        this.bounds = bounds;
+        this.junctions = junctions;
     }
 }
 
@@ -1148,8 +1168,13 @@ export class Para{
     }
     //
     resolve(xVals, yVals){
-        this.xFunc.resolve(xVals);
-        this.yFunc.resolve(yVals);
+        let xStore = this.xFunc;
+        //
+        if (this.xFunc.resolve(xVals)){
+            if(!this.yFunc.resolve(yVals)){
+                this.xFunc = xStore;
+            }
+        }
     }
     //
     calc(t){
@@ -1459,13 +1484,24 @@ export class Func{
     }
     //
     resolve(inputs){
-        let X = this.approxMatrix(inputs);
+        let X = this.matrixCalc(inputs);//this.approxMatrix(inputs);
+        console.log(X);
+        //
+        for(var n = 0; n < X.length; n++){
+            if(!isFinite(X[n])){
+                alert('Error: No solution found. Please check your inputs.');
+                return false;
+            }
+        }
+        //
         this.terms = [];
         //
         let len = X.length - 1;
         X.forEach((coef, idx) => {
             this.addTerm(coef, len - idx);
         });
+        //
+        return true;
     }
     //
     approxMatrix(inputs){
@@ -1481,7 +1517,7 @@ export class Func{
         if(X.length == 0){
             //console.log("APPROX FAILED.");
         }
-        //console.log(X);
+        console.log(X);
         return X;
     }
     //

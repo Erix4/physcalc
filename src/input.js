@@ -352,10 +352,8 @@ export default class Input{
                     if(event.ctrlKey){
                         //console.log('time snapping');
                         let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy), this.command.selected);
-                        console.log(pos);
                         let xPos = this.command.scaleX(pos[0]);
                         let yPos = this.command.scaleY(pos[1]);
-                        console.log(`xPos: ${xPos}, yPos: ${yPos}`);
                         //
                         this.command.setScreenPos(0, xPos, yPos, this.command.selObs);//move object(s)
                         this.command.objPosChange(this.command.selObs);//update corresponding displays
@@ -591,7 +589,7 @@ export default class Input{
             input.command.changeViewType(2);
         });
         //
-        d3.select("#saveB").on("mousedown", function(){
+        d3.select("#save").on("mousedown", function(){
             input.command.saveState();
         });
         //
@@ -599,14 +597,13 @@ export default class Input{
         //
         var dropbox = document.getElementById("getFile");
         document.addEventListener("dragenter", e => {
-            if(window.getSelection().anchorNode == null){
+            if(window.getSelection().isCollapsed && window.getSelection().type != "Range"){//prevent false dragging events
                 d3.select("#getFile").style("pointer-events", "all").style("opacity", "0.5");
                 e.stopPropagation();
                 e.preventDefault();
             }
         }, false);
         dropbox.addEventListener("dragleave", e => {
-            console.log("drag left");
             d3.select("#getFile").style("pointer-events", "none").style("opacity", "0");
             fake = false;
         }, false);
@@ -618,7 +615,6 @@ export default class Input{
         dropbox.addEventListener("drop", e => {
             e.stopPropagation();
             e.preventDefault();
-            console.log("Drop detected");
             //
             const dt = e.dataTransfer;
             const files = dt.files;

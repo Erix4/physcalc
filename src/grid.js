@@ -230,20 +230,20 @@ export default class Grid{
     //
     customResize(){
         var curRes = this.getGridRes(true);
-        while(curRes < this.gridMin || curRes > this.gridMax){//resizing may need to be done several times
+        var loopCatcher = 0;
+        while((curRes < this.gridMin || curRes > this.gridMax) && loopCatcher < 100){//resizing may need to be done several times
             let fd = firstDigit(this.superRes * (parseFloat(this.yRes)));//redo the gridlines
             this.yRes = getGrid(curRes, this.yRes, this.gridMin, this.gridMax, fd, this.bd);
             curRes = this.getGridRes(true);
-            console.log(`curres: ${curRes}, yres: ${this.yRes}`);
+            loopCatcher++;
         }
         //
-        console.log(`gridMin: ${this.gridMin}, gridMax: ${this.gridMax}`);
         curRes = this.getGridRes(false) * this.strX;
-        while(curRes < this.gridMin || curRes > this.gridMax){
+        while((curRes < this.gridMin || curRes > this.gridMax) && loopCatcher < 200){
             let fd = firstDigit(this.superRes * (parseFloat(this.xRes)));//redo the gridlines for x axis
             this.xRes = getGrid(curRes, this.xRes, this.gridMin, this.gridMax, fd, this.bd);
             curRes = this.getGridRes(false) * this.strX;
-            console.log(`curres: ${curRes}, xres: ${this.xRes}, fd: ${fd}`);
+            loopCatcher++;
         }
         //
         this.command.drawGrid();

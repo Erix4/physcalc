@@ -189,13 +189,11 @@ export default class Object{
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
             case 1:
-                //this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
-                this.px = this.profile.getValIdx(this.command.time);
+                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[0];
                 break;
             case 2:
-                //this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
-                this.px = this.profile.getValIdx(this.command.time);
+                this.px = this.profile.getCurIdx(this.command.time) == -1 ? this.profile.bounds[this.piece][1] : this.command.time;
                 this.py = this.profile.calc(0, this.command.time)[1];
                 break;
         }
@@ -590,7 +588,7 @@ export default class Object{
     /**
      * Delete this object and its SVG elements
      */
-    delete(){
+    delete(commStuff = true){
         this.toBeDeleted = true;
         //
         this.self.remove();
@@ -609,16 +607,18 @@ export default class Object{
             point.remove();
         });
         //
-        this.command.deleteExtreme(this);
-        this.command.updateGrid();
-        this.command.objects.forEach(obj => {
-            obj.idx = this.command.objects.indexOf(obj);
-        });
-        this.command.drawGrid();
-        this.command.drawTimeline();
-        this.command.select();
-        this.command.props.renderEqs();
-        this.command.checkArrows();
+        if(commStuff){
+            this.command.deleteExtreme(this);
+            this.command.updateGrid();
+            this.command.objects.forEach(obj => {
+                obj.idx = this.command.objects.indexOf(obj);
+            });
+            this.command.drawGrid();
+            this.command.drawTimeline();
+            this.command.select();
+            this.command.props.renderEqs();
+            this.command.checkArrows();
+        }
     }
     //
 }

@@ -574,18 +574,65 @@ export default class Command{
      */
     saveState(){
         var str = "";
-        this.objects.forEach(obj => {
-            let comps = obj.profile.comps;
-            comps.forEach(level => {
-                level.forEach(comp => {
-                    str += `${comp.xFunc.getCoefs()}y${comp.yFunc.getCoefs()}v`;
+        this.objects.forEach((obj, idx) => {//loop objects
+            let objStr = `{object ${idx}\n`;
+            //
+            let pieces = obj.profile.pieces;
+            pieces.forEach((piece, idx) => {//loop pieces
+                objStr += `{piece ${idx}\n`;
+                //
+                piece.comps.forEach((power, idx) => {//loop powers
+                    objStr += `{power ${idx}\n`;
+                    //
+                    power.forEach((comp, idx) => {//loop comps
+                        objStr += `{comp ${idx}\n`;
+                        //
+                        objStr += `<${comp.xFunc.getCoefs()}>, <${comp.yFunc.getCoefs()}>\n`;//record coefs
+                        //
+                        objStr += `}\n`;
+                    });
+                    //
+                    objStr += `}\n`;
                 });
-                str = str.slice(0, -1);
-                str += `/`;
+                //
+                objStr += `}\n`;
             });
-            str = str.slice(0, -1);
-            str += `\n`;
+            //
+            objStr += `[bounds\n`;
+            obj.profile.bounds.forEach(bound => {
+                objStr += `${bound}\n`;
+            });
+            objStr += `]\n`;
+            //
+            objStr += `[junctions\n`;
+            obj.profile.junctions.forEach(junc => {
+                objStr += `${junc}\n`;
+            });
+            objStr += `]\n`;
+            //
+            objStr += `}\n`;
+            //
+            str += objStr;
         });
+        //
+        str += `[user settings\n`;
+        str += `${d3.select('#gravityCheck').property('checked') ? 1 : 0},${d3.select('#gravitySet').property('value')}\n`;
+        str += `<${this.scaleX.domain()[0]},${this.scaleX.domain()[1]}>\n`;
+        str += `<${this.scaleY.domain()[0]},${this.scaleY.domain()[1]}>\n`;
+        str += `${this.autoScale ? 1 : 0}\n`;
+        str += `${this.timeSnapping ? 1 : 0}\n`;
+        str += `${this.showExtremes ? 1 : 0}\n`;
+        str += `]\n`;
+        //
+        str += `[state settings\n`;
+        str += `${this.time}\n`;
+        str += `${this.vectorMode}\n`;
+        str += `${this.viewType}\n`;
+        str += `]\n`;
+        //
+        str += `[prop settings\n`;
+        str += `]\n`;
+        //
         console.log(str);
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes();
@@ -599,40 +646,112 @@ export default class Command{
     openState(file){
         var comm = this;
         //
+        this.nukeIt();
+        //
         console.log(file);
         const reader = new FileReader();
         reader.addEventListener('load', function() {//file reading is asynchronous, so this actually executes after the readAsText
-            let objs = this.result.split("\n");
-            objs.pop();
-            console.log(objs);
             //
-            comm.objects.forEach(obj => {
-                obj.delete();
-            });
-            comm.select();
+            let lines = this.result.split("\n");
+            let lineIdx = 0;
             //
-            objs.forEach(obj => {
-                let newComps = [];//all new comps for this object
-                //format: level>compList>xy>terms
+            while(lines[lineIdx].charAt(0) == "{"){//loop objects
+                lineIdx++;
                 //
-                let levels = obj.split("/");
-                levels.forEach(level => {
-                    let newLevelComps = [];//list of comps at this power level
-                    let comps = level.split("v");
-                    comps.forEach(comp => {
-                        let compS = comp.split("y");//a and y functions for this comp
-                        newLevelComps.push([compS[0].split(","), compS[1].split(",")]);//split the commas
-                    });
-                    //console.log(newLevelComps);
-                    newComps.push(newLevelComps);
-                });
-                console.log(`Object comps:`);
-                console.log(newComps);
+                let newObj = new Object(comm, comm.idCount, 0, 0);
+                comm.objects.push(newObj);
+                comm.idCount++;
                 //
-                let idx = comm.objects.length;
-                comm.objects.push(new Object(comm, idx, 0, 0));
-                comm.objects[idx].profile.setAllComps(newComps);
-            });
+                let pieces = [];
+                //
+                while(lines[lineIdx].charAt(0) == "{"){//loop pieces
+                    lineIdx++;
+                    //
+                    pieces.push([]);
+                    //
+                    while(lines[lineIdx].charAt(0) == "{"){//loop powers
+                        lineIdx++;
+                        //
+                        let powers = pieces[pieces.length - 1]
+                        powers.push([]);
+                        //
+                        while(lines[lineIdx].charAt(0) == "{"){//loop comps
+                            lineIdx++;
+                            //
+                            console.log(lines[lineIdx]);
+                            let line = lines[lineIdx]
+                            var xStart = 1;
+                            var xEnd = moveToNext(line, xStart, '>');
+                            var yStart = xEnd + 4;
+                            var yEnd = moveToNext(line, yStart, '>');
+                            //
+                            let xCoefs = line.slice(xStart, xEnd).split(',').map(x => parseFloat(x));
+                            let yCoefs = line.slice(yStart, yEnd).split(',').map(x => parseFloat(x));
+                            //
+                            powers[powers.length - 1].push([xCoefs, yCoefs]);
+                            //
+                            lineIdx += 2;
+                        }
+                        //
+                        lineIdx++;
+                    }
+                    //
+                    lineIdx++;
+                }
+                //
+                let bounds = [];
+                lineIdx++;//enter bounds
+                while(lines[lineIdx].charAt(0) != "]"){//loop bounds
+                    bounds.push(lines[lineIdx].split(',').map(x => parseFloat(x)));
+                    lineIdx++;
+                }
+                lineIdx++;//exit bounds
+                //
+                let junctions = []
+                lineIdx++;//enter junctions
+                while(lines[lineIdx].charAt(0) != "]"){//loop junctions
+                    junctions.push(parseInt(lines[lineIdx]));
+                    lineIdx++;
+                }
+                lineIdx++;//exit junctions
+                //
+                newObj.profile.loadPieces(pieces, bounds, junctions);
+                //
+                lineIdx++;
+            }
+            //
+            lineIdx++;//enter user settings
+            //
+            let gravStore = lines[lineIdx].split(',');//get gravity
+            console.log(`gravity got: ${gravStore[1]}`);
+            d3.select('#gravityCheck').property('checked', gravStore[0] == 1);
+            d3.select('#gravitySet').property('value', gravStore[1]);
+            if(gravStore[0] == 1){
+                comm.gravity = parseFloat(gravStore[1]);
+            }else{
+                comm.gravity = 0;
+            }
+            //
+            lineIdx++;
+            let xVals = lines[lineIdx].slice(1, moveToNext(lines[lineIdx], 1, '>')).split(',').map(x => parseFloat(x));
+            lineIdx++;
+            let yVals = lines[lineIdx].slice(1, moveToNext(lines[lineIdx], 1, '>')).split(',').map(x => parseFloat(x));
+            comm.grid.setSizeByEdge({left: xVals[0], right: xVals[1], top: yVals[1], bottom: yVals[0]});
+            //
+            lineIdx++;
+            this.autoScale = lines[lineIdx] == 1;
+            lineIdx++;
+            this.timeSnapping = lines[lineIdx] == 1;
+            lineIdx++;
+            this.showExtremes = lines[lineIdx] == 1;
+            //
+            lineIdx += 3;//enter state settings
+            //
+            comm.time = parseFloat(lines[lineIdx]);
+            lineIdx++;
+            comm.vectorMode = parseInt(lines[lineIdx]);
+            lineIdx++;
+            comm.viewType = parseInt(lines[lineIdx]);
             //
             comm.updateGrid();
             comm.drawGrid();
@@ -641,9 +760,22 @@ export default class Command{
             comm.drawTimeline();
             comm.spawnExtremes();
             comm.toggleVectors(1);
-          });
+        });
         reader.readAsText(file);
         d3.select("#getFile").style("pointer-events", "none");
+    }
+    //
+    nukeIt(){
+        this.objects.forEach(obj => {
+            obj.delete(false);
+        });
+        this.objects = [];
+        //
+        this.idCount = 0;
+        //
+        this.deleteAllExtremes();
+        //
+        this.select();
     }
     //#endregion
     //
@@ -789,4 +921,12 @@ function download(filename, text) {
     element.click();
   
     document.body.removeChild(element);
+}
+
+function moveToNext(str, startI, charGoal){
+    var i = startI;
+    while(i < str.length && str.charAt(i) != charGoal){
+        i++;
+    }
+    return i;
 }

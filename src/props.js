@@ -112,9 +112,27 @@ export default class Props{
         d3.selectAll('.propField').nodes().slice(27, 33).forEach((elem, idx) => {
             //d3.select(elem).style('background-color', 'red');
             d3.select(elem).on('input', function(){
-                let modIndicator = idx % 2 == 0;
-                //let checIndicator = ;
+                let modIndicator = idx % 2;
+                let checIndicator = elem.value != ""; //d3.select(d3.selectAll('.wtSolveCheck').nodes()[idx]).property('checked');
                 console.log(`detected change on ${idx % 2 == 0 ? 'left' : 'right'}`);
+                //
+                d3.selectAll('.wtSolveCheck').nodes().forEach((elema, i) => {
+                    if(i % 2 == modIndicator && checIndicator){
+                        d3.select(elema).property('checked', true);
+                        //
+                        if(self.wtFields[i].value == ""){
+                            d3.select(self.wtFields[i]).property('value', '0');
+                        }
+                    }
+                });
+            });
+        });
+        //
+        d3.selectAll('.wtSolveCheck').on('change', function(d, i){
+            d3.selectAll('.wtSolveCheck').nodes().forEach((elema, j) => {
+                if(i % 2 == j % 2){
+                    d3.select(elema).property('checked', this.checked);
+                }
             });
         });
         //
@@ -202,19 +220,11 @@ export default class Props{
                                 return;
                             }
                             //
-                            command.selected.profile.resolve(command.selected.profile.getValIdx(command.time), xVals, yVals);//new values don't correctly propagate throughtout the piece
-                            console.log(command.selected.profile.pieces[0]);
+                            command.selected.profile.resolve(command.selected.profile.getValIdx(command.time), xVals, yVals);
                             command.updateGrid([command.selected]);
                             command.drawGrid();
                             command.moveGrid([command.selected]);
                             command.spawnExtremes([command.selected]);
-                            //
-                            let func = new Func(1000, [1, 1]);
-                            func.resolve(xVals);
-                            console.log(func.getCoefs());
-                            //
-                            func.resolve(yVals);
-                            console.log(func.getCoefs());
                             //
                         }else{
                             console.log(`denied`);
@@ -222,7 +232,33 @@ export default class Props{
                         }
                         break;
                     case 2:
+                        let t1 = self.getDropIdx(d3.select('#wtTypeOne'));//x or v0
+                        let t2 = self.getDropIdx(d3.select('#wtTypeTwo'));//v0 or v
+                        let t3 = self.getDropIdx(d3.select('#wtTypeThree'));//v or a
                         //
+                        let checks = d3.selectAll('.wtSolveCheck').nodes();
+                        //
+                        console.log(`types: ${t1}, ${t2}, ${t3}`);
+                        //
+                        //step 1. Validation
+                        if(t1 - t2 > 0 || t2 - t3 > 0){
+                            alert('You cannot set the same value twice.');
+                            return;
+                        }
+                        if(!checks[0].checked && ! checks[1].checked){
+                            alert('You must give at least x or y values to solve.');
+                            return;
+                        }
+                        //
+                        if(t1 == 0 && t2 == 0 && t3 == 0){//x, v0, v
+                            //
+                        }else if(t1 == 0 && t2 == 0 && t3 == 1){//x, v0, a
+                            //
+                        }else if(t1 == 0 && t2 == 1 && t3 == 1){//x, v, a
+                            //
+                        }else if(t1 == 1 && t2 == 1 && t3 == 1){//v0, v, a
+                            //
+                        }
                         //
                         break;
                 }
