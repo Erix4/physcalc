@@ -132,6 +132,10 @@ export default class Props{
             d3.selectAll('.wtSolveCheck').nodes().forEach((elema, j) => {
                 if(i % 2 == j % 2){
                     d3.select(elema).property('checked', this.checked);
+                    //
+                    if(this.checked && self.wtFields[j].value == ""){
+                        d3.select(self.wtFields[j]).property('value', '0');
+                    }
                 }
             });
         });
@@ -238,6 +242,9 @@ export default class Props{
                         //
                         let checks = d3.selectAll('.wtSolveCheck').nodes();
                         //
+                        let type = (d3.select(checks[0]).property('checked') ? 1 : 0) + (d3.select(checks[1]).property('checked') ? 2 : 0);
+                        console.log(`type: ${type}`);
+                        //
                         console.log(`types: ${t1}, ${t2}, ${t3}`);
                         //
                         //step 1. Validation
@@ -250,15 +257,65 @@ export default class Props{
                             return;
                         }
                         //
-                        if(t1 == 0 && t2 == 0 && t3 == 0){//x, v0, v
-                            //
-                        }else if(t1 == 0 && t2 == 0 && t3 == 1){//x, v0, a
-                            //
-                        }else if(t1 == 0 && t2 == 1 && t3 == 1){//x, v, a
-                            //
-                        }else if(t1 == 1 && t2 == 1 && t3 == 1){//v0, v, a
-                            //
+                        let time0 = parseFloat(d3.select('#initialTime').property('value'));
+                        let x0 = parseFloat(d3.select('#initX').property('value'));
+                        let y0 = parseFloat(d3.select('#initY').property('value'));
+                        //
+                        let xs = [];
+                        let ys = [];
+                        d3.select('#withoutTime').selectAll('.solveInput').nodes().forEach((elem, i) => {
+                            if(i % 2 == 0){
+                                xs.push(type % 2 == 1 ? parseFloat(elem.value) : i == 0 ? x0 : 0);
+                            }else{
+                                ys.push(type > 1 ? parseFloat(elem.value) : i == 1 ? y0 : 0);
+                            }
+                        });
+                        //
+                        console.log(xs);
+                        console.log(ys);
+                        //
+                        let profile = command.selected.profile;
+                        //
+                        let pIdx = profile.getValIdx(command.time);
+                        let piece = profile.pieces[pIdx];
+                        //
+                        if(pIdx > 0 && profile.junctions[pIdx - 1] == 0){//if piece has a left juction and the junction is continuous
+                            profile.junctions[pIdx - 1] = 1;//set the junction to discontinuous
                         }
+                        if(pIdx < profile.pieces.length - 1 && profile.junctions[pIdx] == 0){//if piece has a right juctino and the junction is continuous
+                            profile.junctions[pIdx] = 1;//set the junction to discontinuous
+                        }
+                        //
+                        if(t1 == 0 && t2 == 0 && t3 == 0){//x, v0, v
+                            piece.setValTime(0, time0, x0, y0, false);
+                            piece.setValTime(1, time0, xs[1], ys[1], false);
+                            //
+                            const getAcc = (x0, x, v0, v) => ((Math.pow(v, 2) - Math.pow(v0, 2)) / (2 * (x - x0)));
+                            //
+                            piece.setValTime(2, time0, getAcc(x0, xs[0], xs[1], xs[2]), getAcc(y0, ys[0], ys[1], ys[2]), false);
+                        }else if(t1 == 0 && t2 == 0 && t3 == 1){//x, v0, a
+                            piece.setValTime(0, time0, x0, y0, false);
+                            piece.setValTime(1, time0, xs[1], ys[1], false);
+                            piece.setValTime(1, time0, xs[2], ys[2], false);
+                        }else if(t1 == 0 && t2 == 1 && t3 == 1){//x, v, a
+                            piece.setValTime(0, time0, x0, y0, false);
+                            //
+                            const getVel = (x0, x, v, a) => (Math.sqrt(Math.pow(v, 2) + 2 * a * (x - x0)));
+                            //
+                            piece.setValTime(1, time0, getVel(x0, xs[0], xs[1], xs[2]), getVel(y0, ys[0], ys[1], ys[2]), false);
+                            piece.setValTime(1, time0, xs[2], ys[2], false);
+                        }else if(t1 == 1 && t2 == 1 && t3 == 1){//v0, v, a
+                            piece.setValTime(0, time0, x0, y0, false);
+                            piece.setValTime(1, time0, xs[0], ys[0], false);
+                            piece.setValTime(1, time0, xs[2], ys[2], false);
+                        }
+                        //
+                        piece.paras = piece.paras.slice(0, 3);//remove all but first three paras
+                        //
+                        command.updateGrid([command.selected]);
+                        command.drawGrid();
+                        command.moveGrid([command.selected]);
+                        command.spawnExtremes([command.selected]);
                         //
                         break;
                 }
@@ -303,6 +360,8 @@ export default class Props{
             //
             let stX = selected.xS.length > power ? selected.xS[power] : 0;
             let stY = selected.yS.length > power ? selected.yS[power] : 0;
+            //
+            selected.profile.setOrigin(self.command.time);
             //
             selected.setValue(power, stX + x, stY + y);//move object(s)
             self.command.objPosChange([selected]);//update corresponding displays

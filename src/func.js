@@ -364,6 +364,8 @@ export default class Profile{
             }
         });
         //
+        points.sort((a, b) => a - b);
+        //
         return points;
     }
     //
