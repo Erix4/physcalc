@@ -9,11 +9,9 @@ export default class Grid{
         this.totalW = parseInt(this.body.style("width"));
         this.totalH = parseInt(this.body.style("height")) - parseInt(this.timeline.style("height"));
         //
-        this.bd = require('bigdecimal');//local instance of npm package
-        //
         this.superRes = 5;//frequency of bolded lines, constant
-        this.yRes = this.bd.BigDecimal(`1`);//frequency of any lines (internal unit values), impervious to floating point errors
-        this.xRes = this.bd.BigDecimal(`1`);//frequency of x axis lines
+        this.yRes = new bigDecimal(`1`);//frequency of any lines (internal unit values), impervious to floating point errors
+        this.xRes = new bigDecimal(`1`);//frequency of x axis lines
         //
         this.cx = cx;//center position in units, describes the grid position the field of view is positioned around
         this.cy = cy;
@@ -64,11 +62,11 @@ export default class Grid{
         this.conX = d3.scaleLinear().domain([0, this.scrW]).range([0, xSc]);
         this.conY = d3.scaleLinear().domain([0, this.scrH]).range([0, -this.scale]);
         //
-        let fd = firstDigit(this.superRes * (parseFloat(this.yRes)));//redo the gridlines
-        this.yRes = getGrid(this.getGridRes(true), this.yRes, this.gridMin, this.gridMax, fd, this.bd);
+        let fd = firstDigit(this.superRes * (parseFloat(this.yRes.value)));//redo the gridlines
+        this.yRes = getGrid(this.getGridRes(true), this.yRes, this.gridMin, this.gridMax, fd);
         //
-        fd = firstDigit(this.superRes * (parseFloat(this.xRes)));//redo the gridlines for x axis
-        this.xRes = getGrid(this.getGridRes(false) * this.strX, this.xRes, this.gridMin, this.gridMax, fd, this.bd);
+        fd = firstDigit(this.superRes * (parseFloat(this.xRes.value)));//redo the gridlines for x axis
+        this.xRes = getGrid(this.getGridRes(false) * this.strX, this.xRes, this.gridMin, this.gridMax, fd);
         //
         if(setProps){
             d3.select('#x1Bound').property('value', lf.toFixed(3));
@@ -232,16 +230,16 @@ export default class Grid{
         var curRes = this.getGridRes(true);
         var loopCatcher = 0;
         while((curRes < this.gridMin || curRes > this.gridMax) && loopCatcher < 100){//resizing may need to be done several times
-            let fd = firstDigit(this.superRes * (parseFloat(this.yRes)));//redo the gridlines
-            this.yRes = getGrid(curRes, this.yRes, this.gridMin, this.gridMax, fd, this.bd);
+            let fd = firstDigit(this.superRes * (parseFloat(this.yRes.value)));//redo the gridlines
+            this.yRes = getGrid(curRes, this.yRes, this.gridMin, this.gridMax, fd);
             curRes = this.getGridRes(true);
             loopCatcher++;
         }
         //
         curRes = this.getGridRes(false) * this.strX;
         while((curRes < this.gridMin || curRes > this.gridMax) && loopCatcher < 200){
-            let fd = firstDigit(this.superRes * (parseFloat(this.xRes)));//redo the gridlines for x axis
-            this.xRes = getGrid(curRes, this.xRes, this.gridMin, this.gridMax, fd, this.bd);
+            let fd = firstDigit(this.superRes * (parseFloat(this.xRes.value)));//redo the gridlines for x axis
+            this.xRes = getGrid(curRes, this.xRes, this.gridMin, this.gridMax, fd);
             curRes = this.getGridRes(false) * this.strX;
             loopCatcher++;
         }
@@ -304,7 +302,7 @@ export default class Grid{
      * @returns pixels in between each y grid line
      */
     getGridRes(yq){
-        return this.scrH / (this.scale / parseFloat(yq ? this.yRes : this.xRes));
+        return this.scrH / (this.scale / parseFloat(yq ? this.yRes.value : this.xRes.value));
     }
     //
     zoomX(c, px, py){
@@ -321,8 +319,8 @@ export default class Grid{
         var ySinks = [];
         var dSinks = [];
         //
-        let yRes = parseFloat(this.yRes) * this.superRes;
-        let xRes = parseFloat(this.xRes) * this.superRes;
+        let yRes = parseFloat(this.yRes.value) * this.superRes;
+        let xRes = parseFloat(this.xRes.value) * this.superRes;
         //
         let xLeft = this.command.scaleX.domain()[0];//get x left and right (in units)
         let xRight = this.command.scaleX.domain()[1];
@@ -400,8 +398,8 @@ export default class Grid{
     draw(ctx){
         ctx.clearRect(0, 0, this.scrW, this.scrH);
         //
-        let yRes = parseFloat(this.yRes);
-        let xRes = parseFloat(this.xRes);
+        let yRes = parseFloat(this.yRes.value);
+        let xRes = parseFloat(this.xRes.value);
         //
         let xLeft = this.command.scaleX.domain()[0];//get x left and right (in units)
         let xRight = this.command.scaleX.domain()[1];
@@ -414,14 +412,14 @@ export default class Grid{
         ctx.fillStyle = "gray";
         //
         var curY = Math.ceil(yBot / yRes) * yRes;//get first y line position
-        var exactY = this.yRes.multiply(new this.bd.BigDecimal(`${Math.ceil(yBot / yRes)}`));//exact line position with big decimal
+        var exactY = this.yRes.multiply(new bigDecimal(`${Math.ceil(yBot / yRes)}`));//exact line position with big decimal
         //
         for (var n = 0; n < (this.scale / yRes); n++){
-            if(parseFloat(exactY) == 0){
+            if(parseFloat(exactY.value) == 0){
                 ctx.lineWidth = 4;
-            }else if(parseFloat(exactY.divide(this.yRes) % this.superRes) / (this.superRes + 1) == 0){
+            }else if((parseFloat(exactY.divide(this.yRes).value) % this.superRes) / (this.superRes + 1) == 0){
                 ctx.lineWidth = 2;
-                ctx.fillText(eify(parseFloat(exactY)), this.command.scaleX(0) + 5, this.command.scaleY(curY) + 20);
+                ctx.fillText(eify(parseFloat(exactY.value)), this.command.scaleX(0) + 5, this.command.scaleY(curY) + 20);
             }else{
                 ctx.lineWidth = 0.5;
             }
@@ -435,14 +433,14 @@ export default class Grid{
         }
         //
         var curX = Math.ceil(xLeft / xRes) * xRes;//get first x line position
-        var exactX = this.xRes.multiply(new this.bd.BigDecimal(`${Math.ceil(xLeft / xRes)}`));//new bigdecimal.BigDecimal(`${Math.ceil(xLeft / res) * this.exactRes}`);
+        var exactX = this.xRes.multiply(new bigDecimal(`${Math.ceil(xLeft / xRes)}`));//new bigdecimal.BigDecimal(`${Math.ceil(xLeft / res) * this.exactRes}`);
         //
         for(var n = 0; n < ((xRight - xLeft) / xRes); n++){//loop for number of lines (if multiple of res, there will be a line at the left of the screen)
-            if(parseFloat(exactX) == 0){
+            if(parseFloat(exactX.value) == 0){
                 ctx.lineWidth = 4;
-            }else if(parseFloat(exactX.divide(this.xRes) % this.superRes) / (this.superRes + 1) == 0){
+            }else if((parseFloat(exactX.divide(this.xRes).value) % this.superRes) / (this.superRes + 1) == 0){
                 ctx.lineWidth = 2;
-                ctx.fillText(eify(parseFloat(exactX)), this.command.scaleX(curX) + 5, this.command.scaleY(0) + 20);
+                ctx.fillText(eify(parseFloat(exactX.value)), this.command.scaleX(curX) + 5, this.command.scaleY(0) + 20);
             }else{
                 ctx.lineWidth = 0.5;
             }
@@ -457,18 +455,18 @@ export default class Grid{
     }
 }
 
-function getGrid(gridRes, res, gridMin, gridMax, fd, bd){
+function getGrid(gridRes, res, gridMin, gridMax, fd){
     if(gridRes < gridMin){
         if(fd == 1 || fd == 5){//if the first digit is 1 or 5
-            return res.multiply(new bd.BigDecimal(`2`));//multiply res by 2
+            return res.multiply(new bigDecimal(`2`));//multiply res by 2
         }else{//first digit is 2
-            return res.multiply(new bd.BigDecimal(`2.5`));//multiply res by 5/2
+            return res.multiply(new bigDecimal(`2.5`));//multiply res by 5/2
         }
     }else if(gridRes > gridMax){
         if(fd == 1 || fd == 2){//if the first digit is 1 or 2
-            return res.divide(new bd.BigDecimal(`2`));//divide res by 2
+            return res.divide(new bigDecimal(`2`));//divide res by 2
         }else{//first digit is five
-            return res.multiply(new bd.BigDecimal(`0.4`));//multiply res by 2/5
+            return res.multiply(new bigDecimal(`0.4`));//multiply res by 2/5
         }
     }
     return res;
