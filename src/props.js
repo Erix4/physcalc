@@ -282,7 +282,7 @@ export default class Props{
                         if(pIdx > 0 && profile.junctions[pIdx - 1] == 0){//if piece has a left juction and the junction is continuous
                             profile.junctions[pIdx - 1] = 1;//set the junction to discontinuous
                         }
-                        if(pIdx < profile.pieces.length - 1 && profile.junctions[pIdx] == 0){//if piece has a right juctino and the junction is continuous
+                        if(pIdx < profile.pieces.length - 1 && profile.junctions[pIdx] == 0){//if piece has a right junction and the junction is continuous
                             profile.junctions[pIdx] = 1;//set the junction to discontinuous
                         }
                         //

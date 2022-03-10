@@ -359,7 +359,7 @@ export default class Profile{
         //
         verts.forEach(v => {
             console.log(`checking ${this.calc(power, v)[x ? 0 : 1]} vs ${value}`);
-            if(numSimilar(this.calc(power, v)[x ? 0 : 1], value)){
+            if(numSimilar(this.calc(power, v)[x ? 0 : 1], value) && !points.includes(v)){
                 points.push(v);
             }
         });
@@ -1428,7 +1428,7 @@ export class Func{
             pascal = [...tempPasc];
         }
         //
-        this.terms[this.terms.length - 1].coef += Yoffset;// - this.calc(Xoffset);
+        this.terms[this.terms.length - 1].coef += Yoffset;//
         this.origin = orxo;
     }
     //

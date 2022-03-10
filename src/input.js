@@ -155,18 +155,47 @@ export default class Input{
         //
         //#endregion
         //
-        document.addEventListener("wheel", event => {
-            if(event.clientX > canox){
-                if(mY < this.command.scrH){
+        /*document.addEventListener("wheel", event => {
+            if(event.clientX > canox){//if mouse is in the right column
+                if(mY < this.command.scrH){//if mouse is over the field
                     if(event.shiftKey){
                         command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
                     }else{
                         command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
                     }
-                }else{
+                }else{//if mouse is over the timeline
                     command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
                 }
+            }*/
+        /*d3.select("#fullDisplay").on("wheel.zoom", function(){
+            if(mY < command.scrH){//if mouse is over the field
+                if(mX > canox){//if mouse is in the right column
+                    d3.event.preventDefault();
+                    if(d3.event.shiftKey){
+                        command.zoomX(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
+                    }else{
+                        command.zoom(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
+                    }
+                }
+            }else{//if mouse is over the timeline
+                d3.event.preventDefault();
+                command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
             }
+        });*/
+        //
+        d3.select("#fieldcolumn").on("wheel.zoom", function(){
+            //console.log(d3.event);
+            d3.event.preventDefault();
+            if(d3.event.shiftKey){
+                command.zoomX(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
+            }else{
+                command.zoom(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
+            }
+        });
+        //
+        d3.select("#timeline").on("wheel.zoom", function(){
+            d3.event.preventDefault();
+            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
         });
         //
         //#region key events
