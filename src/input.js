@@ -76,11 +76,28 @@ export default class Input{
             d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
             d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
         }else{//vertical
-            d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+            d3.select('#title').style('font-size', `${headerHeight * 1.1}px`);
             d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+            d3.select('#title').html('Phys Calc');
+            d3.select('#header').style('height', `${headerHeight * 1.3}px`);
+            d3.select('#settingsB').style('font-size', `150%`);
             d3.select('#leftcolumn').style('width', '100%');
             d3.select('#fieldcolumn').style('display', 'none');
             d3.select('#lefthandle').style('display', 'none');
+            //
+            d3.select('#propHead').style('display', 'none');
+            d3.select('#add').style('display', 'none');
+            d3.select('#save').style('display', 'none');
+            //
+            d3.select("#interface").style('height', '80%');
+            d3.select("#time").style('height', '15%');
+            d3.select("#timeHead").style('height', '40%');
+            d3.select("#timeline").style('height', '60%').style('top', '40%');
+            command.timeline.resize();
+            //
+            d3.select("#timeHead").selectAll('.range.cutout').style('display', 'none');
+            d3.select('#playback').style('width', '60%').style('margin-left', '20%');
+            //
             columnWidth = window.innerWidth;
         }
         //
@@ -102,13 +119,15 @@ export default class Input{
             if(screenRatio > RATIOTHRESHOLD){//horizontal
                 d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
                 d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#title').html('Physics Calculator');
                 d3.select('#leftcolumn').style('width', '25%');
                 d3.select('#fieldcolumn').style('display', 'flex');
                 d3.select('#lefthandle').style('display', 'block');
                 columnWidth = window.innerWidth * 0.25;
             }else{//vertical
-                d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
+                d3.select('#title').style('font-size', `${headerHeight * 1.1}px`);
                 d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
+                d3.select('#title').html('Phys Calc');
                 d3.select('#leftcolumn').style('width', '100%');
                 d3.select('#fieldcolumn').style('display', 'none');
                 d3.select('#lefthandle').style('display', 'none');
@@ -155,34 +174,6 @@ export default class Input{
         //
         //#endregion
         //
-        /*document.addEventListener("wheel", event => {
-            if(event.clientX > canox){//if mouse is in the right column
-                if(mY < this.command.scrH){//if mouse is over the field
-                    if(event.shiftKey){
-                        command.zoomX(Math.pow(2.7, event.deltaY / 700), mX, mY);
-                    }else{
-                        command.zoom(Math.pow(2.7, event.deltaY / 700), mX, mY);
-                    }
-                }else{//if mouse is over the timeline
-                    command.zoomTimeline(Math.pow(2.7, event.deltaY / 700), event.clientX, mY);
-                }
-            }*/
-        /*d3.select("#fullDisplay").on("wheel.zoom", function(){
-            if(mY < command.scrH){//if mouse is over the field
-                if(mX > canox){//if mouse is in the right column
-                    d3.event.preventDefault();
-                    if(d3.event.shiftKey){
-                        command.zoomX(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
-                    }else{
-                        command.zoom(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
-                    }
-                }
-            }else{//if mouse is over the timeline
-                d3.event.preventDefault();
-                command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
-            }
-        });*/
-        //
         d3.select("#fieldcolumn").on("wheel.zoom", function(){
             //console.log(d3.event);
             d3.event.preventDefault();
@@ -193,9 +184,12 @@ export default class Input{
             }
         });
         //
+        d3.select("#fieldcolumn").on("pointerout", function(){console.log("going out")});
+        d3.select("#fieldcolumn").on("touchstart", function(){d3.event.preventDefault()});
+        //
         d3.select("#timeline").on("wheel.zoom", function(){
             d3.event.preventDefault();
-            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
+            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX + canox, mY);
         });
         //
         //#region key events
