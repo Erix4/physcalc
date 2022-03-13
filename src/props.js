@@ -11,6 +11,13 @@ export default class Props{
         //
         this.tabNum = 1;
         //
+        this.headerHeight = parseFloat(d3.select('#header').style('height'));//initial state
+        this.columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+        this.screenRatio = window.innerWidth / window.innerHeight;
+        this.RATIOTHRESHOLD = 0.9;
+        //
+        this.windowResize();
+        //
         this.head = d3.select("#propTitle");
         this.t = d3.select("#timeInput");
         this.tt = d3.select("#timeBarTime");
@@ -20,7 +27,9 @@ export default class Props{
         this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         //
-        console.log(d3.selectAll('.propField').nodes());
+        //console.log(d3.selectAll('.propField').nodes());
+        //
+        //#region event listeners
         //
         d3.selectAll('.propField').on('click', function(){
             this.select();
@@ -474,6 +483,8 @@ export default class Props{
             d3.select(d3.select('#arrowDisplayDrop').selectAll('option').nodes()[command.vectorMode+1]).property('selected', 'selected');
         });
         //
+        //#endregion
+        //
         this.update();
     }
     //
@@ -499,6 +510,8 @@ export default class Props{
             d3.select('.pointList').select('ul').html("");
         }
     }
+    //
+    //#region rendering
     //
     diffObj(selected){
         d3.selectAll('.newtab').remove();
@@ -648,9 +661,7 @@ export default class Props{
         }
     }
     //
-    newObj(){
-        this.column.append("p", "hope");
-    }
+    //#endregion
     //
     tabEvents(){
         console.log(`calling tab events`);
@@ -815,6 +826,104 @@ export default class Props{
     accessIdx(idx, selection){
         return d3.select(selection.nodes()[idx]);
     }
+    //
+    //#region resizing
+    columnResize(newWidth){
+        if(newWidth - (window.innerWidth / 10) > getExtra() && window.innerWidth - newWidth > getField()){//if new width is valid
+            this.canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+            //
+            d3.select('#leftcolumn').style('width', `${newWidth}px`);
+            d3.select('#fieldcolumn').style('width', `${window.innerWidth - newWidth}px`);
+            //initalX = newX;
+            this.columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
+            fitWidth(this.columnWidth);
+            fitSolve(this.columnWidth);
+            this.command.resize();
+        }
+    }
+    //
+    windowResize(){//can trigger a phone switch
+        this.canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+        this.canoy = parseInt(d3.select("#header").style("height"));
+        //
+        this.headerHeight = parseFloat(d3.select('#header').style('height'));
+        this.screenRatio = window.innerWidth / window.innerHeight;
+        //
+        if(this.screenRatio > this.RATIOTHRESHOLD && this.command.phoneMode){
+            this.phoneSwitch(true);
+        }else if(this.screenRatio < this.RATIOTHRESHOLD && !this.command.phoneMode){
+            this.phoneSwitch(false);
+        }
+        //
+        if(this.screenRatio > this.RATIOTHRESHOLD){//horizontal
+            d3.select('#title').style('font-size', `${this.headerHeight * 0.9}px`);
+            d3.select('#title').style('margin-left', `${this.headerHeight / 8}px`);
+            //
+            this.columnWidth = .25 * window.innerWidth;
+            //
+            d3.select('#fieldcolumn').style('width', `${window.innerWidth - this.columnWidth}px`);
+        }else{//vertical
+            d3.select('#title').style('font-size', `${this.headerHeight * 1.1}px`);
+            d3.select('#title').style('margin-left', `${this.headerHeight / 8}px`);
+            //
+            this.columnWidth = window.innerWidth;
+        }
+        //
+        let heightFactor = 60;
+        d3.select('#header').style('font-size', `${window.innerHeight / heightFactor}px`);//font resizing
+        d3.select('#leftcolumn').style('font-size', `${this.columnWidth / 10}px`);
+        d3.select('#fieldcolumn').style('font-size', `${window.innerHeight / heightFactor}px`);
+        d3.select("#timeHead").style('font-size', `${window.innerHeight / heightFactor}px`);
+        //
+        fitWidth(this.columnWidth);
+        fitSolve(this.columnWidth);
+    }
+    //
+    phoneSwitch(horizontal){
+        //adjust header font-size and hide field by screen ratio
+        console.log(`Switching phone mode to ${!horizontal}`);
+        if(horizontal){//horizontal
+            console.log("Re-entering horizontal");
+            d3.select('#title').html('Physics Calculator');
+            d3.select('#settingsB').style('font-size', `250%`);
+            d3.select('#leftcolumn').style('width', `25%`);
+            d3.select('#fieldcolumn').style('display', 'flex');
+            d3.select('#lefthandle').style('display', 'block');
+            //
+            d3.select('#propHead').style('display', 'block');
+            d3.selectAll('.headerButton').style('display', 'block');
+            //
+            d3.select("#interface").style('height', '85%');
+            d3.select("#time").style('height', '10%');
+            d3.select("#timeHead").style('height', '25%');
+            d3.select("#timeline").style('height', '75%').style('top', '25%');
+            this.command.timeline.resize();
+            //
+            d3.select("#timeHead").selectAll('.range.cutout').style('display', 'flex');
+            d3.select('#playback').style('width', '10%').style('margin-left', '45%');
+        }else{//vertical
+            d3.select('#title').html('Phys Calc');
+            //d3.select('#settingsB').style('font-size', `150%`);
+            d3.select('#leftcolumn').style('width', `100%`);
+            d3.select('#fieldcolumn').style('display', 'none');
+            d3.select('#lefthandle').style('display', 'none');
+            //
+            d3.select('#propHead').style('display', 'none');
+            d3.selectAll('.headerButton').style('display', 'none');
+            //
+            d3.select("#interface").style('height', '80%');
+            d3.select("#time").style('height', '15%');
+            d3.select("#timeHead").style('height', '40%');
+            d3.select("#timeline").style('height', '60%').style('top', '40%');
+            this.command.timeline.resize();
+            //
+            d3.select("#timeHead").selectAll('.range.cutout').style('display', 'none');
+            d3.select('#playback').style('width', '60%').style('margin-left', '20%');
+        }
+        //
+        this.command.phoneMode = !horizontal;
+    }
+    //#endregion
 }
 
 function getPrecision(number){
@@ -833,4 +942,39 @@ function isNumeric(str) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
            !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+function getWidth(id){//get width of any element, including margins
+    let elem = d3.select(id);
+    return parseFloat(elem.style('width')) + parseFloat(elem.style('margin-left')) + parseFloat(elem.style('margin-right'));
+}
+
+function getExtra(){//get the width of the non-field elements of the values section
+    return getWidth('.expandCompIcon') + (2 * getWidth('.propParaLabel')) + (2 * getWidth('.propdrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getCalc(){//get the width of the non-field elements of the solver section
+    return (2 * getWidth('.checkbox')) + (2 * getWidth('.readCalcLabel')) + (2 * getWidth('.readCalcDrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
+}
+
+function getField(){//get the width of the field
+    if(d3.select('#settings').style('display') == 'none'){
+        return getWidth('#leftfield') + 10;
+    }else{
+        return parseFloat(d3.select('#settings').style('width')) + getWidth('#leftfield') + 10;
+    }
+}
+
+function fitWidth(columnWidth){//fit the input fields to the width of the left column
+    let labelWidth = getExtra();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.fitWidth').style('width', `${fieldWidth}px`);
+}
+
+function fitSolve(columnWidth){//fit the input fields in the solve section
+    let labelWidth = getCalc();
+    let fieldWidth = (columnWidth - labelWidth) / 2;
+    //
+    d3.selectAll('.solveInput').style('width', `${fieldWidth}px`);
 }

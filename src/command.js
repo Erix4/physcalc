@@ -11,6 +11,7 @@ var unitPx;
 export default class Command{
     constructor(loopStart, canvas, svg){
         this.darkMode = true;
+        this.phoneMode = false;
         //
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
@@ -429,7 +430,7 @@ export default class Command{
         objs.forEach(obj => {
             idxs.push(obj.idx);
         });
-        console.log(`found idxs: ${idxs}`);
+        //console.log(`found idxs: ${idxs}`);
         return idxs;
     }
     //#endregion

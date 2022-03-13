@@ -477,7 +477,7 @@ i{
 
 .expandIcon.subExpandText{
     transform: rotate(0deg);
-    font-size: 1.8vw !important;
+    font-size: 70% !important;
 }
 
 .propExpand:hover{

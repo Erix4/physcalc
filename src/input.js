@@ -63,112 +63,10 @@ export default class Input{
         let canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
         let canoy = parseInt(d3.select("#header").style("height"));
         //
-        //#region resizing
-        //
-        let headerHeight = parseFloat(d3.select('#header').style('height'));//initial state
-        let columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
-        let screenRatio = window.innerWidth / window.innerHeight;
-        console.log(columnWidth);
-        const RATIOTHRESHOLD = 0.9;
-        //
-        //adjust header font-size and hide field by screen ratio
-        if(screenRatio > RATIOTHRESHOLD){//horizontal
-            d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
-            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-        }else{//vertical
-            d3.select('#title').style('font-size', `${headerHeight * 1.1}px`);
-            d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-            d3.select('#title').html('Phys Calc');
-            d3.select('#header').style('height', `${headerHeight * 1.3}px`);
-            d3.select('#settingsB').style('font-size', `150%`);
-            d3.select('#leftcolumn').style('width', '100%');
-            d3.select('#fieldcolumn').style('display', 'none');
-            d3.select('#lefthandle').style('display', 'none');
-            //
-            d3.select('#propHead').style('display', 'none');
-            d3.select('#add').style('display', 'none');
-            d3.select('#save').style('display', 'none');
-            //
-            d3.select("#interface").style('height', '80%');
-            d3.select("#time").style('height', '15%');
-            d3.select("#timeHead").style('height', '40%');
-            d3.select("#timeline").style('height', '60%').style('top', '40%');
-            command.timeline.resize();
-            //
-            d3.select("#timeHead").selectAll('.range.cutout').style('display', 'none');
-            d3.select('#playback').style('width', '60%').style('margin-left', '20%');
-            //
-            columnWidth = window.innerWidth;
-        }
-        //
-        d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);//adjust left column font size
-        fitWidth(columnWidth);//fit the input fields to the width of the left column
-        fitSolve(columnWidth);
-        //
         window.addEventListener("resize", event => {
             window.setTimeout(function(){command.resize();}, 50);//sometimes screen resizing takes a little bit
-            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            canoy = parseInt(d3.select("#header").style("height"));
-            //
-            headerHeight = parseFloat(d3.select('#header').style('height'));
-            screenRatio = window.innerWidth / window.innerHeight;
-            if(screenRatio > RATIOTHRESHOLD){//horizontal
-                d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
-                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-                d3.select('#title').html('Physics Calculator');
-                d3.select('#leftcolumn').style('width', '25%');
-                d3.select('#fieldcolumn').style('display', 'flex');
-                d3.select('#lefthandle').style('display', 'block');
-                columnWidth = window.innerWidth * 0.25;
-            }else{//vertical
-                d3.select('#title').style('font-size', `${headerHeight * 1.1}px`);
-                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-                d3.select('#title').html('Phys Calc');
-                d3.select('#leftcolumn').style('width', '100%');
-                d3.select('#fieldcolumn').style('display', 'none');
-                d3.select('#lefthandle').style('display', 'none');
-                columnWidth = window.innerWidth;
-            }
-            d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
-            d3.select('#leftcolumn').style('width', `${columnWidth}px`);
-            d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
-            fitWidth(columnWidth);
-            fitSolve(columnWidth);
+            command.props.windowResize();
         });
-        //
-        ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "msfullscreenchange"].forEach(
-            eventType => document.addEventListener(eventType, event => {
-            console.log("Full screen detected");
-            command.resize();
-            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            canoy = parseInt(d3.select("#header").style("height"));
-            //
-            headerHeight = parseFloat(d3.select('#header').style('height'));
-            screenRatio = window.innerWidth / window.innerHeight;
-            if(screenRatio > RATIOTHRESHOLD){//horizontal
-                d3.select('#title').style('font-size', `${headerHeight * 0.9}px`);
-                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-                d3.select('#leftcolumn').style('width', '25%');
-                d3.select('#fieldcolumn').style('display', 'flex');
-                d3.select('#lefthandle').style('display', 'block');
-                columnWidth = window.innerWidth * 0.25;
-            }else{//vertical
-                d3.select('#title').style('font-size', `${headerHeight * 0.4}px`);
-                d3.select('#title').style('margin-left', `${headerHeight / 8}px`);
-                d3.select('#leftcolumn').style('width', '100%');
-                d3.select('#fieldcolumn').style('display', 'none');
-                d3.select('#lefthandle').style('display', 'none');
-                columnWidth = window.innerWidth;
-            }
-            d3.select('#leftcolumn').style('font-size', `${columnWidth / 10}px`);
-            d3.select('#leftcolumn').style('width', `${columnWidth}px`);
-            d3.select('#fieldcolumn').style('width', `${window.innerWidth - columnWidth}px`);
-            fitWidth(columnWidth);
-            fitSolve(columnWidth);
-        }));
-          
-        //
-        //#endregion
         //
         d3.select("#fieldcolumn").on("wheel.zoom", function(){
             //console.log(d3.event);
@@ -180,7 +78,7 @@ export default class Input{
             }
         });
         //
-        d3.select("#fieldcolumn").on("pointerout", function(){console.log("going out")});
+        //d3.select("#fieldcolumn").on("pointerout", function(){console.log("going out")});
         d3.select("#fieldcolumn").on("touchstart", function(){d3.event.preventDefault()});
         //
         d3.select("#timeline").on("wheel.zoom", function(){
@@ -438,18 +336,7 @@ export default class Input{
                     if(event.stopPropagation) event.stopPropagation();
                     if(event.preventDefault) event.preventDefault();
                     event.cancelBubble=true;
-                    let newX = event.clientX;
-                    if(newX - (window.innerWidth / 10) > getExtra() && window.innerWidth - newX > getField()){
-                        d3.select('#leftcolumn').style('width', `${newX}px`);
-                        d3.select('#fieldcolumn').style('width', `${window.innerWidth - newX}px`);
-                        //initalX = newX;
-                        columnWidth = parseFloat(d3.select('#leftcolumn').style('width'));
-                        fitWidth(columnWidth);
-                        fitSolve(columnWidth);
-                        console.log(`column resize event`);
-                        command.resize();
-                        canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-                    }
+                    command.props.columnResize(event.clientX);
                     break;
                 case 9://move object by extreme
                     if(event.ctrlKey){
@@ -875,39 +762,4 @@ function isNumeric(str) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
            !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-}
-
-function getWidth(id){//get width of any element, including margins
-    let elem = d3.select(id);
-    return parseFloat(elem.style('width')) + parseFloat(elem.style('margin-left')) + parseFloat(elem.style('margin-right'));
-}
-
-function getExtra(){//get the width of the non-field elements of the values section
-    return getWidth('.expandCompIcon') + (2 * getWidth('.propParaLabel')) + (2 * getWidth('.propdrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
-}
-
-function getCalc(){//get the width of the non-field elements of the solver section
-    return (2 * getWidth('.checkbox')) + (2 * getWidth('.readCalcLabel')) + (2 * getWidth('.readCalcDrop')) + parseFloat(d3.select('.valueContents').style('padding-left')) + 10;
-}
-
-function getField(){//get the width of the field
-    if(d3.select('#settings').style('display') == 'none'){
-        return getWidth('#leftfield') + 10;
-    }else{
-        return parseFloat(d3.select('#settings').style('width')) + getWidth('#leftfield') + 10;
-    }
-}
-
-function fitWidth(columnWidth){//fit the input fields to the width of the left column
-    let labelWidth = getExtra();
-    let fieldWidth = (columnWidth - labelWidth) / 2;
-    //
-    d3.selectAll('.fitWidth').style('width', `${fieldWidth}px`);
-}
-
-function fitSolve(columnWidth){//fit the input fields in the solve section
-    let labelWidth = getCalc();
-    let fieldWidth = (columnWidth - labelWidth) / 2;
-    //
-    d3.selectAll('.solveInput').style('width', `${fieldWidth}px`);
 }
