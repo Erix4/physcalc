@@ -34,7 +34,7 @@ Object capabilities:
     - contain and calc visiblity domain on resize
 */
 
-import Profile from "./func";
+import Profile from "./func.js";
 
 export default class Object{
     constructor(command, id, px, py, type=0){

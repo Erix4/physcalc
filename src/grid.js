@@ -314,7 +314,7 @@ export default class Grid{
         this.calcSize();
     }
     //
-    getNearUnits(xPos, yPos, exception){//use exception for setting values (to avoid colliding with extremes)
+    getNearUnits(xPos, yPos){//use exception for setting values (to avoid colliding with extremes)
         var xSinks = [];
         var ySinks = [];
         var dSinks = [];
@@ -342,7 +342,7 @@ export default class Grid{
         }
         //
         this.command.objects.forEach(obj => {//for every object
-            if(obj != exception){//except the exception
+            if(!isIn(obj, this.command.selObs)){//except the exception
                 obj.points.forEach(point => {//for each extreme point in the object
                     xSinks.push(this.command.scaleX.invert(parseFloat(point.attr("cx"))));
                     ySinks.push(this.command.scaleY.invert(parseFloat(point.attr("cy"))));
@@ -515,4 +515,13 @@ function firstDigit(num){
 
 function pythagorus(a, b){
     return Math.sqrt(a * a + b * b);
+}
+
+function isIn(item, list){
+    for(var n = 0; n < list.length; n++){
+        if(item == list[n]){
+            return true;
+        }
+    }
+    return false;
 }

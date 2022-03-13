@@ -5,9 +5,9 @@ let canvas = document.getElementById("fieldCanvas");
 let body = d3.select("body");
 let svg = d3.select("#fieldSVG");
 
-import Command from "./command";
-import 'simplebar';
-import 'simplebar/dist/simplebar.css';
+import Command from "./command.js";
+//import 'simplebar';
+//import 'simplebar/dist/simplebar.css';
 
 d3.select('#settingsB').on('click', function(){//show/hide the settings section and rotate the settings icon
     if(d3.select('#settings').style('display') == 'none'){

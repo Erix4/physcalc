@@ -1,10 +1,10 @@
-import Grid from "./grid";
-import Input from "./input";
-import Object from "./object";
-import Profile from "./func";
-import Props from "./props";
-import {Func} from "./func";
-import Timeline from "./time";
+import Grid from "./grid.js";
+import Input from "./input.js";
+import Object from "./object.js";
+import Profile from "./func.js";
+import Props from "./props.js";
+import {Func} from "./func.js";
+import Timeline from "./time.js";
 
 var unitPx;
 
@@ -56,11 +56,6 @@ export default class Command{
         //
         //this.para = new Para(this.time, 1, [1,4],[2,1,3],0,0);
         //
-        this.a = 1;
-        console.log(this.a);
-        this.a +=1;
-        console.log(this.a);
-        //
         this.sels = [];
         this.selObs = [];
         //
@@ -69,10 +64,10 @@ export default class Command{
         this.func = new Func(1000, [1, 1]);
         this.func.resolve([[0, 0, 0], [18.5, 1, 0], [46.1, 1, 2.47]]);
         //this.func.draw(this, -10, 10);
-        console.log(`------`);
-        console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
-        console.log(`Distance: ${this.func.calc(2.47)}`);
-        console.log(`------`);
+        //console.log(`------`);
+        //console.log(`Acceleration: ${this.func.terms[0].coef * 2}`);
+        //console.log(`Distance: ${this.func.calc(2.47)}`);
+        //console.log(`------`);
         //
         this.prof = new Profile(this, 2, [1, 0], [2, 1, 3], 'green');
         this.prof.draw(0, 500);
@@ -85,6 +80,10 @@ export default class Command{
         //
         this.moveGrid();
         //console.log(`accel: ${this.func.terms[0].coef * 2}`);
+        //
+        let func1 = new Func(1, [4, -22, 36, -18]);//4x^{3}-22x^{2}+35x-15
+        //let func1 = new Func(1, [4,-16,15,-1,-1]);//4x^{4}-16x^{3}+15x^{2}-x-1
+        console.log(func1.approxRoots(func1, .0001));
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);

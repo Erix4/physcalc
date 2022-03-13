@@ -1377,10 +1377,92 @@ export class Func{
                 }
                 return roots;
             default:
-                let shiftEq = this.getCoefs();
-                shiftEq[shiftEq.length - 1] -= val;//shift equation to desired value
-                return findRealRoots(shiftEq);
+                let shiftEq = this.makeClone(false);
+                shiftEq.terms[shiftEq.terms.length - 1].coef -= val;//shift equation to desired value
+                //console.log(shiftEq.getCoefs());
+                return this.approxRoots(shiftEq, .0000001);
         }
+    }
+    //
+    approxRoots(p1, precision){
+        /*
+        For Collins-Akritas/Bisection, given polynomial p1, use the following steps:
+            1. Copy and compress p1 into p2
+                a. p2 = p1
+                b. offset p2 by 1 (move to the right), to move roots in (0, inf) to (1, inf)
+                c. reverse p2 coefficients (simulates f(1/x)), to move roots in (1, inf) to (1, 0)
+            2. Pass the function off to a recursive Collins-Akritas root isolation algorithm
+            3. Decompress and treat the resulting intervals
+            4. Pass the intervals into a recursive Bisection root refinement algorithm with a precision input
+            5. Return the lower bounds of the resulting intervals (intervals are small enough that averaging isn't necessary)
+        */
+        //
+        let p2 = p1.makeClone(false);
+        p2.distMult(-1);//flip polynomial
+        //
+        let p3 = p1.makeClone(false);
+        p3.setOff(1);
+        p3.reverse();
+        //
+        let p4 = p2.makeClone(false);
+        p4.setOff(1);
+        p4.reverse();
+        //
+        let intervals = CollinsAkritas(p3, 0, 1);
+        let intervalsN = CollinsAkritas(p4, 0, 1);
+        for(var i = 0; i < intervals.length; i++){//swap and decompress intervals
+            let temp = intervals[i].slice();
+            intervals[i][1] = (1 / temp[0]) - 1;
+            intervals[i][0] = (1 / temp[1]) - 1;
+        }
+        //intervals.forEach(intr => console.log(intr));
+        for(var i = 0; i < intervalsN.length; i++){//swap and decompress intervals
+            let temp = intervalsN[i].slice();
+            intervalsN[i][1] = (1 / temp[0]) - 1;
+            intervalsN[i][0] = (1 / temp[1]) - 1;
+        }
+        //
+        let roots = [];
+        for(var i = 0; i < intervals.length; i++){
+            roots.push(Bisection(p1, intervals[i], precision)[0]);
+        }
+        for(var i = 0; i < intervalsN.length; i++){
+            roots.push(-Bisection(p2, intervalsN[i], precision)[0]);
+        }
+        //
+        return roots;
+    }
+    //
+    distMult(c){
+        if(this.terms.length > 0){
+            for(var i = 0; i < this.terms.length; i++){
+                this.terms[i].coef *= Math.pow(c, this.terms[i].power);
+            }
+        }
+    }
+    //
+    reverse(){
+        let starts = this.getCoefs();
+        for(var i = 0; i < starts.length; i++){
+            this.terms[starts.length - i -1].coef = starts[i];
+        }
+    }
+    //
+    getSigns(){
+        if(this.terms.length <= 1){
+            return 0;
+        }
+        let signs = 0;
+        let last = this.terms[0].coef;
+        for(var i = 1; i < this.terms.length; i++){
+            if(this.terms[i].coef * last < 0){
+                signs++;
+            }
+            if(this.terms[i].coef != 0){
+                last = this.terms[i].coef;
+            }
+        }
+        return signs;
     }
     //
     calcDelta(rStart, rEnd){//calculate the differnce between two values
@@ -1474,15 +1556,6 @@ export class Func{
             lastX = nextX;
             lastV = nextV;
         }
-    }
-    //
-    redraw(field, selection, start, end){
-        /*
-            1. (Optional) When necessary (after value change) bake visible lines
-            2. Calc # of necessary lines for draw
-            3. Add or remove excess lines
-            4. Adjust position for lines
-        */
     }
     //
     resolve(inputs){
@@ -1690,6 +1763,15 @@ export class Func{
         }
         return X;
     }
+    //
+    makeClone(copyOrigin=true){
+        let clone = new Func(this.steps, this.getCoefs());
+        clone.color = this.color;
+        if(copyOrigin){
+            clone.origin = this.origin;
+        }
+        return clone;
+    }
 }
 
 function multMatricis(A, B){//assumes square matricies of the same size
@@ -1821,7 +1903,7 @@ function findRoot(func, derFunc, x0){//find root for a given guess
             return x;
         }
     }
-    return x;
+    return null;
 }
 
 function numSimilar(num1, num2){//check if two numbers are similar
@@ -1842,27 +1924,27 @@ function numInList(num, list){//check if a number is in a list}
 function findRealRoots(func){//find real roots of a function
     func.forEach((val, i) => func[i] += val == 0 ? .00001 : 0);//add .00001 if number is 0 to prevent dividing by zero
     //
-    var nFunc = func.slice();
-    var posRoots = countSignChanges(func)
+    var nFunc = func.slice();//create negative function
+    var posRoots = countSignChanges(func)//get max positive roots
     for(var i = func.length; i >= 0; i -= 2){
         nFunc[i] *= -1
     }
-    var negRoots = countSignChanges(nFunc)
+    var negRoots = countSignChanges(nFunc)//get max negative roots
     //
-    var derFunc = []
+    var derFunc = []//create derivative function
     for(var i = 0; i < func.length - 1; i++){
-        derFunc.push(func[i]*(func.length-1-i));
+        derFunc.push(func[i]*(func.length-1-i));//generate derivative coefficients
     }
     //
-    let testNum = 200;
+    let testNum = 200;//number of starting samples to find roots
     //
     var guess = 0;
     var roots = [];
     var posRootsFound = 0;
     var negRootsFound = 0;
-    for(var i = 0; i < testNum; i++){
-        var root = findRoot(func, derFunc, guess)
-        if(!numInList(root, roots)){
+    for(var i = 0; i < testNum; i++){//find roots with positive samples
+        var root = findRoot(func, derFunc, guess);
+        if(!numInList(root, roots) && root != null){
             roots.push(root);
             if(root >= 0){
                 posRootsFound += 1;
@@ -1870,7 +1952,7 @@ function findRealRoots(func){//find real roots of a function
                 negRootsFound += 1;
             }
         }
-        if(posRootsFound == posRoots && negRootsFound == negRoots){
+        if(posRootsFound >= posRoots){
             break;
         }
         guess += 1;
@@ -1878,8 +1960,8 @@ function findRealRoots(func){//find real roots of a function
     //
     guess = -1
     for(var i = 0; i < testNum; i++){
-        root = findRoot(func, derFunc, guess)
-        if(!numInList(root, roots)){
+        root = findRoot(func, derFunc, guess);
+        if(!numInList(root, roots) && root != null){
             roots.push(root);
             if(root >= 0){
                 posRootsFound += 1;
@@ -1888,11 +1970,99 @@ function findRealRoots(func){//find real roots of a function
             }
         }
         //
-        if(posRootsFound == posRoots && negRootsFound == negRoots){
+        if(negRootsFound >= negRoots){
             break;
         }
         guess -= 1;
     }
     //
     return roots;
+}
+//
+//Insert Collins-Akritas, Bisection root finding here
+function CollinsAkritas(given, n, m){
+    /*
+    For Collins-Akritas, given compressed polynomial p1, use the following steps:
+        1. count the max number of real roots between 0 and 1
+        2. if there is one root:
+            a. add [n, m] as an isolating interval
+        3. else if there's more than 1 root:
+            a. create a new polynomial p2 = p1(0.5x)
+            b. recurse with (p2, n, .5(n+m))
+            c. create a new polynomial p3 = p2(x+1), giving offset of -1
+            d. check if p3(n) = 0, which means .5(n+m) is a root
+            e. recurse with (p3, .5(n+m), m)
+    */
+    //
+    let num = countDescartes(given);
+    if(num == 1){
+        return [[n, m]];
+    }else if(num > 1){
+        let intervals = [];
+        var c1 = given.makeClone(false);
+        c1.distMult(0.5);
+        intervals.push(...CollinsAkritas(c1, n, 0.5*(n+m)));
+        //
+        var c2 = c1.makeClone(false);
+        c2.origin = 0;
+        c2.setOff(-1);
+        if(c2.calc(n) == 0){
+            intervals.push([0.5*(n+m), 0.5*(n+m)]);
+        }
+        intervals.push(...CollinsAkritas(c2, 0.5*(n+m), m));
+        //
+        return intervals;
+    }else{
+        return [];
+    }
+}
+
+function Bisection(given, intr, thresh){
+    if(intr[1] - intr[0] < thresh){
+        return intr;
+    }else{
+        let midpoint;
+        if(intr[1] == Infinity){
+            midpoint = intr[0] + 1;
+        }else{
+            midpoint = 0.5 * (intr[1] + intr[0]);
+        }
+        //
+        if(given.calc(midpoint) == 0){
+            return [midpoint, midpoint];
+        }
+        //
+        let lowerInt = [intr[0], midpoint];
+        let upperInt = [midpoint, intr[1]];
+        //
+        if(countRange(given, lowerInt[0], lowerInt[1]) > 0){
+            return Bisection(given, lowerInt, thresh);
+        }else{
+            return Bisection(given, upperInt, thresh);
+        }
+    }
+}
+
+/**
+ * check number of roots within [0, 1]
+ * @param {Func} given the compressed polynomial to check
+ */
+function countDescartes(given){
+    var clone = given.makeClone(false);
+    clone.reverse();
+    clone.origin = 0;
+    clone.setOff(-1);
+    return clone.getSigns();
+}
+
+function countRange(given, start, end){
+    var clone = given.makeClone(false);
+    clone.origin = 0;
+    clone.setOff(-start);
+    clone.distMult((end - start));//move roots to [0, 1]
+    //
+    clone.reverse();
+    clone.origin = 0;
+    clone.setOff(-1);//move roots to [0, inf]
+    return clone.getSigns(start, end);
 }

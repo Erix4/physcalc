@@ -1,5 +1,3 @@
-import {Func} from "./func";
-
 export default class Props{
     constructor(command){
         this.command = command;

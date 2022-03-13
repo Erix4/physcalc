@@ -106,11 +106,7 @@ export default class Input{
         fitSolve(columnWidth);
         //
         window.addEventListener("resize", event => {
-            console.log("resize event");
-            if (screen.width == window.innerWidth && screen.height == window.innerHeight) {
-                console.log("full screen");
-             }             
-            command.resize();
+            window.setTimeout(function(){command.resize();}, 50);//sometimes screen resizing takes a little bit
             canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
             canoy = parseInt(d3.select("#header").style("height"));
             //
@@ -374,7 +370,7 @@ export default class Input{
                 case 2://object move
                     if(event.ctrlKey){
                         //console.log('time snapping');
-                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy), this.command.selected);
+                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
                         let xPos = this.command.scaleX(pos[0]);
                         let yPos = this.command.scaleY(pos[1]);
                         //
@@ -458,7 +454,7 @@ export default class Input{
                 case 9://move object by extreme
                     if(event.ctrlKey){
                         //console.log('time snapping');
-                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy), this.command.selected);
+                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
                         console.log(pos);
                         let xPos = this.command.scaleX(pos[0]);
                         let yPos = this.command.scaleY(pos[1]);
