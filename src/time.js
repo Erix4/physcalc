@@ -205,7 +205,9 @@ export default class Timeline{
         }
         //
         this.command.objects.forEach(obj => {
-            obj.extremes.forEach(extr => timeSinks.push(extr));
+            if(obj != this.command.selected){
+                obj.extremes.forEach(extr => timeSinks.push(extr));
+            }
         });
         //
         let nearTime = timeSinks.reduce((prev, curr) => {//find nearest time sink

@@ -29,6 +29,8 @@ export default class Command{
         this.time = 0;
         this.rate = 1;//seconds / second
         //
+        this.rootPrecision = Math.pow(.1, 8);//eight zeroes
+        //
         this.running = false;
         this.loopStart = loopStart;
         //
@@ -93,6 +95,9 @@ export default class Command{
         this.drawGrid();
         this.spawnExtremes([this.objects[0]]);
         this.toggleVectors(1);
+        //
+        let self = this;
+        window.setTimeout(function(){self.props.renderEqs();}, 500);
     }
     //
     //#region View Control
@@ -475,10 +480,14 @@ export default class Command{
                     let curPos = obj.getVals(power, time);
                     let x = curPos[0];
                     let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
-                    obj.setValueTime(power, t, x, y);
-                    obj.profile.shiftPropagate(t, this.grid.conX(cx));
+                    //obj.setValueTime(power, t, x, y);
+                    //obj.profile.shiftAllPieces(this.grid.conX(cx));
+                    console.log(`shift by ${this.grid.conX(cx)}, ${this.grid.conY(cy)} at time ${time}`);
+                    obj.profile.shiftFromPiece(time, this.grid.conX(cx), 0, this.grid.conY(cy));
+                    //obj.setValueTime(power, t, x, y);
+                    //obj.profile.shiftPropagate(t, this.grid.conX(cx));
                 });
-                this.setTime(this.time + (t - time));
+                //this.setTime(this.time + (t - time));
                 break;
         }
     }

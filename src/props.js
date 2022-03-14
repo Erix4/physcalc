@@ -150,7 +150,7 @@ export default class Props{
         d3.select('#calcButton').on('click', function(){
             if(command.selected){
                 switch(self.getDropIdx(d3.select('#solveType'))){
-                    case 0:
+                    case 0://for point
                         let drops = d3.select('#forPoint').selectAll('.propdrop').nodes();
                         let power = self.getDropIdx(d3.select(drops[0]));
                         let x = self.getDropIdx(d3.select(drops[1])) == 0;
@@ -182,7 +182,7 @@ export default class Props{
                         }
                         //
                         break;
-                    case 1:
+                    case 1://for motion
                         let firstProp = d3.select('#forMotion').select('.propInput');
                         if(firstProp.selectAll('.solveCheck').nodes()[0].checked && firstProp.selectAll('.solveCheck').nodes()[1].checked){
                             console.log(`confirmed`);
@@ -242,7 +242,7 @@ export default class Props{
                             alert("Please specify an initial x and y position.");
                         }
                         break;
-                    case 2:
+                    case 2://without time
                         let t1 = self.getDropIdx(d3.select('#wtTypeOne'));//x or v0
                         let t2 = self.getDropIdx(d3.select('#wtTypeTwo'));//v0 or v
                         let t3 = self.getDropIdx(d3.select('#wtTypeThree'));//v or a

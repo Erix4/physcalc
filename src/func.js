@@ -154,7 +154,7 @@ export default class Profile{
     //
     /**
      * shift all bounds by a given time
-     * @param ct time to shift by
+     * @param {Number} ct time to shift by
      */
     shiftAllPieces(ct){
         this.pieces.forEach((piece, idx) => {
@@ -179,17 +179,33 @@ export default class Profile{
     }
     //
     /**
-     * 
+     * shift function by t, x, and y and propagate
+     * @param {Number} xb 
+     * @param {Number} v 
+     */
+    shiftFromPiece(t, ct, cx, cy){
+        let pIdx = this.getValIdx(t);
+        //
+        console.log(`offsetting piece ${pIdx} by ${ct}`);
+        this.pieces[pIdx].paras[0].setOff(ct);//shift highest level equation
+        //this.pieces[pIdx].setOrigin(t, 0);
+        //this.pieces[pIdx].propagate(0);//propagate shift to lower levels
+        //this.propagateContinuum(pIdx, 0);//adjust connected junctions to match
+        //this.shiftPropagate(t, ct);//shift all pieces and propagate
+    }
+    //
+    /**
+     * set the shift of all pieces in the profile
      * @param {Number} st starting time
      * @param {Number} cs current shift
      * @param {Number} t new time
      */
     setAllPieces(st, cs, t){
-        let ns = (t - st) - cs;
-        console.log(`start: ${st}, current shift: ${cs}, time: ${t}, new shift: ${ns}`);
+        let ns = (t - st) - cs;//new shift = full shift - current shift
+        //console.log(`start: ${st}, current shift: ${cs}, time: ${t}, full shift: ${t - st}, new shift: ${ns}`);
         //
-        this.shiftAllPieces(ns);
-        return cs + ns;
+        this.shiftAllPieces(ns);//move pieces by the new shift
+        return cs + ns;//return the full shift
     }
     //
     /**
@@ -213,7 +229,7 @@ export default class Profile{
         //
         //step 2. propagate left
         var i;
-        for(i = curIdx - 1; i >= 0 && this.junctions[i] != 2; i--){//pieces are to the left and the left juction is continous
+        for(i = curIdx - 1; i >= 0 && this.junctions[i] != 2; i--){//pieces are to the left and the left juction is complete
             this.bounds[i][1] += ct;
             if(isFinite(this.bounds[i][0])){
                 this.bounds[i][0] += ct;
@@ -231,7 +247,7 @@ export default class Profile{
         //
         //step 3. propagate right
         let len = this.pieces.length - 1;
-        for(i = curIdx + 1; i <= len && this.junctions[i-1] != 2; i++){//pieces are to the left and the left juction is continous
+        for(i = curIdx + 1; i <= len && this.junctions[i-1] != 2; i++){//pieces are to the left and the left juction is complete
             this.bounds[i][0] += ct;
             if(isFinite(this.bounds[i][1])){
                 this.bounds[i][1] += ct;
@@ -421,6 +437,21 @@ export default class Profile{
         //console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
         //
         this.setPieceValTime(power, t, curIdx, x, y, propagator);
+        this.propagateContinuum(curIdx, alignPower);
+        //
+        //console.log(this.pieces[curIdx]);
+        //
+        let curPiece = this.pieces[curIdx];
+        let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
+        //
+        //this loop sets moves each function so that they intersect with the given point given a point in time
+        /**this.pieces.forEach(piece => {
+            piece.setOrigin(curOrigin, power);//set origin to the origin of the current piece
+            piece.setValTime(power, t, x, y, propagator);//set the value at the given time to the offset
+        });**/
+    }
+    //
+    propagateContinuum(curIdx, alignPower = 0){
         var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];
         var leftY = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[1];
         for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
@@ -438,17 +469,6 @@ export default class Profile{
             leftX = this.calc(alignPower, this.bounds[i][1], i)[0];
             leftY = this.calc(alignPower, this.bounds[i][1], i)[1];
         }
-        //
-        //console.log(this.pieces[curIdx]);
-        //
-        let curPiece = this.pieces[curIdx];
-        let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
-        //
-        //this loop sets moves each function so that they intersect with the given point given a point in time
-        /**this.pieces.forEach(piece => {
-            piece.setOrigin(curOrigin, power);//set origin to the origin of the current piece
-            piece.setValTime(power, t, x, y, propagator);//set the value at the given time to the offset
-        });**/
     }
     //
     /**
@@ -462,6 +482,10 @@ export default class Profile{
      */
     setPieceValTime(power, t, pIdx, x, y, propagator=true){
         this.pieces[pIdx].setValTime(power, t, x, y, propagator);
+    }
+    //
+    shiftPieceValTime(power, t, pIdx, cx, cy, propagator=true){
+        //this.pieces[pIdx]
     }
     //
     /**
@@ -497,6 +521,7 @@ export default class Profile{
      * @param {Number} [power] the power of which to set the origins
      */
     setOrigin(time, pIdx, power){
+        console.log(`setting origin to ${time}`);
         if(pIdx || pIdx == 0){
             this.pieces[pIdx].setOrigin(time, power);
         }else{
@@ -1198,6 +1223,7 @@ export class Para{
             this.xFunc.setOff(t, x);
             this.yFunc.setOff(t, y);
         }else{
+            console.log(`offseting t by ${t}`);
             this.xFunc.setOff(t);
             this.yFunc.setOff(t);
         }
@@ -1380,7 +1406,7 @@ export class Func{
                 let shiftEq = this.makeClone(false);
                 shiftEq.terms[shiftEq.terms.length - 1].coef -= val;//shift equation to desired value
                 //console.log(shiftEq.getCoefs());
-                return this.approxRoots(shiftEq, .0000001);
+                return this.approxRoots(shiftEq, this.command.rootPrecision);
         }
     }
     //

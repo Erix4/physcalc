@@ -285,7 +285,7 @@ export default class Grid{
      * @param {Number} py zoom center y in pixels
      */
     zoom(c, px, py){
-        if((-Math.log10(this.scale) < 12 || c > 1) && (Math.log10(this.scale) < 20 || c < 1)){//check for zoom bounds
+        if((-Math.log10(this.scale) < 7 || c > 1) && (Math.log10(this.scale) < 20 || c < 1)){//check for zoom bounds
             this.scale *= c;
         }
         //
@@ -414,7 +414,9 @@ export default class Grid{
         var curY = Math.ceil(yBot / yRes) * yRes;//get first y line position
         var exactY = this.yRes.multiply(new bigDecimal(`${Math.ceil(yBot / yRes)}`));//exact line position with big decimal
         //
+        //console.log(`drawing x grid lines starting with curY=${curY} and yRes=${yRes}`);
         for (var n = 0; n < (this.scale / yRes); n++){
+            //console.log(`drawing grid line at y=${curY}`);
             if(parseFloat(exactY.value) == 0){
                 ctx.lineWidth = 4;
             }else if((parseFloat(exactY.divide(this.yRes).value) % this.superRes) / (this.superRes + 1) == 0){
@@ -456,6 +458,7 @@ export default class Grid{
 }
 
 function getGrid(gridRes, res, gridMin, gridMax, fd){
+    //console.log(`getGrid(${gridRes}, ${res.value}, ${gridMin}, ${gridMax}, ${fd})`);
     if(gridRes < gridMin){
         if(fd == 1 || fd == 5){//if the first digit is 1 or 5
             return res.multiply(new bigDecimal(`2`));//multiply res by 2

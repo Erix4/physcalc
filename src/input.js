@@ -53,7 +53,7 @@ export default class Input{
         var mX = 0;//current mouse position
         var mY = 0;
         var cs = 0;//current shift
-        var stcX = 0;//starting timeline position
+        this.stcX = 0;//starting timeline position
         //
         var mT = null;//time mouse was pressed
         //
@@ -66,10 +66,12 @@ export default class Input{
         window.addEventListener("resize", event => {
             window.setTimeout(function(){command.resize();}, 50);//sometimes screen resizing takes a little bit
             command.props.windowResize();
+            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+            canoy = parseInt(d3.select("#header").style("height"));//referencing the props values is susceptible to time delay
         });
         //
         d3.select("#fieldcolumn").on("wheel.zoom", function(){
-            //console.log(d3.event);
+            //console.log('zooming');
             d3.event.preventDefault();
             if(d3.event.shiftKey){
                 command.zoomX(Math.pow(2.7, d3.event.deltaY / 700), mX, mY);
@@ -213,16 +215,15 @@ export default class Input{
         //
         //#region mouse events
         //
-        document.addEventListener("mousedown", function(){
+        document.addEventListener("mousedown", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            emy -= parseInt(d3.select("#header").style("height"));
+            emx -= canox;
+            emy -= canoy;
             //
             stX = emx;
             stY = emy;
             cs = 0;
-            stcX = event.clientX;
             //
             mX = emx;
             mY = emy;
@@ -312,12 +313,12 @@ export default class Input{
                 case 6://retime an object via timeline extremes
                     if(new Date - mT > 300){//if mouse has been held long enough (so no accidents)
                         //this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
-                        if(command.timeSnapping){
-                            console.log(`input time: ${command.timeline.timeX.invert(event.clientX)}`);
-                            cs = command.selected.profile.setAllPieces(command.timeline.timeX.invert(stcX), cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)));
+                        if(command.timeSnapping || event.ctrlKey){
+                            cs = command.selected.profile.setAllPieces(this.strX, cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)));
                         }else{
                             //this.command.selected.profile.shiftPropagate(command.timeline.timeX.invert(event.clientX), command.timeline.conTime(emx - mX));
                             this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
+                            this.strX += command.timeline.conTime(emx - mX);
                         }
                         //this.command.selected.profile.reBoundLeftPiece()
                         command.props.retime();
@@ -337,8 +338,10 @@ export default class Input{
                     if(event.preventDefault) event.preventDefault();
                     event.cancelBubble=true;
                     command.props.columnResize(event.clientX);
+                    canox = command.props.canox;
                     break;
                 case 9://move object by extreme
+                    this.propActive += command.grid.conX(emx - mX);
                     if(event.ctrlKey){
                         //console.log('time snapping');
                         let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
@@ -630,7 +633,6 @@ export default class Input{
         //
         point.on("mousedown", function(){
             input.moveState = 6;
-            console.log("point click detected");
             input.command.selected = object;
             input.active = point;
             input.command.select(object);
@@ -638,6 +640,7 @@ export default class Input{
                 object.toggleLock();
             }
             //
+            input.strX = parseFloat(point.attr("val"));
             input.tX = object.profile.calc(0, parseFloat(point.attr("val")))[0];
             input.tY = object.profile.calc(0, parseFloat(point.attr("val")))[1];
             object.profile.setOrigin(parseFloat(point.attr("val")));
