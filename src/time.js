@@ -190,7 +190,7 @@ export default class Timeline{
         return this.scrW / (this.scale / this.res);
     }
     //
-    getNearTime(t){
+    getNearTime(t, incSel = true){
         var timeSinks = [];
         //
         let res = this.res;
@@ -205,7 +205,7 @@ export default class Timeline{
         }
         //
         this.command.objects.forEach(obj => {
-            if(obj != this.command.selected){
+            if(incSel || obj != this.command.selected){
                 obj.extremes.forEach(extr => timeSinks.push(extr));
             }
         });

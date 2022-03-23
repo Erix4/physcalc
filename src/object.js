@@ -37,9 +37,11 @@ Object capabilities:
 import Profile from "./func.js";
 
 export default class Object{
-    constructor(command, id, px, py, type=0){
+    constructor(command, id, x, y, type=0){
+        //#region Variable Declaration
         this.command = command;
         this.field = command.field;
+        this.svg = command.svg;
         //
         this.id = id;
         this.idx = command.objects.length;
@@ -71,25 +73,9 @@ export default class Object{
         const vy = 5;
         const ax = 0;
         const ay = command.gravity;
+        //#endregion
         //
-        this.profile;
-        switch(command.viewType){
-            case 0:
-                this.px = this.command.scaleX.invert(px);
-                this.py = this.command.scaleY.invert(py);
-                break;
-            case 1:
-                this.command.setTime(this.command.scaleX.invert(px));
-                this.px = this.command.scaleY.invert(py);
-                this.py = 0;
-                break;
-            case 2:
-                this.command.setTime(this.command.scaleX.invert(px));
-                this.px = 0;
-                this.py = this.command.scaleY.invert(py);
-                break;
-        }
-        this.profile = new Profile(this.command, this.depth, [ax / 2, vx, this.px], [ay / 2, vy, this.py], this.color);
+        this.profile = new Profile(this.command, this.depth, [ax / 2, vx, x], [ay / 2, vy, y], this.color);
         //this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
         this.extremes = [];
@@ -100,13 +86,17 @@ export default class Object{
             this.yS.push(this.profile.calc(n, command.time)[1]);
         }
         //
+        this.px = command.viewType == 0 ? x : command.time;
+        this.py = command.viewType == 1 ? x : y;
+        console.log(`pos at ${this.px}, ${this.py}`);
+        //
         this.arrStr = 1 / 4;//amount to stretch arrow vs real numbers
         this.arrLen = 100 * this.command.unitPx;//arrow lengths in x or y only display
         this.nets = [];
         this.comps = [];//redo comp listing for better illustration
         for(var n = 1; n <= this.depth; n++){//make an arrow for every para except position
             this.nets.push(new netArrow(command, this, n));
-            var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
+            //var curPiece = this.profile.pieces[this.profile.getValIdx(this.command.time)];
             //
             /*let compPower = [];
             for(var a in curPiece.comps[n]){
@@ -115,7 +105,6 @@ export default class Object{
             //this.comps.push(compPower);*/
             //
         }
-        this.updateVectors();
         /*this.comps.forEach(comp => {
             comp.forEach(arrow => {
                 arrow.self.head.raise();
@@ -128,19 +117,12 @@ export default class Object{
             net.self.head.raise();
         });
         //
-        if(command.viewType == 1){
-            this.px = this.command.scaleX.invert(px);
-        }else if(command.viewType == 2){
-            this.py = this.command.scaleX.invert(px);
-        }
-        //
-        this.svg = command.svg;
-        //
         this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7 * this.command.unitPx)
         .attr("r", 20 * this.command.unitPx);
         /*.style("visibility", "hidden")*/;
         //
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
+        console.log(`pos at ${this.px}, ${this.py}`);
         //
         command.input.newObject(this);
         command.drawGrid();
@@ -399,10 +381,11 @@ export default class Object{
      */
     spawnExtremes(){
         this.pointDiv.html("");//delete all extreme labels
+        //
+        this.extremes = this.profile.getExtremes();
+        var n;
         switch(this.command.viewType){
             case 0:
-                this.extremes = this.profile.getExtremes();
-                var n;
                 for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                         .attr("cx", this.command.scaleX(this.profile.calc(0, this.extremes[n])[0]))//get x and y position at given time
@@ -418,14 +401,8 @@ export default class Object{
                     this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
                     n++;
                 }
-                while(this.points.length > this.extremes.length){//remove points that aren't used
-                    this.points[this.points.length - 1].remove();
-                    this.points.pop();
-                }
                 break;
             case 1:
-                this.extremes = this.profile.getExtremes();
-                var n;
                 for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
@@ -440,14 +417,8 @@ export default class Object{
                     this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
                     n++;
                 }
-                while(this.points.length > this.extremes.length){
-                    this.points[this.points.length - 1].remove();
-                    this.points.pop();
-                }
                 break;
             case 2:
-                this.extremes = this.profile.getExtremes();
-                var n;
                 for(n = 0; n < this.points.length && n < this.extremes.length; n++){//set position for every point that already exists
                     this.points[n].attr("val", this.extremes[n]).style("fill", this.color)
                         .attr("cx", this.command.scaleX(this.extremes[n]))//get x and y position at given time
@@ -462,11 +433,11 @@ export default class Object{
                     this.command.input.newObjPoint(this, this.points[this.points.length - 1]);
                     n++;
                 }
-                while(this.points.length > this.extremes.length){
-                    this.points[this.points.length - 1].remove();
-                    this.points.pop();
-                }
                 break;
+        }
+        while(this.points.length > this.extremes.length){//remove points that aren't used
+            this.points[this.points.length - 1].remove();
+            this.points.pop();
         }
     }
     //
@@ -769,7 +740,6 @@ class Arrow{
         this.ey = ey;//ending y
         //
         this.color = color;
-        console.log(`setting color to ${this.color}`);
         //
         this.tailSize = 30;
         this.tailAng = 60;

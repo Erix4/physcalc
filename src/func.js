@@ -179,22 +179,6 @@ export default class Profile{
     }
     //
     /**
-     * shift function by t, x, and y and propagate
-     * @param {Number} xb 
-     * @param {Number} v 
-     */
-    shiftFromPiece(t, ct, cx, cy){
-        let pIdx = this.getValIdx(t);
-        //
-        console.log(`offsetting piece ${pIdx} by ${ct}`);
-        this.pieces[pIdx].paras[0].setOff(ct);//shift highest level equation
-        //this.pieces[pIdx].setOrigin(t, 0);
-        //this.pieces[pIdx].propagate(0);//propagate shift to lower levels
-        //this.propagateContinuum(pIdx, 0);//adjust connected junctions to match
-        //this.shiftPropagate(t, ct);//shift all pieces and propagate
-    }
-    //
-    /**
      * set the shift of all pieces in the profile
      * @param {Number} st starting time
      * @param {Number} cs current shift
@@ -215,9 +199,6 @@ export default class Profile{
      */
     shiftPropagate(t, ct){
         let curIdx = this.getValIdx(t-ct);
-        //console.log(`prop`)
-        //
-        console.log(`propagating shift from idx ${curIdx}, time ${t-ct} by ${ct}`);
         //
         //step 1. change bounds of current piece
         if(isFinite(this.bounds[curIdx][0])){
@@ -449,6 +430,25 @@ export default class Profile{
             piece.setOrigin(curOrigin, power);//set origin to the origin of the current piece
             piece.setValTime(power, t, x, y, propagator);//set the value at the given time to the offset
         });**/
+    }
+    //
+    /**
+     * shift function by t, x, and y and propagate
+     * @param {Number} xb 
+     * @param {Number} v 
+     */
+     setValTimeFunc(t, nt, py, x=true){
+        let pIdx = this.getValIdx(t);
+        //
+        let aFunc = x ? this.pieces[pIdx].paras[0].xFunc : this.pieces[pIdx].paras[0].yFunc;
+        //
+        //aFunc.origin = t;
+        aFunc.setOff(nt, py);//shift highest level equation
+        //console.log(this.pieces[pIdx].paras[0].yFunc.getCoefs());
+        //this.pieces[pIdx].setOrigin(t, 0);
+        this.pieces[pIdx].propagate(0);//propagate shift to lower levels
+        this.propagateContinuum(pIdx, 0);//adjust connected junctions to match
+        this.shiftPropagate(t, nt - t);//shift all pieces and propagate
     }
     //
     propagateContinuum(curIdx, alignPower = 0){
@@ -1379,6 +1379,8 @@ export class Func{
     }
     //
     calcRoots(val = 0){//faulty, assuming term powers are in descending order: 2, 1, 0
+        let rootPrecision = Math.pow(.1, 8);
+        //
         this.removeArbs();
         switch(this.terms.length){
             case 1:
@@ -1406,7 +1408,7 @@ export class Func{
                 let shiftEq = this.makeClone(false);
                 shiftEq.terms[shiftEq.terms.length - 1].coef -= val;//shift equation to desired value
                 //console.log(shiftEq.getCoefs());
-                return this.approxRoots(shiftEq, this.command.rootPrecision);
+                return this.approxRoots(shiftEq, rootPrecision);
         }
     }
     //
@@ -1491,7 +1493,7 @@ export class Func{
         return signs;
     }
     //
-    calcDelta(rStart, rEnd){//calculate the differnce between two values
+    calcDelta(rStart, rEnd){//calculate the difference between two values
         var p1 = calc(rStart);
         var p2 = calc(rEnd);
         return p2 - p1;
@@ -1501,17 +1503,21 @@ export class Func{
         this.terms.push(new Term (coef, power));
     }
     //
+    /**
+     * moves function to given point from current origin
+     * @param {Number} Xoffset new x location for origin point
+     * @param {Number} Yoffset new y location for origin point
+     */
     setOff(Xoffset, Yoffset){
         if(arguments.length < 2){
             Yoffset = this.calc(this.origin);
         }else{
             //console.log(`Adding to Yoffset ${this.terms[this.terms.length - 1].coef} - ${this.calc(this.origin)}`)
-            Yoffset += this.terms[this.terms.length - 1].coef - this.calc(this.origin);
+            Yoffset += this.terms[this.terms.length - 1].coef - this.calc(this.origin);//2 - 1
         }
         let orxo = Xoffset;
         Xoffset -= this.origin;
         //console.log(this.getCoefs());
-        //console.log(`Setting to offset (${Xoffset}, ${Yoffset})`);
         var sum = 0;
         //console.log(this.calc(0));
         this.terms[this.terms.length - 1].coef = 0

@@ -54,6 +54,7 @@ export default class Input{
         var mY = 0;
         var cs = 0;//current shift
         this.stcX = 0;//starting timeline position
+        this.setLoc = [0, 0];
         //
         var mT = null;//time mouse was pressed
         //
@@ -221,6 +222,8 @@ export default class Input{
             emx -= canox;
             emy -= canoy;
             //
+            //this.setLoc = [command.scaleX.invert(emx), command.scaleY.invert(emy)];
+            //
             stX = emx;
             stY = emy;
             cs = 0;
@@ -255,7 +258,7 @@ export default class Input{
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= canox;
+            emx -= canox;//early mouse x, y
             emy -= canoy;
             //
             switch(this.moveState){
@@ -267,16 +270,26 @@ export default class Input{
                     }
                     break;
                 case 2://object move
+                    let pos;
+                    let opos;
                     if(event.ctrlKey){
-                        //console.log('time snapping');
-                        let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
-                        let xPos = this.command.scaleX(pos[0]);
-                        let yPos = this.command.scaleY(pos[1]);
-                        //
-                        this.command.setScreenPos(0, xPos, yPos, this.command.selObs);//move object(s)
-                        this.command.objPosChange(this.command.selObs);//update corresponding displays
+                        pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
+                        opos = this.setLoc;//get position of main selected object
+                        this.setLoc = pos;
+                        //console.log(`opos ${opos[0]}, ${opos[1]} to pos ${pos[0]}, ${pos[1]}`);
                     }else{
-                        this.command.shiftPos(0, emx - mX, emy - mY, this.command.selObs);//move object(s)
+                        pos = [this.command.scaleX.invert(emx), this.command.scaleY.invert(emy)];
+                        opos = this.setLoc;
+                        this.setLoc = pos;
+                        //this.command.shiftPos(0, this.command.grid.conX(emx - mX), this.command.grid.conY(emy - mY), this.command.selObs);//move object(s)
+                        //this.command.setScreenPos(0, emx, emy, this.command.selObs);//move object(s)
+                    }
+                    //
+                    this.command.shiftPos(0, pos[0] - opos[0], pos[1] - opos[1], this.command.selObs);//move object(s)
+                    if(this.command.viewType != 0){
+                        this.command.time += pos[0] - opos[0];
+                        this.command.objPosChange(this.command.objects);
+                    }else{
                         this.command.objPosChange(this.command.selObs);//update corresponding displays
                     }
                     break;
@@ -314,7 +327,7 @@ export default class Input{
                     if(new Date - mT > 300){//if mouse has been held long enough (so no accidents)
                         //this.command.selected.setValueTime(0, command.timeline.timeX.invert(event.clientX), this.tX, this.tY);
                         if(command.timeSnapping || event.ctrlKey){
-                            cs = command.selected.profile.setAllPieces(this.strX, cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX)));
+                            cs = command.selected.profile.setAllPieces(this.strX, cs, command.timeline.getNearTime(command.timeline.timeX.invert(event.clientX), false));
                         }else{
                             //this.command.selected.profile.shiftPropagate(command.timeline.timeX.invert(event.clientX), command.timeline.conTime(emx - mX));
                             this.command.selected.profile.shiftAllPieces(command.timeline.conTime(emx - mX));
@@ -341,19 +354,13 @@ export default class Input{
                     canox = command.props.canox;
                     break;
                 case 9://move object by extreme
-                    this.propActive += command.grid.conX(emx - mX);
                     if(event.ctrlKey){
-                        //console.log('time snapping');
                         let pos = this.command.grid.getNearUnits(this.command.scaleX.invert(emx), this.command.scaleY.invert(emy));
-                        console.log(pos);
-                        let xPos = this.command.scaleX(pos[0]);
-                        let yPos = this.command.scaleY(pos[1]);
-                        console.log(`xPos: ${xPos}, yPos: ${yPos}`);
                         //
-                        this.command.setScreenPos(0, xPos, yPos, [this.active], this.propActive);//move object(s)
+                        this.command.setObjPos(0, pos[0], pos[1], this.active, this.propActive);//move object(s)
                         this.command.objPosChange([this.active]);//update corresponding displays
                     }else{
-                        this.command.shiftPos(0, emx - mX, emy - mY, [this.active], this.propActive);//move object
+                        this.command.setScreenPos(0, emx, emy, this.active, this.propActive);//move object
                         this.command.objPosChange([this.active]);//update corresponding displays
                     }
                     break;
@@ -698,10 +705,16 @@ export default class Input{
     //
     newObject(obj){
         var input = this;
+        //
         //console.log("object clicked");
         obj.self.on("mousedown", function(){//when object clicked
             input.active = obj;
             input.command.selected = obj;
+            //
+            let pos = obj.getVals(0, input.command.time);
+            input.setLoc = [input.command.viewType == 0 ? pos[0] : input.command.time, input.command.viewType == 1 ? pos[0] : pos[1]];
+            console.log(input.setLoc);
+            //
             if(input.moveState == 0){//this is here for a reason, idiot
                 input.command.selected.profile.setOrigin(input.command.time);
                 input.moveState = 2;

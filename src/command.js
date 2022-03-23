@@ -29,7 +29,8 @@ export default class Command{
         this.time = 0;
         this.rate = 1;//seconds / second
         //
-        this.rootPrecision = Math.pow(.1, 8);//eight zeroes
+        this.rootPrecision = Math.pow(.1, 8);//eight zeroes, not connected
+        console.log(`rootPrecision: ${this.rootPrecision}`);
         //
         this.running = false;
         this.loopStart = loopStart;
@@ -90,7 +91,7 @@ export default class Command{
         //
         //this.func.approxMatrix([[4, 0, 0], [62, 0, -2], [6, 2, 0], [-54, 2, 2], [18, 3, 1]]);
         //this.func.approxMatrix([[-29, 0, -2], [-1, 0, 0], [3, 1, 1], [-40, 2, -2]]);
-        this.newObject((this.scaleX.range()[1] - this.scaleX.range()[0]) / 2, (this.scaleY.range()[0] - this.scaleY.range()[1]) / 2);
+        this.newObjectG(0, 0);
         this.input.moveState = 0;
         this.drawGrid();
         this.spawnExtremes([this.objects[0]]);
@@ -449,45 +450,33 @@ export default class Command{
      * @param {Array<Object} objs list of objects to shift
      * @param {Number} [time]     time to shift position at
      */
-    shiftPos(power, cx, cy, objs, time){
-        if(arguments.length < 5){
-            time = this.time;
-        }
-        //console.log(`shifting position at time ${time} with ${cx}, ${cy}`);
+    shiftPos(power, cx, cy, objs, time=this.time){
+        objs.forEach(obj => {
+            let pos = obj.getVals(power, time);
+            //
+            this.setObjPos(power, (this.viewType == 0 ? pos[0] : time) + cx, (this.viewType == 1 ? pos[0] : pos[1]) + cy, obj, time);
+        });
+        //return this.viewType == 0 ? time : time + cx;
+    }
+    //
+    /**
+     * new object shifting method
+     * @param {*} power power to shift at
+     * @param {*} px pixel x position
+     * @param {*} py pixel y position
+     * @param {*} objs objects to shift
+     * @param {*} time current time to shift at/from
+     */
+    setObjPos(power, gx, gy, obj, time=this.time){
         switch(this.viewType){
             case 0:
-                objs.forEach(obj => {
-                    let curPos = obj.getVals(power, time);
-                    let x = this.scaleX.invert(this.scaleX(curPos[0]) + cx);
-                    let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
-                    obj.setValueTime(power, time, x, y);
-                });
+                obj.setValueTime(power, time, gx, gy);
                 break;
             case 1:
-                var t = this.scaleX.invert(this.scaleX(time) + cx);
-                objs.forEach(obj => {
-                    let curPos = obj.getVals(power, time);
-                    let x = this.scaleY.invert(this.scaleY(curPos[0]) + cy);
-                    let y = curPos[1];
-                    obj.profile.shiftPropagate(t, this.grid.conX(cx));
-                    obj.setValueTime(power, t, x, y);
-                });
-                this.setTime(this.time + (t - time));
+                obj.profile.setValTimeFunc(time, gx, gy, true);
                 break;
             case 2:
-                var t = this.scaleX.invert(this.scaleX(time) + cx);
-                objs.forEach(obj => {
-                    let curPos = obj.getVals(power, time);
-                    let x = curPos[0];
-                    let y = this.scaleY.invert(this.scaleY(curPos[1]) + cy);
-                    //obj.setValueTime(power, t, x, y);
-                    //obj.profile.shiftAllPieces(this.grid.conX(cx));
-                    console.log(`shift by ${this.grid.conX(cx)}, ${this.grid.conY(cy)} at time ${time}`);
-                    obj.profile.shiftFromPiece(time, this.grid.conX(cx), 0, this.grid.conY(cy));
-                    //obj.setValueTime(power, t, x, y);
-                    //obj.profile.shiftPropagate(t, this.grid.conX(cx));
-                });
-                //this.setTime(this.time + (t - time));
+                obj.profile.setValTimeFunc(time, gx, gy, false);
                 break;
         }
     }
@@ -500,30 +489,16 @@ export default class Command{
      * @param {Array<Object} objs list of objects to shift
      * @param {Number} [time]     time to shift position at
      */
-    setScreenPos(power, px, py, objs, time){
+    setScreenPos(power, px, py, obj, time){
         if(arguments.length < 5){
             time = this.time;
             this.shiftPos(power, px - this.scaleX(this.selected.px), py - this.scaleY(this.selected.py), objs, time);
-        }else{
-            let ox;
-            let oy;
-            //
-            switch(this.viewType){
-                case 0:
-                    ox = this.selected.profile.calc(0, time)[0];
-                    oy = this.selected.profile.calc(0, time)[1];
-                    break;
-                case 1:
-                    ox = this.selected.profile.getValIdx(time);
-                    oy = this.selected.profile.calc(0, time)[0];
-                    break;
-                case 2:
-                    ox = this.selected.profile.getValIdx(time);
-                    oy = this.selected.profile.calc(0, time)[1];
-                    break;
-            }
-            this.shiftPos(power, px - this.scaleX(ox), py - this.scaleY(oy), objs, time);
         }
+        //
+        let gx = this.scaleX.invert(px);
+        let gy = this.scaleY.invert(py);
+        //
+        this.setObjPos(power, gx, gy, obj, time);
     }
     //
     /**
@@ -562,8 +537,24 @@ export default class Command{
      * @param {Number} py starting y mouse position in pixels
      */
     newObject(px, py){
+        switch(this.viewType){
+            case 0:
+                this.newObjectG(this.scaleX.invert(px), this.scaleY.invert(py));
+                break;
+            case 1:
+                this.setTime(this.scaleX.invert(px));
+                this.newObjectG(this.scaleY.invert(py), 0);
+                break;
+            case 2:
+                this.setTime(this.scaleX.invert(px));
+                this.newObjectG(0, this.scaleY.invert(py));
+                break;
+        }
+    }
+    //
+    newObjectG(x, y){
         this.input.moveState = 3;
-        this.input.active = new Object(this, this.idCount, px, py);
+        this.input.active = new Object(this, this.idCount, x, y);
         this.objects.push(this.input.active);
         this.idCount++;
         //
@@ -628,6 +619,7 @@ export default class Command{
         str += `${d3.select('#gravityCheck').property('checked') ? 1 : 0},${d3.select('#gravitySet').property('value')}\n`;
         str += `<${this.scaleX.domain()[0]},${this.scaleX.domain()[1]}>\n`;
         str += `<${this.scaleY.domain()[0]},${this.scaleY.domain()[1]}>\n`;
+        str += `<${this.timeline.timeX.domain()[0]},${this.timeline.timeX.domain()[1]}>\n`;
         str += `${this.autoScale ? 1 : 0}\n`;
         str += `${this.timeSnapping ? 1 : 0}\n`;
         str += `${this.showExtremes ? 1 : 0}\n`;
@@ -741,18 +733,27 @@ export default class Command{
                 comm.gravity = 0;
             }
             //
+            let parseRange = (str) => {return str.slice(1, moveToNext(str, 1, '>')).split(',').map(x => parseFloat(x));};//return list of two floats
             lineIdx++;
-            let xVals = lines[lineIdx].slice(1, moveToNext(lines[lineIdx], 1, '>')).split(',').map(x => parseFloat(x));
+            let xVals = parseRange(lines[lineIdx]);
             lineIdx++;
-            let yVals = lines[lineIdx].slice(1, moveToNext(lines[lineIdx], 1, '>')).split(',').map(x => parseFloat(x));
-            comm.grid.setSizeByEdge({left: xVals[0], right: xVals[1], top: yVals[1], bottom: yVals[0]});
+            let yVals = parseRange(lines[lineIdx]);
+            comm.grid.setSizeByEdge({left: xVals[0], right: xVals[1], top: yVals[1], bottom: yVals[0], setProps: true});
             //
             lineIdx++;
-            this.autoScale = lines[lineIdx] == 1;
+            let tVals = parseRange(lines[lineIdx]);
+            comm.timeline.setSizeByEdge({left: tVals[0], right: tVals[1], setProps: true});
+            //
             lineIdx++;
-            this.timeSnapping = lines[lineIdx] == 1;
+            comm.autoScale = lines[lineIdx] == 1;
             lineIdx++;
-            this.showExtremes = lines[lineIdx] == 1;
+            comm.timeSnapping = lines[lineIdx] == 1;
+            lineIdx++;
+            comm.showExtremes = lines[lineIdx] == 1;
+            //
+            d3.select('#autoScaleCheck').property('checked', comm.autoScale);
+            d3.select('#timeSnapCheck').property('checked', comm.timeSnapping);
+            d3.select('#criticalCheck').property('checked', comm.showExtremes);
             //
             lineIdx += 3;//enter state settings
             //

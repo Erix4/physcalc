@@ -386,7 +386,6 @@ export default class Grid{
                     return [xSinks[dSinks[0][2]], ySinks[dSinks[0][3]]];
             }
         }//otherwise, there is no good snapping location
-        console.log('no good snapping location');
         //
         return [xPos, yPos];//return given position
     }
