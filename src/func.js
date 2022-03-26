@@ -198,7 +198,8 @@ export default class Profile{
      * @param ct time to shift by
      */
     shiftPropagate(t, ct){
-        let curIdx = this.getValIdx(t-ct);
+        let curIdx = this.getValIdx(t);
+        console.log(`shifting proping at time ${t}, ct ${ct}, index ${curIdx}`);
         //
         //step 1. change bounds of current piece
         if(isFinite(this.bounds[curIdx][0])){
@@ -222,25 +223,25 @@ export default class Profile{
             this.bounds[i][1] = pushVal;
             i--;
         }
-        if(i >= 0 && this.bounds[i][1] > pushVal){
+        if(i >= 0 && this.bounds[i][1] > pushVal && ct < 0){//leftmost piece has been compressed and should be expanded
             this.bounds[i][1] = pushVal;
         }
         //
         //step 3. propagate right
         let len = this.pieces.length - 1;
-        for(i = curIdx + 1; i <= len && this.junctions[i-1] != 2; i++){//pieces are to the left and the left juction is complete
+        for(i = curIdx + 1; i <= len && this.junctions[i-1] != 2; i++){//pieces are to the right and the right juction is complete
             this.bounds[i][0] += ct;
             if(isFinite(this.bounds[i][1])){
                 this.bounds[i][1] += ct;
             }
         }
-        pushVal = this.bounds[i-1][1];//left value of leftmost shifted piece
-        while(i <= len && this.bounds[i][1] < pushVal){//compress all incomplete pieces to left of the leftmost shifted piece
+        pushVal = this.bounds[i-1][1];//right value of rightmost shifted piece
+        while(i <= len && this.bounds[i][1] < pushVal){//compress all incomplete pieces to right of the rightmost shifted piece
             this.bounds[i][0] = pushVal;
             this.bounds[i][1] = pushVal;
             i++;
         }
-        if(i <= len && this.bounds[i][0] < pushVal){
+        if(i <= len && this.bounds[i][0] < pushVal && ct > 0){
             this.bounds[i][0] = pushVal;
         }
         //
@@ -439,19 +440,41 @@ export default class Profile{
      */
      setValTimeFunc(t, nt, py, x=true){
         let pIdx = this.getValIdx(t);
-        //
         let aFunc = x ? this.pieces[pIdx].paras[0].xFunc : this.pieces[pIdx].paras[0].yFunc;
         //
-        //aFunc.origin = t;
         aFunc.setOff(nt, py);//shift highest level equation
-        //console.log(this.pieces[pIdx].paras[0].yFunc.getCoefs());
-        //this.pieces[pIdx].setOrigin(t, 0);
         this.pieces[pIdx].propagate(0);//propagate shift to lower levels
-        this.propagateContinuum(pIdx, 0);//adjust connected junctions to match
         this.shiftPropagate(t, nt - t);//shift all pieces and propagate
+        this.propagateContinuumTime(pIdx, nt - t);//adjust connected junctions to match
     }
     //
-    propagateContinuum(curIdx, alignPower = 0){
+    /**
+     * align continuous junctions, even in 
+     * @param {Number} curIdx 
+     * @param {Number} ct 
+     * @param {Number} alignPower 
+     */
+    propagateContinuumTime(curIdx, ct, alignPower = 0){//modify to account for change in time in some view modes
+        var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];
+        var leftY = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[1];
+        for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
+            this.setOrigin(this.bounds[i][1], i);
+            this.setPieceValTime(alignPower, this.bounds[i][1] + ct, i, leftX, leftY, false);//only propagate position
+            leftX = this.calc(alignPower, this.bounds[i][0], i)[0];
+            leftY = this.calc(alignPower, this.bounds[i][0], i)[1];
+        }
+        //
+        leftX = this.calc(alignPower, this.bounds[curIdx][1], curIdx)[0];//sort this out
+        leftY = this.calc(alignPower, this.bounds[curIdx][1], curIdx)[1];
+        for(var i = curIdx + 1; i < this.pieces.length && this.junctions[i-1] == 0; i++){//pieces are to the left and the left juction is continous
+            this.setOrigin(this.bounds[i][0], i);
+            this.setPieceValTime(alignPower, this.bounds[i][0] + ct, i, leftX, leftY, false);//only propagate position
+            leftX = this.calc(alignPower, this.bounds[i][1], i)[0];
+            leftY = this.calc(alignPower, this.bounds[i][1], i)[1];
+        }
+    }
+    //
+    propagateContinuum(curIdx, alignPower = 0){//modify to account for change in time in some view modes
         var leftX = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[0];
         var leftY = this.calc(alignPower, this.bounds[curIdx][0], curIdx)[1];
         for(var i = curIdx - 1; i >= 0 && this.junctions[i] == 0; i--){//pieces are to the left and the left juction is continous
@@ -482,10 +505,6 @@ export default class Profile{
      */
     setPieceValTime(power, t, pIdx, x, y, propagator=true){
         this.pieces[pIdx].setValTime(power, t, x, y, propagator);
-    }
-    //
-    shiftPieceValTime(power, t, pIdx, cx, cy, propagator=true){
-        //this.pieces[pIdx]
     }
     //
     /**
@@ -521,7 +540,6 @@ export default class Profile{
      * @param {Number} [power] the power of which to set the origins
      */
     setOrigin(time, pIdx, power){
-        console.log(`setting origin to ${time}`);
         if(pIdx || pIdx == 0){
             this.pieces[pIdx].setOrigin(time, power);
         }else{

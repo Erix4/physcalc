@@ -75,7 +75,8 @@ export default class Object{
         const ay = command.gravity;
         //#endregion
         //
-        this.profile = new Profile(this.command, this.depth, [ax / 2, vx, x], [ay / 2, vy, y], this.color);
+        this.profile = new Profile(this.command, this.depth, [ax / 2, vx, 0], [ay / 2, vy, 0], this.color);
+        this.setValue(0, x, y);
         //this.profile.addComp(2, [0], [this.gravity]);//add gravity component to all pieces
         //
         this.extremes = [];
@@ -118,19 +119,15 @@ export default class Object{
         });
         //
         this.self = this.svg.append("circle").style("fill", this.color).style("stroke", `hsl(${this.hue}, 65%, 20%`).style("stroke-width", 7 * this.command.unitPx)
-        .attr("r", 20 * this.command.unitPx);
+        .attr("r", (command.viewType == 0 ? 20 : 15) * this.command.unitPx);
         /*.style("visibility", "hidden")*/;
         //
         this.self.attr("cx", this.command.scaleX(this.px)).attr("cy", this.command.scaleY(this.py)).style("visibility", "visible");
-        console.log(`pos at ${this.px}, ${this.py}`);
+        console.log(`pos at ${this.px}, ${this.py} to ${this.command.scaleX.invert(this.self.attr("cx"))}, ${this.command.scaleY.invert(this.self.attr("cy"))}`);
         //
         command.input.newObject(this);
         command.drawGrid();
         command.drawTimeline();
-    }
-    //
-    setPosCoefs(coefs){
-        //
     }
     //
     //#region Illustration

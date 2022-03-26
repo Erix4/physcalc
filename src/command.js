@@ -558,15 +558,11 @@ export default class Command{
         this.objects.push(this.input.active);
         this.idCount++;
         //
-        if(this.viewType != 0){
-            this.input.active.self.attr("r", pixels(15));
-            this.input.active.update();
-            this.input.active.move();
-        }
         this.select(this.input.active);
         this.selected.self.raise();
         this.drawTimeline();
         this.checkArrows();
+        console.log(`pos at ${this.input.active.px}, ${this.input.active.py} to ${this.scaleX.invert(this.input.active.self.attr("cx"))}, ${this.scaleY.invert(this.input.active.self.attr("cy"))}`);
     }
     //
     /**

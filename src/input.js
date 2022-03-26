@@ -287,7 +287,7 @@ export default class Input{
                     //
                     this.command.shiftPos(0, pos[0] - opos[0], pos[1] - opos[1], this.command.selObs);//move object(s)
                     if(this.command.viewType != 0){
-                        this.command.time += pos[0] - opos[0];
+                        this.command.shiftTime(pos[0] - opos[0]);
                         this.command.objPosChange(this.command.objects);
                     }else{
                         this.command.objPosChange(this.command.selObs);//update corresponding displays
