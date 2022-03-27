@@ -24,7 +24,7 @@ export default class Props{
         //
         let self = this;
         //
-        this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//
+        this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//unit drop downs next to value fields
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         //
         //console.log(d3.selectAll('.propField').nodes());
@@ -49,13 +49,21 @@ export default class Props{
             d3.select(field).on('input', function(){
                 if(isNumeric(this.value)){
                     let mult = self.idxToMult(self.getDropIdx(d3.select(self.drops[idx])));
+                    let value = parseFloat(this.value) * mult;
+                    let power = Math.floor(idx / 2);
+                    let aMult;
+                    let aValue;
                     //
                     if(idx % 2 == 0){//x field
-                        command.selected.setValue(Math.floor(idx / 2), parseFloat(this.value) * mult, parseFloat(d3.select(self.fields[idx+1]).property("value")));
+                        aMult = self.idxToMult(self.getDropIdx(d3.select(self.drops[idx+1])));
+                        aValue = parseFloat(d3.select(self.fields[idx+1]).property("value"));
+                        command.selected.setValue(power, value, aValue * aMult);
                         command.objPosChange([command.selected], true);
                         self.renderEqs();
                     }else{//y field
-                        command.selected.setValue(Math.floor(idx / 2), parseFloat(d3.select(self.fields[idx-1]).property("value")), parseFloat(this.value) * mult);
+                        aMult = self.idxToMult(self.getDropIdx(d3.select(self.drops[idx-1])));
+                        aValue = parseFloat(d3.select(self.fields[idx-1]).property("value"))
+                        command.selected.setValue(power, aValue * aMult, value);
                         command.objPosChange([command.selected], true);
                         self.renderEqs();
                     }
