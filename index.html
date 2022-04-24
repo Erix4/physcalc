@@ -55,6 +55,7 @@
             </div>
         </div>
         <div id="interface">
+            <div id="tooltip"><p></p></div>
             <div id="leftcolumn">
                 <div id="propHead" class="container">
                     <h2 id="propTitle" class="text noSelect">An object</h2>
@@ -74,9 +75,9 @@
                         <img class="discIcon" src="/assets/imcomIcon1.svg"/>
                         <img class="sel discIcon" src="/assets/infinity-solid.svg"/>
                     </div>
-                    <input class="noField tabField" type="number">
+                    <input id="firstField" class="noField tabField" step="any" step="any" type="number">
                     <p id="tabInfoText" class="text">&#60;t&#60;</p>
-                    <input class="noField tabField" type="number">
+                    <input class="noField tabField" step="any" step="any" type="number">
                     <div class="juncType">
                         <img class="discIcon" src="/assets/contIcon1.svg"/>
                         <img class="discIcon" src="/assets/discontIcon2.svg"/>
@@ -107,7 +108,7 @@
                                         <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                         <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                     </div>
-                                    <div class="toggleButton">
+                                    <div class="toggleButton vectorToggle">
                                         <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                     </div>
                                 </div>
@@ -115,7 +116,7 @@
                             ><div class="propInput">
                                 <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                 <p class="propParaLabel text">X: </p>
-                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -123,7 +124,7 @@
                                     <option>km</option>
                                 </select>
                                 <p class="propParaLabel text">Y: </p>
-                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -141,7 +142,7 @@
                                         <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                         <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                     </div>
-                                    <div class="toggleButton">
+                                    <div class="toggleButton vectorToggle">
                                         <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                     </div>
                                 </div>
@@ -149,7 +150,7 @@
                             <div class="propInput">
                                 <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                 <p class="propParaLabel text">x: </p>
-                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -157,7 +158,7 @@
                                     <option>km</option>
                                 </select>
                                 <p class="propParaLabel text">y: </p>
-                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -175,7 +176,7 @@
                                         <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                         <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                     </div>
-                                    <div class="toggleButton">
+                                    <div class="toggleButton vectorToggle">
                                         <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                     </div>
                                 </div>
@@ -183,7 +184,7 @@
                             <div class="propInput">
                                 <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                 <p class="propParaLabel text">x: </p>
-                                <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -191,7 +192,7 @@
                                     <option>km</option>
                                 </select>
                                 <p class="propParaLabel text">y: </p>
-                                <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                 <select class="propdrop">
                                     <option>mm</option>
                                     <option>cm</option>
@@ -217,7 +218,7 @@
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                             </div>
-                                            <div class="toggleButton">
+                                            <div class="toggleButton vectorToggle">
                                                 <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                             </div>
                                         </div>
@@ -225,7 +226,7 @@
                                     ><div class="propInput">
                                         <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                         <p class="propParaLabel text">X: </p>
-                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -233,7 +234,7 @@
                                             <option>km</option>
                                         </select>
                                         <p class="propParaLabel text">Y: </p>
-                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -251,7 +252,7 @@
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                             </div>
-                                            <div class="toggleButton">
+                                            <div class="toggleButton vectorToggle">
                                                 <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                             </div>
                                         </div>
@@ -259,7 +260,7 @@
                                     <div class="propInput">
                                         <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                         <p class="propParaLabel text">x: </p>
-                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -267,7 +268,7 @@
                                             <option>km</option>
                                         </select>
                                         <p class="propParaLabel text">y: </p>
-                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -285,7 +286,7 @@
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                             </div>
-                                            <div class="toggleButton">
+                                            <div class="toggleButton vectorToggle">
                                                 <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                             </div>
                                         </div>
@@ -293,7 +294,7 @@
                                     <div class="propInput">
                                         <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                         <p class="propParaLabel text">x: </p>
-                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -301,7 +302,7 @@
                                             <option>km</option>
                                         </select>
                                         <p class="propParaLabel text">y: </p>
-                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -319,7 +320,7 @@
                                                 <i class="cart toggleIcon noSelect fas fa-border-all"></i>
                                                 <i class="polar toggleIcon noSelect far fa-dot-circle"></i>
                                             </div>
-                                            <div class="toggleButton">
+                                            <div class="toggleButton vectorToggle">
                                                 <i class="vectorIcon toggleIcon noSelect fas fa-arrow-right"></i>
                                             </div>
                                         </div>
@@ -327,7 +328,7 @@
                                     <div class="propInput">
                                         <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                         <p class="propParaLabel text">x: </p>
-                                        <input id="xPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="xPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -335,7 +336,7 @@
                                             <option>km</option>
                                         </select>
                                         <p class="propParaLabel text">y: </p>
-                                        <input id="yPos" class="fitWidth propField" type="number" value="0">
+                                        <input id="yPos" class="fitWidth propField" step="any" type="number" value="0">
                                         <select class="propdrop">
                                             <option>mm</option>
                                             <option>cm</option>
@@ -415,7 +416,7 @@
                                         <option>y</option>
                                     </select>
                                     <p class="propParaLabel text">: </p>
-                                    <input id="solvePointInput" class="solveInput propField" type="number">
+                                    <input id="solvePointInput" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -432,7 +433,7 @@
                             <div id="forMotion">
                                 <div class="solver labelLine">
                                     <p class="propLabel text">At time</p>
-                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <input id="xPos" class="timeInput propField" step="any" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
                                         <option>ms</option>
                                         <option selected="selected">s</option>
@@ -448,7 +449,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="solveCheck" type="checkbox" checked="true"/></label>
                                     <p class="readCalcLabel propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number" value="0">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number" value="0">
                                     <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -457,7 +458,7 @@
                                     </select>
                                     <label class="checkbox"><input class="solveCheck" type="checkbox" checked="true"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number" value="0">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number" value="0">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -467,7 +468,7 @@
                                 </div>
                                 <div class="solver labelLine">
                                     <p class="propLabel text">At time</p>
-                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <input id="xPos" class="timeInput propField" step="any" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
                                         <option>ms</option>
                                         <option selected="selected">s</option>
@@ -484,7 +485,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -493,7 +494,7 @@
                                     </select>
                                     <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -503,7 +504,7 @@
                                 </div>
                                 <div class="solver labelLine">
                                     <p class="propLabel text">At time</p>
-                                    <input id="xPos" class="timeInput propField" type="number" value="0">
+                                    <input id="xPos" class="timeInput propField" step="any" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
                                         <option>ms</option>
                                         <option selected="selected">s</option>
@@ -521,7 +522,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -530,7 +531,7 @@
                                     </select>
                                     <label class="checkbox"><input class="solveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -542,7 +543,7 @@
                             <div id="withoutTime">
                                 <div class="solver labelLine">
                                     <p class="propLabel text">Initial position at time</p>
-                                    <input id="initialTime" class="timeInput propField" type="number" value="0">
+                                    <input id="initialTime" class="timeInput propField" step="any" type="number" value="0">
                                     <select id="calcTimeUnits" class="propdrop">
                                         <option>ms</option>
                                         <option selected="selected">s</option>
@@ -554,7 +555,7 @@
                                 <div class="propInput">
                                     <i class="expandCompIcon noSelect fas fa-caret-right"></i>
                                     <p class="propParaLabel text">X: </p>
-                                    <input id="initX" class="fitWidth propField" type="number" value="0">
+                                    <input id="initX" class="fitWidth propField" step="any" type="number" value="0">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -562,7 +563,7 @@
                                         <option>km</option>
                                     </select>
                                     <p class="propParaLabel text">Y: </p>
-                                    <input id="initY" class="fitWidth propField" type="number" value="0">
+                                    <input id="initY" class="fitWidth propField" step="any" type="number" value="0">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -580,7 +581,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="readCalcLabel propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number">
                                     <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -589,7 +590,7 @@
                                     </select>
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -607,7 +608,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="readCalcLabel propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number">
                                     <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -616,7 +617,7 @@
                                     </select>
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -634,7 +635,7 @@
                                 <div class="solver propInput">
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="readCalcLabel propParaLabel text">x: </p>
-                                    <input id="xPos" class="solveInput propField" type="number">
+                                    <input id="xPos" class="solveInput propField" step="any" type="number">
                                     <select class="readCalcDrop propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -643,7 +644,7 @@
                                     </select>
                                     <label class="checkbox"><input class="wtSolveCheck" type="checkbox"/></label>
                                     <p class="propParaLabel text">y: </p>
-                                    <input id="yPos" class="solveInput propField" type="number">
+                                    <input id="yPos" class="solveInput propField" step="any" type="number">
                                     <select class="propdrop">
                                         <option>mm</option>
                                         <option>cm</option>
@@ -677,7 +678,7 @@
                             </div>
                             <div class="apply propInput">
                             <p class="propParaLabel text">x: </p>
-                            <input id="xApply" class="fitWidth propField" type="number" value="0">
+                            <input id="xApply" class="fitWidth propField" step="any" type="number" value="0">
                             <select id="xApplyUnit" class="propdrop">
                                 <option>mm</option>
                                 <option>cm</option>
@@ -685,7 +686,7 @@
                                 <option>km</option>
                             </select>
                             <p class="propParaLabel text">y: </p>
-                            <input id="yApply" class="fitWidth propField" type="number" value="0">
+                            <input id="yApply" class="fitWidth propField" step="any" type="number" value="0">
                             <select id="yApplyUnit" class="propdrop">
                                 <option>mm</option>
                                 <option>cm</option>
@@ -706,7 +707,7 @@
                 <div id="leftfield">
                     <div id="timeValue">
                         <p id="timeText" class="text">time = </p>
-                        <input id="timeInput" class="field" type="number" value="0"/>
+                        <input id="timeInput" class="field" step="any" type="number" value="0"/>
                         <select id="timeValueDrop" class="leftColumnDrop propdrop">
                             <option>ms</option>
                             <option selected="selected">s</option>
@@ -740,7 +741,7 @@
                     <div class="settingLine">
                         <label class="settingToggle checkbox"><input id="gravityCheck" type="checkbox" checked="checked"/></label>
                         <p class="settingToggle text">Gravity:</p>
-                        <input id="gravitySet" class="settingField propField" type="number" value="-9.81">
+                        <input id="gravitySet" class="settingField propField" step="any" type="number" value="-9.81">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -750,9 +751,9 @@
                     </div>
                     <p class="settingToggle text">Field Scale</p>
                     <div class="settingLine">
-                        <input id="x1Bound" class="settingField propField" type="number" value="-10">
+                        <input id="x1Bound" class="settingField propField" step="any" type="number" value="-10">
                         <p class="settingToggle text">	&#60; x &#60;&#160;</p>
-                        <input id="x2Bound" class="settingField propField" type="number" value="10">
+                        <input id="x2Bound" class="settingField propField" step="any" type="number" value="10">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -761,9 +762,9 @@
                         </select>
                     </div>
                     <div class="settingLine">
-                        <input id="y1Bound" class="settingField propField" type="number" value="-10">
+                        <input id="y1Bound" class="settingField propField" step="any" type="number" value="-10">
                         <p class="settingToggle text">	&#60; y &#60;&#160;</p>
-                        <input id="y2Bound" class="settingField propField" type="number" value="10">
+                        <input id="y2Bound" class="settingField propField" step="any" type="number" value="10">
                         <select class="settingScale propdrop">
                             <option>mm</option>
                             <option>cm</option>
@@ -804,9 +805,9 @@
                     <p class="text">Rescale</p>
                 </div>
                 <div id="timeRange" class="range cutout">
-                    <div class="leftRange rangeButton"><input value="-5" id="leftTimeBound" class="rangeField field" type="number"/></div>
-                    <div class="leftRange rangeButton"><input value="0" id="timeBarTime" class="rangeField field" type="number"/></div>
-                    <div class="rangeButton"><input value="5" id="rightTimeBound" class="rangeField field" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="-5" id="leftTimeBound" class="rangeField field" step="any" type="number"/></div>
+                    <div class="leftRange rangeButton"><input value="0" id="timeBarTime" class="rangeField field" step="any" type="number"/></div>
+                    <div class="rangeButton"><input value="5" id="rightTimeBound" class="rangeField field" step="any" type="number"/></div>
                 </div>
                 <select class="range cutout propdrop">
                     <option>ms</option>

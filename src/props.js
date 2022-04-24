@@ -1,3 +1,5 @@
+//import { set } from "core-js/core/dict";
+
 export default class Props{
     constructor(command){
         this.command = command;
@@ -339,6 +341,7 @@ export default class Props{
         //
         this.t.on("input", function(){
             if(isNumeric(this.value)){
+                let drop = d3.select('#timeValueDrop');
                 command.setTime(parseFloat(this.value), true);
                 self.tt.property("value", parseFloat(this.value).toFixed(3));
             }
@@ -493,6 +496,8 @@ export default class Props{
         //
         //#endregion
         //
+        this.tooltipControls();
+        //
         this.update();
     }
     //
@@ -584,7 +589,7 @@ export default class Props{
             //
             let curPara = curPiece.paras[power];
             //
-            var str = this.buildEq(curPara.xFunc.getCoefs().reverse().map(coef => coef * mult), `x${devs}`);//get the coefficients, reverse them, and multiply them all
+            var str = this.buildEq(curPara.xFunc.getCoefs().reverse().map(coef => coef / mult), `x${devs}`);//get the coefficients, reverse them, and multiply them all
             //
             var math = MathJax.Hub.getAllJax("math")[0];
             MathJax.Hub.Queue(["Text", math, str]);
@@ -593,7 +598,7 @@ export default class Props{
                 d3.select(elemx).html(d3.select("#math").html());
             });
             //
-            str = this.buildEq(curPara.yFunc.getCoefs().reverse().map(coef => coef * mult), `y${devs}`);
+            str = this.buildEq(curPara.yFunc.getCoefs().reverse().map(coef => coef / mult), `y${devs}`);
             math = MathJax.Hub.getAllJax("math")[0];
             MathJax.Hub.Queue(["Text", math, str]);
             //
@@ -671,6 +676,169 @@ export default class Props{
     //
     //#endregion
     //
+    //#region tooltip
+    //
+    tooltipControls(){
+        let self = this;
+        //
+        d3.select('#propTitle').on('mouseenter', function(){
+            self.handleColTooltip(this, 0, "The object whose data is being displayed" + (self.selected == null ? " (currently none)" : "") + "</p><p class='ttpc'>[Click an object to select it]");
+        });
+        d3.select('#propTitle').on('mouseleave', function(){
+            if(self.ttc == 0) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.tab').on('mouseenter', function(){
+            if(self.selected == null) return;
+            let pIdx = self.selected.piece;
+            let val = parseFloat(d3.select(this).attr('val'));
+            self.handleColTooltip(this, 1, `Function ${val} of the object's motion` + (pIdx == val-1 ? "" : `</p><p class='ttpc'>[Click to enter function]`));
+        });
+        d3.selectAll('.tab').on('mouseleave', function(){
+            if(self.ttc == 1) self.removeTooltip();
+        });
+        //
+        d3.select('#addTab').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 0, "Add a new function to the object's motion </p><p class='ttpc'>[Click to add]");
+        });
+        d3.select('#addTab').on('mouseleave', function(){
+            if(self.ttc == 0) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.juncType').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleJuncTooltip(this);
+        });
+        d3.selectAll('.juncType').on('mouseleave', function(){
+            if(self.ttc == 1) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.tabField').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleTabFieldTooltip(this);
+        });
+        d3.selectAll('.tabField').on('mouseleave', function(){
+            if(self.ttc == 2) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.undoButton').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 3, "Set both values to 0 </p><p class='ttpc'>[Click to set]");
+        });
+        d3.selectAll('.undoButton').on('mouseleave', function(){
+            if(self.ttc == 3) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.vectorToggle').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 4, "Display the vector for these values </p><p class='ttpc'>[Click to display]");
+        });
+        d3.selectAll('.vectorToggle').on('mouseleave', function(){
+            if(self.ttc == 4) self.removeTooltip();
+        });
+    }
+    //
+    handleJuncTooltip(elem){
+        let pIdx = this.selected.piece;
+        let bounds = this.selected.profile.bounds[pIdx];
+        let junctions = this.selected.profile.junctions;
+        //
+        var desc;
+        if(junctions.length > 0){//there are junctions
+            if(elem.id == "firstJunc"){
+                if(pIdx == 0){
+                    if(isFinite(bounds[0])){
+                        desc = `This function starts at ${+bounds[0].toFixed(5)}</p><p class='ttpc'>[Click to start function at -infinity]`;
+                    }else{
+                        desc = "This function starts at -infinity</p><p class='ttpc'>[Click to set a start point]";
+                    }
+                }else{
+                    switch(junctions[pIdx-1]){
+                        case 0:
+                            desc = `This function starts connected to the previous function at ${+bounds[0].toFixed(5)}</p><p class='ttpc'>[Click to disconnect from previous function]`;
+                            break;
+                        case 1:
+                            desc = `This function starts, disconnected, when the previous function ends at ${+bounds[0].toFixed(5)}</p><p class='ttpc'>[Click to separate from previous function]`;
+                            break;
+                        case 2:
+                            desc = `This function starts at ${+bounds[0].toFixed(5)}</p><p class='ttpc'>[Click to connect to previous function]`;
+                            break;
+                    }
+                }
+            }else{
+                if(pIdx == junctions.length){
+                    if(isFinite(bounds[1])){
+                        desc = `This function ends at ${+bounds[1].toFixed(5)}</p><p class='ttpc'>[Click to end function at infinity]`;
+                    }else{
+                        desc = "This function ends at infinity</p><p class='ttpc'>[Click to set an end point]";
+                    }
+                }else{
+                    switch(junctions[pIdx]){
+                        case 0:
+                            desc = `This function ends connected to the next function at ${+bounds[1].toFixed(5)}</p><p class='ttpc'>[Click to disconnect from next function]`;
+                            break;
+                        case 1:
+                            desc = `This function ends, disconnected, when the next function starts at ${+bounds[1].toFixed(5)}</p><p class='ttpc'>[Click to separate from next function]`;
+                            break;
+                        case 2:
+                            desc = `This function ends at ${+bounds[1].toFixed(5)}</p><p class='ttpc'>[Click to connect to next function]`;
+                            break;
+                    }
+                }
+            }
+        }else{
+            if(elem.id == "firstJunc"){
+                if(isFinite(bounds[0])){
+                    desc = `This function starts at ${+bounds[0].toFixed(5)}</p><p class='ttpc'>[Click to start function at -infinity]`;
+                }else{
+                    desc = "This function starts at -infinity </p><p class='ttpc'>[Click to set a start point]";
+                }
+            }else{
+                if(isFinite(bounds[1])){
+                    desc = `This function ends at ${+bounds[1].toFixed(5)}</p><p class='ttpc'>[Click to end function at infinity]`;
+                }else{
+                    desc = "This function ends at infinity </p><p class='ttpc'>[Click to set an end point]";
+                }
+            }
+        }
+        this.handleColTooltip(elem, 1, desc);
+    }
+    //
+    handleTabFieldTooltip(elem){
+        let pIdx = this.selected.piece;
+        let bounds = this.selected.profile.bounds[pIdx];
+        //
+        var desc;
+        if(elem.id == "firstField"){
+            desc = `This function starts at ${+bounds[0].toFixed(5)} </p><p class='ttpc'>[Type here to change start point]`;
+        }else{
+            desc = `This function ends at ${+bounds[1].toFixed(5)} </p><p class='ttpc'>[Type here to change end point]`;
+        }
+        this.handleColTooltip(elem, 2, desc);
+    }
+    //
+    handleColTooltip(elem, ttc, desc){
+        let elY = elem.getBoundingClientRect().y + elem.getBoundingClientRect().height / 2;
+        this.ttc = ttc;
+        this.setTooltip(this.columnWidth + 30, elY, desc);
+    }
+    //
+    setTooltip(x, y, desc){
+        let tooltip = d3.select('#tooltip');
+        tooltip.select('p').html(desc);
+        tooltip.style('display', 'block');
+        //
+        let pHeight = tooltip.node().getBoundingClientRect().height;
+        tooltip.style('left', `${x}px`);
+        tooltip.style('top', `${y - (pHeight / 2)}px`);
+    }
+    removeTooltip(){
+        d3.select('#tooltip').style('display', 'none');
+    }
+    //
+    //#endregion
+    //
     tabEvents(){
         console.log(`calling tab events`);
         console.log(this.tabNum);
@@ -678,6 +846,8 @@ export default class Props{
         let input = this.command.input;
         //
         d3.selectAll('.tab').on('click', function(d, i){
+            if(self.selected == null) return;
+            //
             let selected = self.command.selected;
             if(this.attributes.id==null && selected != null){//not the add tab
                 if(selected.profile.bounds.length > 1){
@@ -709,50 +879,58 @@ export default class Props{
                 self.command.drawGrid();
                 self.command.spawnExtremes([selected]);
                 self.tabEvents();
-                self.updateTabs();
             }
+            self.updateTabs();
+            self.tooltipControls();
         });
         //
         d3.selectAll('.juncType').on('click', function(d, i){//cycle the junction icons and enable/disable the bounds fields if necessary
-            if(self.selected != null){
-                let pIdx = self.selected.piece;
-                let bounds = self.selected.profile.bounds[pIdx];
-                if(pIdx == 0 && i == 0){//leftmost piece and left junction
-                    if(isFinite(bounds[0])){//left bound is already a number
-                        self.selected.profile.bounds[pIdx][0] = -Infinity;
-                        //
-                        self.command.selected.update();
-                        self.command.drawGrid();
-                        self.command.spawnExtremes([self.selected]);
-                        self.updateTabs();
-                        return;
-                    }
-                    self.selected.profile.bounds[pIdx][0] = self.command.time;
+            if(self.selected == null) return;
+            //
+            let pIdx = self.selected.piece;
+            let bounds = self.selected.profile.bounds[pIdx];
+            if(pIdx == 0 && i == 0){//leftmost piece and left junction
+                if(isFinite(bounds[0])){//left bound is already a number
+                    self.selected.profile.bounds[pIdx][0] = -Infinity;
+                    //
+                    self.command.selected.update();
+                    self.command.drawGrid();
                     self.command.spawnExtremes([self.selected]);
-                }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece and right junction
-                    if(isFinite(bounds[1])){//right bound is already a number
-                        self.selected.profile.bounds[pIdx][1] = Infinity;
-                        //
-                        self.command.selected.update();
-                        self.command.drawGrid();
-                        self.command.spawnExtremes([self.selected]);
-                        self.updateTabs();
-                        return;
-                    }
-                    self.selected.profile.bounds[pIdx][1] = self.command.time;
-                    self.command.spawnExtremes([self.selected]);
+                    self.updateTabs();
+                    self.handleJuncTooltip(this);
+                    self.tooltipControls();
+                    return;
                 }
+                self.selected.profile.bounds[pIdx][0] = self.command.time;
+                self.command.spawnExtremes([self.selected]);
+            }else if (pIdx == self.selected.profile.pieces.length - 1 && i == 1){//rightmost piece and right junction
+                if(isFinite(bounds[1])){//right bound is already a number
+                    self.selected.profile.bounds[pIdx][1] = Infinity;
+                    //
+                    self.command.selected.update();
+                    self.command.drawGrid();
+                    self.command.spawnExtremes([self.selected]);
+                    self.updateTabs();
+                    self.handleJuncTooltip(this);
+                    self.tooltipControls();
+                    return;
+                }
+                self.selected.profile.bounds[pIdx][1] = self.command.time;
+                self.command.spawnExtremes([self.selected]);
+            }else{
                 self.selected.profile.junctions[pIdx-1+i] = (self.selected.profile.junctions[pIdx-1+i] + 1) % 3;//cycle the junction type
                 if(self.selected.profile.junctions[pIdx-1+i] == 0){
                     self.selected.profile.setOrigin(self.command.time);
                     self.selected.shiftValue(0, 0, 0);
                     self.command.spawnExtremes([self.selected]);
                 }
-                //
-                self.command.selected.update();
-                self.command.drawGrid();
-                self.updateTabs();
             }
+            //
+            self.command.selected.update();
+            self.command.drawGrid();
+            self.updateTabs();
+            self.handleJuncTooltip(this);
+            self.tooltipControls();
         });
         //
         d3.selectAll('.tabField').on('click', function(){
@@ -766,6 +944,7 @@ export default class Props{
                 self.selected.profile.reLeftBoundPiece(self.selected.piece, parseFloat(this.value));
                 self.command.objPosChange([self.command.selected], true);
                 self.command.spawnExtremes([self.selected]);
+                self.handleTabFieldTooltip(this);
             }
         });
         d3.select('.tabField:nth-child(4)').on('input', function(){
@@ -774,6 +953,7 @@ export default class Props{
                 self.selected.profile.reRightBoundPiece(self.selected.piece, parseFloat(this.value));
                 self.command.objPosChange([self.command.selected], true);
                 self.command.spawnExtremes([self.selected]);
+                self.handleTabFieldTooltip(this);
             }
         });
     }
