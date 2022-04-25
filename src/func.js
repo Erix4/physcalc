@@ -424,7 +424,7 @@ export default class Profile{
         //console.log(this.pieces[curIdx]);
         //
         let curPiece = this.pieces[curIdx];
-        let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
+        //let curOrigin = curPiece.paras[power].xFunc.origin;//origin should be the same for x and y functions
         //
         //this loop sets moves each function so that they intersect with the given point given a point in time
         /**this.pieces.forEach(piece => {
@@ -720,8 +720,8 @@ export class Piece{
         //
         this.color = color;
         //
-        console.log(`new peice with x coefs: `);
-        console.log(xCoefs);
+        //console.log(`new peice with x coefs: `);
+        //console.log(xCoefs);
         this.paras = [new Para(command.time, 500, xCoefs, yCoefs, this.color)];
         this.comps = [[new Para(command.time, 500, xCoefs, yCoefs)]];
         while(this.paras[this.paras.length-1].xFunc.terms.length > 1 || this.paras[this.paras.length-1].yFunc.terms.length > 1){//while there are more derivatives
@@ -972,7 +972,26 @@ export class Piece{
         if(propogator){
             this.propagate(power);
         }
+        //
+        if(x == 0 && y == 0 && power == this.paras.length-1){
+            this.clearParas(power);
+        }
         //console.log(this.paras[0].xFunc.getCoefs());
+    }
+    //
+    clearParas(power){//given 
+        if(arguments.length == 0){
+            let vals = this.paras[this.paras.length-1].calc(0);
+            if(vals[0] == 0 && vals[1] == 0){
+                power = this.paras.length - 1;
+            }else{
+                return;
+            }
+        }
+        //
+        this.paras.pop();
+        this.comps.pop();
+        this.command.checkArrows();
     }
     //
     setValues(power, x, y, propogator = true){//set value at current time

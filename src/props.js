@@ -730,12 +730,56 @@ export default class Props{
             if(self.ttc == 3) self.removeTooltip();
         });
         //
-        d3.selectAll('.vectorToggle').on('mouseenter', function(){
+        d3.selectAll('.vectorToggle').on('mouseenter', function(d, i){
             if(self.selected == null) return;
-            self.handleColTooltip(this, 4, "Display the vector for these values </p><p class='ttpc'>[Click to display]");
+            var desc = "Display the vector for these values </p><p class='ttpc'>[Click to display]";
+            if(i == 0){
+                desc = "Hide all vector arrows </p><p class='ttpc'>[Click to hide]";
+            }else if(i > self.selected.profile.pieces[self.selected.piece].paras.length - 1){
+                desc = "Display all non-zero vectors </p><p class='ttpc'>[Click to display]";
+            }
+            self.handleColTooltip(this, 4, desc);
         });
         d3.selectAll('.vectorToggle').on('mouseleave', function(){
             if(self.ttc == 4) self.removeTooltip();
+        });
+        //
+        let labels = d3.selectAll('.propLabel').nodes().slice(0, 7);
+        this.fields.forEach((field, idx) => {
+            d3.select(field).on('mouseenter', function(){
+                if(self.selected == null) return;
+                self.handleColTooltip(this, 5, `The ${idx % 2 == 0 ? "x" : "y"} value of the ${labels[Math.floor(idx/2)].innerText.toLowerCase()} </p><p class='ttpc'>[Type here to set a new value]`);
+            });
+            d3.select(field).on('mouseleave', function(){
+                if(self.ttc == 5) self.removeTooltip();
+            });
+        });
+        //
+        this.drops.forEach((drop, idx) => {
+            d3.select(drop).on('mouseenter', function(){
+                if(self.selected == null) return;
+                self.handleColTooltip(this, 6, `The units for the ${idx % 2 == 0 ? "x" : "y"} value of the ${labels[Math.floor(idx/2)].innerText.toLowerCase()} </p><p class='ttpc'>[Click to select new unit]`);
+            });
+            d3.select(drop).on('mouseleave', function(){
+                if(self.ttc == 6) self.removeTooltip();
+            });
+        });
+        //
+        d3.select('#eqUnitProp').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 7, "The units which the equations are displayed in </p><p class='ttpc'>[Click to change]");
+        });
+        d3.select('#eqUnitProp').on('mouseleave', function(){
+            if(self.ttc == 7) self.removeTooltip();
+        });
+        //
+        d3.selectAll('.eq.text').on('mouseenter', function(d, i){
+            if(self.selected == null) return;
+            console.log(`I'm here!`);
+            self.handleColTooltip(this, 8, `The equation for the ${i % 2 == 0 ? "x" : "y"} values of the ${labels[Math.floor(i/2)].innerText.toLowerCase()}`);
+        });
+        d3.selectAll('.eq.text').on('mouseleave', function(){
+            if(self.ttc == 8) self.removeTooltip();
         });
     }
     //

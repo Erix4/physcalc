@@ -434,6 +434,10 @@ i{
     transition: .2s;
 }
 
+.cartesianToggle{
+    display: none;
+}
+
 .toggleIcon{
     font-size: 70%;
     color: white;
@@ -454,7 +458,7 @@ i{
 }
 
 .undoButton:hover .undo{
-    color: red;
+    color: #ff6f59;
     transition: 0.2s;
 }
 
