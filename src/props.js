@@ -781,6 +781,55 @@ export default class Props{
         d3.selectAll('.eq.text').on('mouseleave', function(){
             if(self.ttc == 8) self.removeTooltip();
         });
+        //
+        d3.select('#solveTypeProp').on('mouseenter', function(){
+            if(self.selected == null) return;
+            let type = self.getDropIdx(d3.select('#solveType'));
+            var desc;//"The type of solver being used </p><p class='ttpc'>[Click to change]"
+            switch(type){
+                case 0:
+                    desc = "For point solver: Finding all points where the object has a certain value </p><p class='ttpc'>[Click to change]";
+                    break;
+                case 1:
+                    desc = "For motion solver: Make the object move according to a set of given values </p><p class='ttpc'>[Click to change]";
+                    break;
+                case 2:
+                    desc = "Without time solver: Make the object move according to a set of given values (excluding time) </p><p class='ttpc'>[Click to change]";
+                    break;
+            }
+            self.handleColTooltip(this, 9, desc);
+        });
+        d3.select('#solveTypeProp').on('mouseleave', function(){
+            if(self.ttc == 9) self.removeTooltip();
+        });
+        //
+        let forPoint = d3.select('#forPoint');
+        forPoint.select('.labelLine').on('mouseenter', function(){
+            if(self.selected == null) return;
+            let type = self.getDropIdx(d3.select(this).select('#calcTimeUnits'));
+            self.handleColTooltip(this, 10, `Solve for a matching ${d3.select(this).select('#calcTimeUnits').selectAll('option').nodes()[type].innerText} </p><p class='ttpc'>[Click to change]`);
+        });
+        forPoint.select('.labelLine').on('mouseleave', function(){
+            if(self.ttc == 10) self.removeTooltip();
+        });
+        //
+        forPoint.select('.propInput').select('.propdrop').on('mouseenter', function(){
+            if(self.selected == null) return;
+            let type = self.getDropIdx(d3.select(this));
+            self.handleColTooltip(this, 11, `Solve for ${type == 0 ? "x" : "y"} values </p><p class='ttpc'>[Click to change]`);
+        });
+        forPoint.select('.propInput').select('.propdrop').on('mouseleave', function(){
+            if(self.ttc == 11) self.removeTooltip();
+        });
+        //
+        d3.select('#solvePointInput').on('mouseenter', function(){
+            if(self.selected == null) return;
+            let type = self.getDropIdx(forPoint.select('.propInput').select('.propdrop'));
+            self.handleColTooltip(this, 11, `The ${type == 0 ? "x" : "y"} values to check for </p><p class='ttpc'>[Type here to check a new value]`);
+        });
+        d3.select('#solvePointInput').on('mouseleave', function(){
+            if(self.ttc == 11) self.removeTooltip();
+        });
     }
     //
     handleJuncTooltip(elem){

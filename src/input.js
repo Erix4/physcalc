@@ -505,6 +505,10 @@ export default class Input{
             input.command.changeViewType(2);
         });
         //
+        d3.select('#add').on("mousedown", function(){
+            command.newObjectG(0, 0);
+        });
+        //
         d3.select("#save").on("mousedown", function(){
             input.command.saveState();
         });

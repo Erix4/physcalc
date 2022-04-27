@@ -2,22 +2,23 @@
   "name": "physcalc",
   "version": "0.5.0",
   "description": "physics calculator",
-  "main": "index.html",
   "type": "module",
   "scripts": {
     "start": "parcel index.html --open",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html",
+    "deploy": "parcel build index.html && aws s3 sync ./dist s3://physcalc.com --delete"
   },
   "dependencies": {
     "bigdecimal": "^0.6.1",
-    "chokidar": "^3.4.0",
-    "core-js": "^3.6.5",
+    "chokidar": "^3.5.3",
+    "core-js": "^3.22.2",
     "fontfaceobserver": "^2.1.0",
     "simplebar": "^5.3.6"
   },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "devDependencies": {
     "@babel/core": "7.2.0",
-    "parcel-bundler": "^1.6.1"
+    "parcel": "^2.5.0"
   },
   "keywords": []
 }

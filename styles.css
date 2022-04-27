@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
 @font-face {
     font-family: 'heavitas';/*not licensed for professional use ($15 fee)*/
     src: url('/fonts/Heavitas.ttf');
@@ -6,7 +7,6 @@
     font-family: 'LatinM';
     src: url('/fonts/lm-regular.woff') format('woff');
 }
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap');
 
 * {
     box-sizing: border-box;
@@ -514,11 +514,13 @@ i{
     display: inline;
     margin-right: .7em;
     transform: rotate(90deg);
+    margin-top: 1.1%;
 }
 
 .expandIcon.subExpandText{
     transform: rotate(0deg);
     font-size: 70% !important;
+    margin-top: .2%;
 }
 
 .propExpand:hover{
