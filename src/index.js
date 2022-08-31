@@ -5,7 +5,9 @@ let canvas = document.getElementById("fieldCanvas");
 let body = d3.select("body");
 let svg = d3.select("#fieldSVG");
 
+console.log(`starting imports`);
 import Command from "./command.js";
+console.log(`command imported successfully`);
 //import 'simplebar';
 //import 'simplebar/dist/simplebar.css';
 

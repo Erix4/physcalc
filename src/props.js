@@ -29,8 +29,6 @@ export default class Props{
         this.drops = d3.selectAll('.propdrop').nodes().slice(0, 14);//unit drop downs next to value fields
         this.fields = d3.selectAll('.propField').nodes().slice(0, 14);//first 14 field objects are for values
         //
-        //console.log(d3.selectAll('.propField').nodes());
-        //
         //#region event listeners
         //
         d3.selectAll('.propField').on('click', function(){
@@ -476,6 +474,7 @@ export default class Props{
         this.tt.property("value", this.command.time.toFixed(3));
         //
         d3.selectAll('.undoButton').on('click', function(d, i){
+            command.selected.profile.setOrigin(command.time);
             command.selected.setValue(i, 0, 0);
             command.objPosChange([command.selected]);
             self.renderEqs();
@@ -825,10 +824,37 @@ export default class Props{
         d3.select('#solvePointInput').on('mouseenter', function(){
             if(self.selected == null) return;
             let type = self.getDropIdx(forPoint.select('.propInput').select('.propdrop'));
-            self.handleColTooltip(this, 11, `The ${type == 0 ? "x" : "y"} values to check for </p><p class='ttpc'>[Type here to check a new value]`);
+            self.handleColTooltip(this, 12, `The ${type == 0 ? "x" : "y"} values to check for </p><p class='ttpc'>[Type here to check a new value]`);
         });
         d3.select('#solvePointInput').on('mouseleave', function(){
-            if(self.ttc == 11) self.removeTooltip();
+            if(self.ttc == 12) self.removeTooltip();
+        });
+        //
+        d3.select('#solvePointUnit').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 13, `The units of the values to check for </p><p class='ttpc'>[Click to change]`);
+        });
+        d3.select('#solvePointUnit').on('mouseleave', function(){
+            if(self.ttc == 13) self.removeTooltip();
+        });
+        //
+        forPoint.select('.pointList').select('.propParaLabel').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 14, `The solutions found by the solver`);
+        });
+        forPoint.select('.pointList').select('.propParaLabel').on('mouseleave', function(){
+            if(self.ttc == 14) self.removeTooltip();
+        });
+        //
+        let forMotion = d3.select('#forMotion');
+        forMotion.selectAll('.labelLine').nodes().forEach((node, idx) => {
+            d3.select(node).select('.timeInput').on('mouseenter', function(){
+                if(self.selected == null) return;
+                self.handleColTooltip(this, 15, `The time of point ${idx + 1} of the solver`);
+            });
+            d3.select(node).select('.timeInput').on('mouseleave', function(){
+                if(self.ttc == 15) self.removeTooltip();
+            });
         });
     }
     //
@@ -933,8 +959,6 @@ export default class Props{
     //#endregion
     //
     tabEvents(){
-        console.log(`calling tab events`);
-        console.log(this.tabNum);
         let self = this;
         let input = this.command.input;
         //

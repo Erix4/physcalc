@@ -6,7 +6,7 @@
   "scripts": {
     "start": "parcel index.html --open",
     "build": "parcel build index.html",
-    "deploy": "aws s3 sync . s3://physcalc.com --exclude .git/* --exclude .parcel-cache/* --exclude node_modules/*"
+    "deploy": "parcel build index.html && aws s3 sync . s3://physcalc.com --exclude .git/* --exclude .parcel-cache/* --exclude node_modules/* --delete"
   },
   "dependencies": {
     "bigdecimal": "^0.6.1",

@@ -1,7 +1,6 @@
 export default class Grid{
     constructor(command, ctx, svg, cx, cy, scale){
         this.command = command;
-        console.log("Creating Field");
         this.svg = svg;
         this.body = d3.select("body");
         this.timeline = d3.select("#time")

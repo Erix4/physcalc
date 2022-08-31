@@ -1,7 +1,6 @@
 export default class Timeline{
     constructor(command, canvas, svg, scale){
         this.command = command;
-        console.log("Creating Timeline");
         //
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
