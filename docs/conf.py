@@ -15,7 +15,7 @@ author = 'Eric Patton'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-sys.path.append(os.path.abspath('exts'))
+sys.path.append(os.path.abspath('exts/video-master'))
 
 extensions = [
     'sphinxcontrib.video'
