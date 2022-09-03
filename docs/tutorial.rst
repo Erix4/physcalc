@@ -9,15 +9,32 @@ Display
 
 On a computer, the largest feature of the website is the display.
 It allows you view and control the physics calculator at the same time.
+There are several things you can do on the display without needing to use other sections.
 
 Adding objects
 --------------
+
+.. video:: vids/tutvid1.mov
+    :autoplay:
+    A video
 
 When you open the website, you'll notice an object has been created for you.
 It will look like a red circle in the middle of the grid.
 If there is no object, you can press the add button or the a key on your keyboard to create one.
 After adding an object, click somewhere on the grid to comfirm its initial location.
 You can create as many objects as you like, but keep in mind that with too many objects (more than 10) performance will be affected.
+
+Selecting an object is as simple as clicking it.
+Once an object is selected, details about it will appear in the properties menu.
+To deselect on object, just click anywhere on the field.
+If you want, you are allowed to select multiple objects.
+There are a few ways to do this.
+One way is to shift click an object you also want selected.
+Shift clicking on object which is already selected will deselect it.
+Another way to select mutliple objects is holding down shift and dragging over all the objects you want selected.
+
+.. note::
+    When you select multiple objects, the object details displayed in the property menu will stay on the object last selected.
 
 There are a number of ways that you can change an object with the display alone.
 Most simply, you can click and drag an object to change its current position. 
@@ -26,8 +43,6 @@ You can see an object's path of motion by the red curve behind the object.
 The graph of an object's path will always match the color of the object.
 You'll also notice, as you drag the object around, that some values in the properties menu to the left are updated automatically.
 We'll go over this in more detail in :doc:`properties` section below.
-
-If you want, you are allowed to select 
 
 On the object, there is an arrow protruding to the top right.
 When an object is created, it is given a default velocity of 5 m/s on the x, and 5 m/s on the y.
