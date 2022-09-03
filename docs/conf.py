@@ -18,7 +18,8 @@ author = 'Eric Patton'
 #sys.path.append(os.path.abspath('exts/video-master'))
 
 extensions = [
-    'exts.video'
+    'sphinxcontrib.video'
+    #'exts.video'
     #'exts.video-master.sphinxcontrib.video'
 ]
 
