@@ -1165,6 +1165,10 @@ export default class Props{
                     }
                 }
             }else if(selected != null){//is the add tab
+                if(round(self.command.time, 3) == round(selected.profile.bounds[selected.profile.getCurIdx(self.command.time)][0], 3)){//a piece has already been created at this point in time
+                    alert("You have already created a piece at this location.");
+                    return;
+                }
                 self.tabNum++;
                 console.log(`add tab`);
                 let newTab = d3.select('#tabs').append('div').attr('class', 'newtab tab').attr('val', self.tabNum);

@@ -1,5 +1,17 @@
+########
+Tutorial
+########
+
+.. _display:
+
 Display
 =======
+
+On a computer, the largest feature of the website is the display.
+It allows you view and control the physics calculator at the same time.
+
+Adding objects
+--------------
 
 When you open the website, you'll notice an object has been created for you.
 It will look like a red circle in the middle of the grid.
@@ -13,7 +25,9 @@ Moving an object at any point in time will also change its path of motion.
 You can see an object's path of motion by the red curve behind the object.
 The graph of an object's path will always match the color of the object.
 You'll also notice, as you drag the object around, that some values in the properties menu to the left are updated automatically.
-We'll go over this in more detail in the :doc:`properties` section below.
+We'll go over this in more detail in :doc:`properties` section below.
+
+If you want, you are allowed to select 
 
 On the object, there is an arrow protruding to the top right.
 When an object is created, it is given a default velocity of 5 m/s on the x, and 5 m/s on the y.
@@ -36,7 +50,7 @@ Above the menu for arrows is an textbox which shows the current time.
 You can click on this box to edit the current time in the calculator, and click on the menu to the right of it to change the units that time is measured in.
 To run the calculator in real time, simply press the space bar, and the object will start moving according to kinematics in Newtonian physics.
 Press the space bar again to stop the motion.
-Time scrubbing and playback will be covered in more depth in the the-timeline section below.
+Time scrubbing and playback will be covered in more depth in :ref:`timeline` section below.
 
 Finally, in the bottom left corner of the grid display, you'll see three buttons, labeled "f(t)", "x(t)", and "y(t)".
 Every object's motion is dictated by two separate functions for the x and y component of its motion.
@@ -44,3 +58,20 @@ By default, both functions are shown together as a parametric function over a y 
 However, you can also view either function individually with relation to t, or time.
 The "x(t)" button will show you the isolated x motion over time, while the "y(t)" button will show you the y motion over time.
 The vector arrows will still be shown, but they will no longer indicate the magnitude of their value by length, and instead point in angle only.
+
+.. _timeline:
+
+The Timeline
+============
+
+About the use of the timeline
+
+The Properties Menu
+===================
+
+About the use of the properties menu
+
+The Settings Menu
+=================
+
+About the use of the settings menu

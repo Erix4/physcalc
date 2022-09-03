@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "parcel index.html --open",
+    "starthttps" : "parcel index.html --https",
     "build": "parcel build index.html",
-    "deploy": "parcel build index.html && aws s3 sync . s3://physcalc.com --exclude .git/* --exclude .parcel-cache/* --exclude node_modules/* --delete"
+    "deploy": "parcel build index.html && aws s3 sync . s3://physcalc.com --exclude .git/* --exclude .parcel-cache/* --exclude node_modules/* --exclude docs/* --delete"
   },
   "dependencies": {
     "bigdecimal": "^0.6.1",

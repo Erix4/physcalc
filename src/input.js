@@ -86,7 +86,7 @@ export default class Input{
         //
         d3.select("#timeline").on("wheel.zoom", function(){
             d3.event.preventDefault();
-            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX + this.canox, mY);
+            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX + input.canox, mY);
         });
         //
         //#region key events
