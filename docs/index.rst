@@ -20,8 +20,15 @@ term (reStructuredText)
 
    - Here is a bullet list.
 
+Get Started
+===========
+
+Let's learn how to use the website step by step! For more depth on specific features, refer to the [User Refernce](#user-reference) section below.
+Note that this tutorial is intended for computer use only. Several features of the website are different or missing on the phone.
+
 Contents
 --------
 
 .. toctree::
-   The Display
+   display
+   properties
