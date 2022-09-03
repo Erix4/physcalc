@@ -1,6 +1,8 @@
 # physcalc
 A physics calculator website
 
+Go [here](https://physcalc-docs.readthedocs.io/en/latest/index.html) for the official documentation.
+
 # Get Started
 
 Let's learn how to use the website step by step! For more depth on specific features, refer to the [User Refernce](#user-reference) section below.

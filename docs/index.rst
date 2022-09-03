@@ -6,19 +6,12 @@
 Welcome to Physics Calculator's documentation!
 ====================================
 
-This is some documentation for the Physics Calculator.
+This the official documentation for the `Physics Calculator <https://physcalc.com>`_ website.
+It includes a full website tutorial as well as 
 
-* It uses a syntax called reStructuredText
-* It's similar to markdown, but a little more powerful
-
-term (reStructuredText)
-   A markdown language used to format text.
-
-   This is a syntax which can define terms
-
-.. note:: This is a paragraph
-
-   - Here is a bullet list.
+.. warning:: Physics Calculator is in alpha
+   The website may sporadically go offline, lose functionality, or undergo major changes.
+   Additionally, this documentation will likely be outdated until the beta release.
 
 Get Started
 ===========
