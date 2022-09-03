@@ -7,11 +7,11 @@ Welcome to Physics Calculator's documentation!
 ====================================
 
 This the official documentation for the `Physics Calculator <https://physcalc.com>`_ website.
-It includes a full website tutorial as well as 
+It includes a full website tutorial as well as user reference for the website's capabilities.
 
-.. warning:: Physics Calculator is in alpha
+.. warning:: Physics Calculator is in alpha.
    The website may sporadically go offline, lose functionality, or undergo major changes.
-   Additionally, this documentation will likely be outdated until the beta release.
+   Additionally, this documentation will likely be unfinished until the beta release.
 
 Get Started
 ===========
