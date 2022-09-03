@@ -41,7 +41,7 @@ Moving an object at any point in time will also change its path of motion.
 You can see an object's path of motion by the red curve behind the object.
 The graph of an object's path will always match the color of the object.
 You'll also notice, as you drag the object around, that some values in the properties menu to the left are updated automatically.
-We'll go over this in more detail in :doc:`properties` section below.
+We'll go over this in more detail in :ref:`properties` section below.
 
 On the object, there is an arrow protruding to the top right.
 When an object is created, it is given a default velocity of 5 m/s on the x, and 5 m/s on the y.
