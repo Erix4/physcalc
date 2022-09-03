@@ -995,6 +995,11 @@ p.settingToggle{
     transition: .2s;
 }
 
+#helpButton{
+    padding-left: .8em;
+    padding-right: .8em;
+}
+
 /*#endregion*/
 
 /*#endregion*/
