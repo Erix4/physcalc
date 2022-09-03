@@ -16,8 +16,6 @@ Adding objects
 
 .. video:: vids/tutvid1.mov
     :autoplay:
-    
-    A video
 
 When you open the website, you'll notice an object has been created for you.
 It will look like a red circle in the middle of the grid.
