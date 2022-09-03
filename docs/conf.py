@@ -6,12 +6,16 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import sys, os
+
 project = 'physcalc'
 copyright = '2022, Eric Patton'
 author = 'Eric Patton'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+sys.path.append(os.path.abspath('exts/sphinx-contrib'))
 
 extensions = [
     'sphinxcontrib.video'
