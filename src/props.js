@@ -121,6 +121,11 @@ export default class Props{
             if(this.checked && self.accessIdx(i, d3.select('#forMotion').selectAll('.solveInput')).property('value') == ""){
                 self.accessIdx(i, d3.select('#forMotion').selectAll('.solveInput')).property('value', 0);
             }
+            if(self.ttc == 17){
+                if(self.selected == null) return;
+                let type = this.checked;
+                self.handleColTooltip(this, 17, `The ${i % 2 == 0 ? 'x' : 'y'} value of point ${Math.floor(i / 2) + 1} is ${type ? 'active' : 'inactive'} </p><p class='ttpc'>[Click to ${type ? 'deactive' : 'activate'}]`);
+            }
         });
         //
         this.wtFields = d3.selectAll('.propField').nodes().slice(27, 33);
@@ -153,6 +158,12 @@ export default class Props{
                     }
                 }
             });
+            //
+            if(self.ttc == 23){
+                if(self.selected == null) return;
+                let type = this.checked;
+                self.handleColTooltip(this, 23, `The ${i % 2 == 0 ? 'x' : 'y'} values of the solver are ${type ? 'active' : 'inactive'} </p><p class='ttpc'>[Click to ${type ? 'deactive' : 'activate'}]`);
+            }
         });
         //
         d3.select('#calcButton').on('click', function(){
@@ -286,6 +297,11 @@ export default class Props{
                             }
                         });
                         //
+                        if(t1 == 0 && t2 == 0 && t3 == 0 && ((x0 != xs[0] && xs[1] == xs[2]) || (y0 != ys[0] && ys[1] == ys[2]))){
+                            alert('There was an error in the calculation. Make sure your velocity changes between points.');
+                            return;
+                        }
+                        //
                         console.log(xs);
                         console.log(ys);
                         //
@@ -302,12 +318,15 @@ export default class Props{
                         }
                         //
                         if(t1 == 0 && t2 == 0 && t3 == 0){//x, v0, v
+                            console.log(`y0: ${y0}, ys[1]: ${ys[1]}, type: ${type}`);
                             piece.setValTime(0, time0, x0, y0, false);
                             piece.setValTime(1, time0, xs[1], ys[1], false);
                             //
                             const getAcc = (x0, x, v0, v) => ((Math.pow(v, 2) - Math.pow(v0, 2)) / (2 * (x - x0)));
+                            console.log(getAcc(x0, xs[0], xs[1], xs[2]));
+                            console.log(getAcc(y0, ys[0], ys[1], ys[2]));
                             //
-                            piece.setValTime(2, time0, getAcc(x0, xs[0], xs[1], xs[2]), getAcc(y0, ys[0], ys[1], ys[2]), false);
+                            piece.setValTime(2, time0, getAcc(x0, xs[0], xs[1], xs[2]), type > 1 ? getAcc(y0, ys[0], ys[1], ys[2]) : 0, false);
                         }else if(t1 == 0 && t2 == 0 && t3 == 1){//x, v0, a
                             piece.setValTime(0, time0, x0, y0, false);
                             piece.setValTime(1, time0, xs[1], ys[1], false);
@@ -325,7 +344,7 @@ export default class Props{
                             piece.setValTime(1, time0, xs[2], ys[2], false);
                         }
                         //
-                        piece.paras = piece.paras.slice(0, 3);//remove all but first three paras
+                        piece.paras = piece.paras.slice(0, 3);//remove all but first three paras (removes extra derivatives)
                         //
                         command.updateGrid([command.selected]);
                         command.drawGrid();
@@ -850,11 +869,172 @@ export default class Props{
         forMotion.selectAll('.labelLine').nodes().forEach((node, idx) => {
             d3.select(node).select('.timeInput').on('mouseenter', function(){
                 if(self.selected == null) return;
-                self.handleColTooltip(this, 15, `The time of point ${idx + 1} of the solver`);
+                self.handleColTooltip(this, 15, `The time of point ${idx + 1} of the solver</p><p class='ttpc'>[Type here to use a new time]`);
             });
             d3.select(node).select('.timeInput').on('mouseleave', function(){
                 if(self.ttc == 15) self.removeTooltip();
             });
+            //
+            d3.select(node).select('.pointType').on('mouseenter', function(){
+                if(self.selected == null) return;
+                self.handleColTooltip(this, 16, `The type of values for point ${idx + 1} of the solver</p><p class='ttpc'>[Click to change]`);
+            });
+            d3.select(node).select('.pointType').on('mouseleave', function(){
+                if(self.ttc == 16) self.removeTooltip();
+            });
+        });
+        //
+        forMotion.selectAll('.propInput').nodes().forEach((node, idx) => {
+            d3.select(node).selectAll('.checkbox').nodes().forEach((box, jdx) => {
+                d3.select(box).on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    let type = d3.select(this).select('.solveCheck').node().checked;
+                    self.handleColTooltip(this, 17, `The ${jdx == 0 ? 'x' : 'y'} value of point ${idx + 1} is ${type ? 'active' : 'inactive'} </p><p class='ttpc'>[Click to ${type ? 'deactive' : 'activate'}]`);
+                });
+                d3.select(box).on('mouseleave', function(){
+                    if(self.ttc == 17) self.removeTooltip();
+                });
+            });
+            //
+            d3.select(node).selectAll('.solveInput').nodes().forEach((box, jdx) => {
+                d3.select(box).on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    self.handleColTooltip(this, 18, `The ${jdx == 0 ? 'x' : 'y'} value of point ${idx + 1} of the solver </p><p class='ttpc'>[Type to use new value]`);
+                });
+                d3.select(box).on('mouseleave', function(){
+                    if(self.ttc == 18) self.removeTooltip();
+                });
+            });
+            //
+            d3.select(node).selectAll('.propdrop').nodes().forEach((box, jdx) => {
+                d3.select(box).on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    self.handleColTooltip(this, 19, `The units for the ${jdx == 0 ? 'x' : 'y'} value of point ${idx + 1} of the solver </p><p class='ttpc'>[Click to change]`);
+                });
+                d3.select(box).on('mouseleave', function(){
+                    if(self.ttc == 19) self.removeTooltip();
+                });
+            });
+        });
+        //
+        d3.select('#initialTime').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 20, `The time of the initial postion</p><p class='ttpc'>[Type to use new value]`);
+        });
+        d3.select('#initialTime').on('mouseleave', function(){
+            if(self.ttc == 20) self.removeTooltip();
+        });
+        //
+        let withoutTime = d3.select('#withoutTime');
+        withoutTime.select('#calcTimeUnits').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 21, `The units of the time of the initial postion</p><p class='ttpc'>[Click to change]`);
+        });
+        withoutTime.select('#calcTimeUnits').on('mouseleave', function(){
+            if(self.ttc == 21) self.removeTooltip();
+        });
+        //
+        withoutTime.selectAll('.labelLine').nodes().forEach((node, idx) => {
+            if(idx != 0){
+                d3.select(node).select('.propdrop').on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    self.handleColTooltip(this, 22, `The type of point specified</p><p class='ttpc'>[Click to change]`);
+                });
+                d3.select(node).select('.propdrop').on('mouseleave', function(){
+                    if(self.ttc == 22) self.removeTooltip();
+                });
+            }
+        });
+        //
+        withoutTime.selectAll('.propInput').nodes().forEach((node, idx) => {
+            if(idx != 0){
+                d3.select(node).selectAll('.checkbox').nodes().forEach((box, jdx) => {
+                    d3.select(box).on('mouseenter', function(){
+                        if(self.selected == null) return;
+                        let type = d3.select(this).select('.wtSolveCheck').node().checked;
+                        self.handleColTooltip(this, 23, `The ${jdx == 0 ? 'x' : 'y'} values of the solver are ${type ? 'active' : 'inactive'} </p><p class='ttpc'>[Click to ${type ? 'deactive' : 'activate'}]`);
+                    });
+                    d3.select(box).on('mouseleave', function(){
+                        if(self.ttc == 23) self.removeTooltip();
+                    });
+                });
+            }
+            //
+            d3.select(node).selectAll('.propField').nodes().forEach((field, jdx) => {
+                d3.select(field).on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    self.handleColTooltip(this, 24, `The ${jdx == 0 ? 'x' : 'y'} value of point ${idx + 1} </p><p class='ttpc'>[Type to use new value]`);
+                });
+                d3.select(field).on('mouseleave', function(){
+                    if(self.ttc == 24) self.removeTooltip();
+                });
+            });
+            //
+            d3.select(node).selectAll('.propdrop').nodes().forEach((drop, jdx) => {
+                d3.select(drop).on('mouseenter', function(){
+                    if(self.selected == null) return;
+                    self.handleColTooltip(this, 25, `The units for the ${jdx == 0 ? 'x' : 'y'} value of point ${idx + 1} </p><p class='ttpc'>[Click to change]`);
+                });
+                d3.select(drop).on('mouseleave', function(){
+                    if(self.ttc == 25) self.removeTooltip();
+                });
+            });
+        });
+        //
+        d3.select('#calcButton').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 26, `Calculate the solution(s)!</p><p class='ttpc'>[Click to calculate]`);
+        });
+        d3.select('#calcButton').on('mouseleave', function(){
+            if(self.ttc == 26) self.removeTooltip();
+        });
+        //
+        d3.select('#applyPower').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 27, `The type of transformation to apply</p><p class='ttpc'>[Click to change]`);
+        });
+        d3.select('#applyPower').on('mouseleave', function(){
+            if(self.ttc == 27) self.removeTooltip();
+        });
+        //
+        d3.select('#xApply').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 28, `The x value of the transformation</p><p class='ttpc'>[Type to use new value]`);
+        });
+        d3.select('#xApply').on('mouseleave', function(){
+            if(self.ttc == 28) self.removeTooltip();
+        });
+        //
+        d3.select('#yApply').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 29, `The y value of the transformation</p><p class='ttpc'>[Type to use new value]`);
+        });
+        d3.select('#yApply').on('mouseleave', function(){
+            if(self.ttc == 29) self.removeTooltip();
+        });
+        //
+        d3.select('#xApplyUnit').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 30, `The units of the x value of the transformation</p><p class='ttpc'>[Click to change]`);
+        });
+        d3.select('#xApplyUnit').on('mouseleave', function(){
+            if(self.ttc == 30) self.removeTooltip();
+        });
+        //
+        d3.select('#yApplyUnit').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 31, `The units of the y value of the transformation</p><p class='ttpc'>[Click to change]`);
+        });
+        d3.select('#yApplyUnit').on('mouseleave', function(){
+            if(self.ttc == 31) self.removeTooltip();
+        });
+        //
+        d3.select('#applyButton').on('mouseenter', function(){
+            if(self.selected == null) return;
+            self.handleColTooltip(this, 32, `Apply a transformation to the object</p><p class='ttpc'>[Click to apply]`);
+        });
+        d3.select('#applyButton').on('mouseleave', function(){
+            if(self.ttc == 32) self.removeTooltip();
         });
     }
     //

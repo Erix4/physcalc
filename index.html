@@ -39,6 +39,7 @@
         gtag('config', 'G-K6YH00LW03');
     </script>
     <link rel="stylesheet" href="styles.css">
+    <script type="module" src="./src/index.js"></script>
 </head>
 <body>
     <div id="noInternet">
@@ -441,7 +442,7 @@
                                         <option>hrs</option>
                                     </select>
                                     <p class="propLabel text">,</p>
-                                    <select class="propdrop">
+                                    <select class="propdrop pointType">
                                         <option selected="selected">position</option>
                                     </select>
                                     <p class="propLabel text">:</p>
@@ -476,7 +477,7 @@
                                         <option>hrs</option>
                                     </select>
                                     <p class="propLabel text">,</p>
-                                    <select id="secondType" class="propdrop">
+                                    <select id="secondType" class="propdrop pointType">
                                         <option>position</option>
                                         <option selected="selected">velocity</option>
                                     </select>
@@ -512,7 +513,7 @@
                                         <option>hrs</option>
                                     </select>
                                     <p class="propLabel text">,</p>
-                                    <select id="thirdType" class="propdrop">
+                                    <select id="thirdType" class="propdrop pointType">
                                         <option selected="selected">position</option>
                                         <option>velocity</option>
                                         <option>acceleration</option>
@@ -822,6 +823,9 @@
             </div>
         </div>
     </div>
-    <script type="module" src="/src/index.js"></script>
+    <script type="module" src="./src/index.js"></script>
+    <script>
+        console.log(`This is a script tester for deployment 2`);
+    </script>
 </body>
 </html>

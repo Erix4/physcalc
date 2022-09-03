@@ -61,14 +61,14 @@ export default class Input{
         this.tX = 0;
         this.tY = 0;
         //
-        let canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-        let canoy = parseInt(d3.select("#header").style("height"));
+        this.canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
+        this.canoy = parseInt(d3.select("#header").style("height"));
         //
         window.addEventListener("resize", event => {
-            window.setTimeout(function(){command.resize();}, 50);//sometimes screen resizing takes a little bit
+            window.setTimeout(function(){command.resize();}, 10);//sometimes screen resizing takes a little bit
             command.props.windowResize();
-            canox = parseInt(d3.select("#leftcolumn").style("width")) + parseInt(d3.select("#lefthandle").style("width"));
-            canoy = parseInt(d3.select("#header").style("height"));//referencing the props values is susceptible to time delay
+            this.canox = command.props.columnWidth + parseInt(d3.select("#lefthandle").style("width"));
+            this.canoy = parseInt(d3.select("#header").style("height"));//referencing the props values is susceptible to time delay
         });
         //
         d3.select("#fieldcolumn").on("wheel.zoom", function(){
@@ -86,7 +86,7 @@ export default class Input{
         //
         d3.select("#timeline").on("wheel.zoom", function(){
             d3.event.preventDefault();
-            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX + canox, mY);
+            command.zoomTimeline(Math.pow(2.7, d3.event.deltaY / 700), mX + this.canox, mY);
         });
         //
         //#region key events
@@ -219,8 +219,10 @@ export default class Input{
         document.addEventListener("mousedown", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= canox;
-            emy -= canoy;
+            emx -= this.canox;
+            emy -= this.canoy;
+            //
+            console.log(`mouse coords: ${emx}, ${emy}, cano: ${this.canox}, ${this.canoy}`);
             //
             //this.setLoc = [command.scaleX.invert(emx), command.scaleY.invert(emy)];
             //
@@ -258,8 +260,8 @@ export default class Input{
         document.addEventListener("mousemove", event => {
             var emx = event.clientX;
             var emy = event.clientY;
-            emx -= canox;//early mouse x, y
-            emy -= canoy;
+            emx -= this.canox;//early mouse x, y
+            emy -= this.canoy;
             //
             switch(this.moveState){
                 case 1://field move
@@ -351,7 +353,7 @@ export default class Input{
                     if(event.preventDefault) event.preventDefault();
                     event.cancelBubble=true;
                     command.props.columnResize(event.clientX);
-                    canox = command.props.canox;
+                    this.canox = command.props.canox;
                     break;
                 case 9://move object by extreme
                     if(event.ctrlKey){
@@ -740,10 +742,6 @@ export default class Input{
                 //obj.profile.setOrigin(input.command.time);
                 obj.profile.setRollingOrigin(input.command.time, 0);
             });
-        });
-        //
-        obj.self.on("dblclick", function(){//this isn't working
-            console.log("object double");
         });
     }
     //

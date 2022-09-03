@@ -98,7 +98,7 @@ export default class Command{
         this.toggleVectors(1);
         //
         let self = this;
-        window.setTimeout(function(){self.props.renderEqs();}, 500);
+        window.setTimeout(function(){self.props.renderEqs();}, 1000);
     }
     //
     //#region View Control
@@ -176,6 +176,9 @@ export default class Command{
         this.drawTimeline();
         this.moveExtremes();
         this.moveSelects();
+        //
+        this.input.canox = this.props.columnWidth + parseInt(d3.select("#lefthandle").style("width"));
+        this.input.canoy = parseInt(d3.select("#header").style("height"));
     }
     //
     /**

@@ -20,11 +20,11 @@ export default class Profile{
             pieceIdx = this.getValIdx(this.command.time);
         }
         //
-        console.log(`copying index ${pieceIdx}`);
+        //console.log(`copying index ${pieceIdx}`);
         let curPara = this.pieces[pieceIdx].paras[0];
         this.newPiece(curPara.xFunc.getCoefs(), curPara.yFunc.getCoefs(), this.command.time, 0);
-        console.log(this.bounds);
-        console.log(this.pieces);
+        //console.log(this.bounds);
+        //console.log(this.pieces);
     }
     //
     /**
@@ -37,8 +37,8 @@ export default class Profile{
     newPiece(xCoefs, yCoefs, time, j){
         let curIdx = this.getCurIdx(time);
         //console.log(`curIdx: ${curIdx}`);
-        console.log(`x coefs:`);
-        console.log(xCoefs);
+        //console.log(`x coefs:`);
+        //console.log(xCoefs);
         //
         if(curIdx == -1){//if there is no piece at the current time
             let nextIdx = this.getRightIdx(time);
@@ -61,7 +61,7 @@ export default class Profile{
                 this.junctions.splice(nextIdx, 0, j);
             }
         }else{
-            console.log(`spliting in ${curIdx}`);
+            //console.log(`spliting in ${curIdx}`);
             this.pieces.splice(curIdx + 1, 0, new Piece(this.command, xCoefs, yCoefs, this.color));//add a new piece after the current piece
             //
             let curEnd = this.bounds[curIdx][1];//find the end of the current piece
@@ -73,7 +73,7 @@ export default class Profile{
             let endPos = this.pieces[curIdx].calc(0, time);
             //this.pieces[curIdx + 1].setOrigin(time, 0);//set the new piece to the current value at the current time
             //this.pieces[curIdx + 1].setValTime(0, time, endPos[0], endPos[1], false);//set the new piece to the current value at the current time
-            console.log(this.pieces[curIdx+1].paras[0].xFunc.getCoefs());
+            //console.log(this.pieces[curIdx+1].paras[0].xFunc.getCoefs());
         }
         //
         //console.log(`new piece:`);
@@ -115,13 +115,13 @@ export default class Profile{
     //
     reRightBoundPiece(idx, t2){//rebounding does not affect (but is affected by) the piece or the junction type
         //
-        console.log(`index given: ${idx}, bounds length: ${this.bounds.length}`);
+        //console.log(`index given: ${idx}, bounds length: ${this.bounds.length}`);
         if(idx != this.bounds.length - 1){//if not the last piece
-            console.log(`is ${t2} > ${this.bounds[idx][1]}`);
+            //console.log(`is ${t2} > ${this.bounds[idx][1]}`);
             if(t2 > this.bounds[idx][1]){//if the new piece ends after the current piece (push)
                 let endIdx = this.getCurIdx(t2);//get the index of the piece that contains the new time
                 let compressIdx = this.getLeftIdx(t2);//get the index of the piece directly to the left or containing the new time
-                console.log(`compress index: ${compressIdx}`);
+                //console.log(`compress index: ${compressIdx}`);
                 //
                 if(endIdx != -1){//new bound ends in an existing piece
                     this.bounds[endIdx][0] = t2;//rebound the rightmost piece
@@ -130,11 +130,11 @@ export default class Profile{
                     this.bounds[n] = [t2, t2];
                 }
             }else if(this.junctions[idx] != 2){//if the new piece starts after the current piece and the right juction is complete (pull)
-                console.log(`pulling piece ${idx + 1} to ${t2}`);
+                //console.log(`pulling piece ${idx + 1} to ${t2}`);
                 this.bounds[idx+1][0] = t2;//rebound the right neighbor to end at the current start
             }
         }else{
-            console.log(`the last piece?`);
+            //console.log(`the last piece?`);
         }
         this.bounds[idx][1] = t2;//rebound the current piece to end at the new end
         //
@@ -199,7 +199,7 @@ export default class Profile{
      */
     shiftPropagate(t, ct){
         let curIdx = this.getValIdx(t);
-        console.log(`shifting proping at time ${t}, ct ${ct}, index ${curIdx}`);
+        //console.log(`shifting proping at time ${t}, ct ${ct}, index ${curIdx}`);
         //
         //step 1. change bounds of current piece
         if(isFinite(this.bounds[curIdx][0])){
@@ -356,7 +356,7 @@ export default class Profile{
         });
         //
         verts.forEach(v => {
-            console.log(`checking ${this.calc(power, v)[x ? 0 : 1]} vs ${value}`);
+            //console.log(`checking ${this.calc(power, v)[x ? 0 : 1]} vs ${value}`);
             if(numSimilar(this.calc(power, v)[x ? 0 : 1], value) && !points.includes(v)){
                 points.push(v);
             }
@@ -410,10 +410,11 @@ export default class Profile{
      */
     setValTime(power, t, x, y, propagator = true, alignPower = 0){
         //console.log(`setting values`);
-        let curIdx = this.getLeftIdx(t);
-        if(curIdx == -1){//time is left of every piece
-            curIdx = 0;//set calc index to the last one
-            t = this.bounds[0][0];//set time to the left bound
+        let curIdx = this.getValIdx(t);
+        if(this.getLeftIdx(t) == -1){
+            t = this.bounds[0][0];
+        }else if(this.getCurIdx(t) == -1){
+            t = this.bounds[this.getValIdx(t)][1];
         }
         //
         //console.log(`setting index ${curIdx} at power ${power} at time ${t} to ${x}, ${y}`);
@@ -445,7 +446,7 @@ export default class Profile{
         aFunc.setOff(nt, py);//shift highest level equation
         this.pieces[pIdx].propagate(0);//propagate shift to lower levels
         this.shiftPropagate(t, nt - t);//shift all pieces and propagate
-        this.propagateContinuumTime(pIdx, nt - t);//adjust connected junctions to match
+        this.propagateContinuumTime(pIdx, nt - t);//adjust connected junctions to match, something here isn't working right
     }
     //
     /**
@@ -559,6 +560,11 @@ export default class Profile{
         if(arguments.length < 3){
             pIdx = this.getValIdx(time);
         }
+        if(this.getLeftIdx(time) == -1){
+            time = this.bounds[0][0];
+        }else if(this.getCurIdx(time) == -1){
+            time = this.bounds[this.getValIdx(time)][1];
+        }
         //
         this.pieces[pIdx].setOrigin(time, power);
         //
@@ -616,6 +622,9 @@ export default class Profile{
      * @returns the index of the piece, or -1 if the time is to the left of every piece
      */
     getLeftIdx(time){
+        if(time < this.bounds[0][0]){
+            return -1;
+        }
         for(var n = 1; n < this.bounds.length; n++){
             if(time < this.bounds[n][0]){//if time is before left bound
                 return n-1;
@@ -958,7 +967,7 @@ export class Piece{
     setValTime(power, t, x, y, propogator = true){
         let newD = power >= this.paras.length;
         while(power >= this.paras.length){
-            console.log(`New derivatives, set to ${x}, ${y}`);
+            //console.log(`New derivatives, set to ${x}, ${y}`);
             this.newDerivatives();
         }
         if(newD){
@@ -1260,7 +1269,7 @@ export class Para{
             this.xFunc.setOff(t, x);
             this.yFunc.setOff(t, y);
         }else{
-            console.log(`offseting t by ${t}`);
+            //console.log(`offseting t by ${t}`);
             this.xFunc.setOff(t);
             this.yFunc.setOff(t);
         }
@@ -1480,7 +1489,7 @@ export class Func{
             intervals[i][1] = (1 / temp[0]) - 1;
             intervals[i][0] = (1 / temp[1]) - 1;
         }
-        //intervals.forEach(intr => console.log(intr));
+        //intervals.forEach(intr => //console.log(intr));
         for(var i = 0; i < intervalsN.length; i++){//swap and decompress intervals
             let temp = intervalsN[i].slice();
             intervalsN[i][1] = (1 / temp[0]) - 1;
@@ -1629,7 +1638,7 @@ export class Func{
     //
     resolve(inputs){
         let X = this.matrixCalc(inputs);//this.approxMatrix(inputs);
-        console.log(X);
+        //console.log(X);
         //
         for(var n = 0; n < X.length; n++){
             if(!isFinite(X[n])){
@@ -1661,7 +1670,7 @@ export class Func{
         if(X.length == 0){
             //console.log("APPROX FAILED.");
         }
-        console.log(X);
+        //console.log(X);
         return X;
     }
     //

@@ -635,6 +635,13 @@ class netArrow{
     }
     //
     reval(px, py){
+        if(this.profile.getLeftIdx(this.command.time) == -1){//left of a finite starting position
+            this.command.setTime(this.profile.bounds[0][0]);//set time to starting position
+            console.log(`hello?`);
+        }else if(this.profile.getRightIdx(this.command.time) == -1){//right of finite ending position
+            this.command.setTime(this.profile.bounds[this.profile.bounds.length - 1][1]);
+        }
+        //
         let x = (this.command.scaleX.invert(px) - this.obj.px) / this.obj.arrStr;//mouse pos - obj pos / arrow fudging
         let y = (this.command.scaleY.invert(py) - this.obj.py) / this.obj.arrStr;
         if(x == 0){
