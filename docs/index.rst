@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to physcalc's documentation!
+Welcome to Physics Calculator's documentation!
 ====================================
 
 This is some documentation for the Physics Calculator.
@@ -20,15 +20,8 @@ term (reStructuredText)
 
    - Here is a bullet list.
 
+Contents
+--------
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   The Display
