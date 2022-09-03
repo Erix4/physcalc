@@ -3,6 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+..
+   The document is written in reStructuredText
+   You can look up the Sphinx documention for rst for more information on how to use it
+
 Welcome to Physics Calculator's documentation!
 ====================================
 

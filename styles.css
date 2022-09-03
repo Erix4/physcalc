@@ -846,9 +846,7 @@ ul li::before {
     color: black;
     text-align: center;
     border: none;
-    border-radius: 3px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    border-radius: 3px 0 0 3px;
 }
 
 .leftColumnDrop{

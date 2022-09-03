@@ -485,6 +485,10 @@ export default class Props{
             command.timeSnapping = d3.select(this).property('checked');
         });
         //
+        d3.select('#helpButton').on('click', function(){
+            window.open('https://physcalc-docs.readthedocs.io/en/latest/index.html', '_blank');
+        });
+        //
         this.tabEvents();
         //
         this.calcB = d3.select("#calcB");
