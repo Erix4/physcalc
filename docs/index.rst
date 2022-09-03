@@ -7,10 +7,11 @@ Welcome to physcalc's documentation!
 ====================================
 
 This is some documentation for the Physics Calculator.
+
 * It uses a syntax called reStructuredText
 * It's similar to markdown, but a little more powerful
 
-term reStructuredText
+term (reStructuredText)
    A markdown language used to format text.
 
    This is a syntax which can define terms
