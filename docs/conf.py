@@ -19,7 +19,7 @@ author = 'Eric Patton'
 
 extensions = [
     #'sphinxcontrib.video'
-    'exts.video'
+    #'exts.video'
     #'exts.video-master.sphinxcontrib.video'
 ]
 

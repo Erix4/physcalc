@@ -14,9 +14,6 @@ There are several things you can do on the display without needing to use other 
 Adding objects
 --------------
 
-.. Video:: vids/tutvid1.mov
-    :autoplay:
-
 When you open the website, you'll notice an object has been created for you.
 It will look like a red circle in the middle of the grid.
 If there is no object, you can press the add button or the a key on your keyboard to create one.
