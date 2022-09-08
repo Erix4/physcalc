@@ -11,6 +11,8 @@ console.log(`command imported successfully`);
 //import 'simplebar';
 //import 'simplebar/dist/simplebar.css';
 
+//changes from last deploy: removed simplebar and removed dist folder from s3 bucket
+
 d3.select('#settingsB').on('click', function(){//show/hide the settings section and rotate the settings icon
     if(d3.select('#settings').style('display') == 'none'){
         d3.select('#settings').style('display', 'inline');
@@ -40,7 +42,7 @@ d3.selectAll('.propExpand').on('click', function(){//expand the corresponding se
 //document.getElementById("vt2").style = "background-color: #254441";
 
 console.log(`hello?`);
-//let sb = new SimpleBar(document.getElementById('leftcolumn'), { autoHide: false });
+let sb = new SimpleBar(document.getElementById('leftcolumn'), { autoHide: false });
 //console.log(d3.select(sb));
 //console.log(d3.select(sb).style('height'));
 

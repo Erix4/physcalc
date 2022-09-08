@@ -10,7 +10,7 @@
 Welcome to Physics Calculator's documentation!
 ====================================
 
-This the official documentation for the `Physics Calculator <https://physcalc.com>`_ website.
+This is the official documentation for the `Physics Calculator <https://physcalc.com>`_ website.
 It includes a full website tutorial as well as user reference for the website's capabilities.
 
 Physics Calculator is a website capable of solving basic kinematics problems.
