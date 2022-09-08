@@ -43,6 +43,8 @@ export default class Command{
         this.showExtremes = true;
         this.timeSnapping = false;
         //
+        this.tooltips = true;//whether to display tooltips
+        //
         this.idCount = 0;
         //
         this.selected = null;

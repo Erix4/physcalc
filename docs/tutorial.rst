@@ -143,15 +143,18 @@ However, you can also view either function individually with relation to t, or t
 The "x(t)" button will show you the isolated x motion over time, while the "y(t)" button will show you the y motion over time.
 The vector arrows will still be shown, but they will no longer indicate the magnitude of their value by length, and instead point in angle only.
 
-    PageBreak
-
 .. _timeline:
 
 The Timeline
 ============
 
 The timeline is a very useful portion of the website, located at the bottom.
-It contains some basic playback tools, and well as a clear visualization of 
+It contains some basic playback tools, and well as a clear visualization of a object's motion path's extreme points.
+The timeline is simpler than the display, but there are still several things you can do.
+
+Navigating the timeline
+-----------------------
+Words here
 
 The Properties Menu
 ===================

@@ -222,8 +222,6 @@ export default class Input{
             emx -= this.canox;
             emy -= this.canoy;
             //
-            console.log(`mouse coords: ${emx}, ${emy}, cano: ${this.canox}, ${this.canoy}`);
-            //
             //this.setLoc = [command.scaleX.invert(emx), command.scaleY.invert(emy)];
             //
             stX = emx;

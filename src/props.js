@@ -489,6 +489,10 @@ export default class Props{
             window.open('https://physcalc-docs.readthedocs.io/en/latest/index.html', '_blank');
         });
         //
+        d3.select('#tooltipCheck').on('click', function(){
+            command.tooltips = d3.select(this).property('checked');
+        });
+        //
         this.tabEvents();
         //
         this.calcB = d3.select("#calcB");
@@ -1128,6 +1132,7 @@ export default class Props{
     }
     //
     setTooltip(x, y, desc){
+        if(!this.command.tooltips) return;
         let tooltip = d3.select('#tooltip');
         tooltip.select('p').html(desc);
         tooltip.style('display', 'block');
