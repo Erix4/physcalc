@@ -16,7 +16,7 @@ In the func.js file, equations are broken down into layers of abstraction, in th
 
 1. Profile: piecewise set of parametric equations which describes the entire movement
 
-2. Piece: a single parametric equation within the profile, with a set of corresponding derivate parametric equations, derived until further derivates are zero
+2. Piece: a single parametric equation within the profile, with a set of corresponding derivative parametric equations, derived until further derivates are zero
 
 3. Para: a single parametric equation, at some level of derivation within the piece
 
