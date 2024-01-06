@@ -1,17 +1,4 @@
 /*
-On creation, the following things can happen:
-1. An object is created at the center of the screen
-2. The user clicks and drags the object to where they want it or enter a few numbers for its position (enter for confirm)
-    - at any time in inputs, the user can press tab to switch coord type to polar
-    - during value process, text below object will prompt user to confirm position, velocity, acceleration
-3. A vector for velocity appears, user can click and drag vector head or enter inputs in props (enter for confirm)
-4. Component vector for acceleration appears, with unclickable gravity and net accel and clickable new acceleration
-    - gravity component will only appear if gravity is toggled on
-5. Based on inputs, the object will solve all other properties
-If at any point the user clicks off the object (onto the grid) or off the props inputs (onto the left column),
-    the remaining values will be negated, and the object will become UNSOLVED
-An UNSOLVED object will have a warning at the top of props and will be static over time
-
 After creation, the following things can happen:
     - the object's values can be changed at any time, leading to a resolve
     - the object's equations can be changed at any time, leading to a resolve

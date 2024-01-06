@@ -8,6 +8,19 @@
     src: url('/fonts/lm-regular.woff') format('woff');
 }
 
+:root{
+    --verydarkgreen :#172b29;
+    --darkgreen: #254441;
+    --midgreen: #3a706b;
+    --lightgreen: #41B883;
+    --lightergreen: #76cab8;
+    --palegreen: #a5cbc3;
+    --blue: #47d7ff;
+    --lightred: #ffa294;
+    --red: #ff6f59;
+    --brightred: #ff472b;
+}
+
 * {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -31,7 +44,7 @@ body{
     z-index: 3;
     padding: 0;
     pointer-events: none;
-    background-color: #47d7ff;
+    background-color: var(--blue);
     opacity: 0;
     border: 0;
 }
@@ -66,11 +79,11 @@ body{
 }
 
 .checkbox > input:checked {
-    background-color: #41B883;
+    background-color: var(--lightgreen);
 }
 
 .checkbox > input:checked:hover {
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
 }
 
 .checkbox > input:hover{
@@ -94,8 +107,8 @@ body{
 /*#region: Header*/
 
 .headerButton{
-    background-color: #ffa294;
-    color: #ff6f59;
+    background-color: var(--lightred);
+    color: var(--red);
     font-family: 'Heavitas';
     font-size: 170%;
     border-radius: .3em;
@@ -107,18 +120,18 @@ body{
 }
 
 .headerButton:hover{
-    background-color: #ff6f59;
-    color: #ffa294;
+    background-color: var(--red);
+    color: var(--lightred);
 }
 
 .headerButton:active{
-    background-color: #ff472b;
+    background-color: var(--brightred);
 }
 
 #header{
     height: 5%;
     width: 100%;
-    background-color: #ff6f59;
+    background-color: var(--red);
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -154,7 +167,7 @@ i{
 
 #settingsIcon{
     transition: .5s;
-    color: #ff6f59;
+    color: var(--red);
     transform: rotate(0deg);
 }
 
@@ -179,7 +192,7 @@ i{
     position: absolute;
     z-index: 3;
     background-color: white;
-    border: .4em solid #41B883;
+    border: .4em solid var(--lightgreen);
     border-radius: .7em;
     padding: .7em;
     left: 30%;
@@ -196,7 +209,7 @@ i{
     margin-top: -10px;
     border-width: 10px;
     border-style: solid;
-    border-color: transparent #41B883 transparent transparent;
+    border-color: transparent var(--lightgreen) transparent transparent;
   }
 
 #tooltip p{
@@ -206,7 +219,7 @@ i{
 }
 
 .ttpc{
-    color: #ff6f59;
+    color: var(--red);
     font-size: 100%;
 }
 /*#endregion */
@@ -215,7 +228,7 @@ i{
 #leftcolumn{
     width: 25%;/*25%*/
     height: 100%;
-    background-color: #254441;
+    background-color: var(--darkgreen);
     overflow-y: auto;
     left: 0;
     overflow-x: hidden;
@@ -224,7 +237,7 @@ i{
 }
 
 .container{
-    background-color:  #41B883;
+    background-color: var(--lightgreen);
 }
 
 .text{
@@ -253,7 +266,7 @@ i{
 /*#region: tabs*/
 
 #tabContainer{
-    background-color: #3a706b;
+    background-color: var(--midgreen);
     width: 100%;
     font-size: 100%;
 }
@@ -265,7 +278,7 @@ i{
 }
 
 .tab{
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
     padding: 5px;
     /*padding-left: 40px;
     padding-right: 40px;*/
@@ -283,18 +296,18 @@ i{
     left: -.04em;
     top: 5%;
     position: absolute;
-    background-color: #41B883;
+    background-color: var(--lightgreen);
     z-index: 1;
     border-radius: 5px;
 }
 
 .tab:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
     transition: .2s;
 }
 
 .selt{
-    background-color: #254441;
+    background-color: var(--darkgreen);
 }
 
 .tabText{
@@ -311,7 +324,7 @@ i{
 }
 
 #addTab:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
 }
 
 #tabIcon{
@@ -330,14 +343,14 @@ i{
 }
 
 .juncType{
-    background-color: #41B883;
+    background-color: var(--lightgreen);
     margin: .2em;
     border-radius: .2em;
     display: flex;
 }
 
 .juncType:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
     transition: .2s;
 }
 
@@ -370,7 +383,7 @@ i{
 
 .noField{
     pointer-events:none;
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
 }
 
 .tabDrop{
@@ -417,7 +430,7 @@ i{
 }
 
 .toggleButton{
-    background-color: #41B883;
+    background-color: var(--lightgreen);
     margin-right: 10px;
     padding: 2px;
     padding-left: 3px;
@@ -430,7 +443,7 @@ i{
 }
 
 .toggleButton:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
     transition: .2s;
 }
 
@@ -444,7 +457,7 @@ i{
 }
 
 .undo{
-    color:  #41B883;
+    color:  var(--lightgreen);
     font-size: 50%;
 }
 
@@ -458,7 +471,7 @@ i{
 }
 
 .undoButton:hover .undo{
-    color: #ff6f59;
+    color: var(--red);
     transition: 0.2s;
 }
 
@@ -482,7 +495,7 @@ i{
 }
 
 .propExpand{
-    background-color: #3a706b;
+    background-color: var(--midgreen);
     width: 100%;
     display: flex;
     vertical-align: middle;
@@ -491,13 +504,13 @@ i{
 }
 
 .subPropExpand{
-    background-color: #172b29;
+    background-color: var(--verydarkgreen);
     display: flex;
 }
 
 .subExpandText{
     font-size: 60% !important;
-    color: #41B883;
+    color: var(--lightgreen);
 }
 
 .expandText{
@@ -524,7 +537,7 @@ i{
 }
 
 .propExpand:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
 }
 
 .propExpand:hover .subExpandText{
@@ -532,7 +545,7 @@ i{
 }
 
 .propContents{
-    background-color: #254441;
+    background-color: var(--darkgreen);
     width: 100%;
     font-size: 100%;
 }
@@ -605,19 +618,19 @@ i{
     border: 0;
     margin-top: -.3em;
     margin-bottom: .5em;
-    box-shadow: .35em .7em 0 -.55em #A5CBC3, -.35em .7em 0 -.55em #A5CBC3;
+    box-shadow: .35em .7em 0 -.55em var(--palegreen), -.35em .7em 0 -.55em var(--palegreen);
     -webkit-transition: box-shadow 0.2s;
     transition: box-shadow 0.2s;
     background-color: transparent;
     font-family: 'LatinM';
     font-weight: 800;
     font-size: 53%;
-    color: #A5CBC3;
+    color: var(--palegreen);
     padding-left: .2em;
 }
 .propField:focus {
     outline: none;
-    box-shadow: .7em .7em 0 -.55em #ff6f59, -.7em .7em 0 -.55em #ff6f59;
+    box-shadow: .7em .7em 0 -.55em var(--red), -.7em .7em 0 -.55em var(--red);
 }
 
 .propField::-webkit-outer-spin-button,
@@ -638,14 +651,14 @@ i{
     font-size: 50%;
     cursor: default;
     margin-right: .2em;
-    color: #a5cbc3;
+    color: var(--palegreen);
 }
 
 /*#endregion*/
 
 .eq{
     font-size: 115%;
-    color: #a5cbc3;
+    color: var(--palegreen);
     margin-top: -.2em;
 }
 
@@ -676,10 +689,10 @@ i{
     font-size: 60%;
     font-weight: 900;
     font-family: 'Courier New', Courier, monospace;
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
     border-radius: .3em;
     width: fit-content;
-    border: #172b29 .2em solid;
+    border: var(--verydarkgreen) .2em solid;
     margin-bottom: .3em;
     padding-left: .2em;
     padding-right: .2em;
@@ -704,7 +717,7 @@ ul{
   
 ul li::before {
     content: "\2022";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
-    color: #a5cbc3; /* Change the color */
+    color: var(--palegreen); /* Change the color */
     font-weight: bold; /* If you want it to be bold */
     display: inline-block; /* Needed to add space between the bullet and the text */
     width: 1.5em; /* Also needed for space (tweak if needed) */
@@ -712,11 +725,11 @@ ul li::before {
 }
 
 .bigButton{
-    background-color: #41B883;
+    background-color: var(--lightgreen);
     font-size: 70%;
     font-family: 'Heavitas';
     width: fit-content;
-    border: solid .3em #ff6f59;
+    border: solid .3em var(--red);
     border-radius: 10px;
     padding-left: 5px;
     padding-right: 5px;
@@ -758,17 +771,17 @@ ul li::before {
 .columnhandle{
     width: 10px;
     height: 100%;
-    background-color: #172b29;
+    background-color: var(--verydarkgreen);
     cursor: e-resize;
     z-index: 2;
 }
 
 .columnhandle.sel{
-    background-color: #41B883;
+    background-color: var(--lightgreen);
 }
 
 .columnhandle:hover{
-    background-color: #41B883;
+    background-color: var(--lightgreen);
     transition: .2s;
 }
 
@@ -876,12 +889,12 @@ ul li::before {
     width: 33.4%;
     height: 100%;
     display: flex;
-    background-color: #254441;
+    background-color: var(--darkgreen);
     cursor: pointer;
 }
 
 .seld{
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
     color: black;
     cursor: default;
 }
@@ -891,7 +904,7 @@ ul li::before {
 }
 
 .seld:hover{
-    background-color: #a5cbc3;
+    background-color: var(--palegreen);
 }
 
 .vectorText{
@@ -914,7 +927,7 @@ ul li::before {
 
 #settings{
     margin-left: auto;
-    background-color: #254441;
+    background-color: var(--darkgreen);
     padding-right: 15px;
     padding-left: 10px;
     display: none;
@@ -989,7 +1002,7 @@ p.settingToggle{
 }
 
 .scaleButton:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
     transition: .2s;
 }
 
@@ -1030,7 +1043,7 @@ p.settingToggle{
 #timeHead{
     width: 100%;
     height: 25%;
-    background-color: #ff6f59;
+    background-color: var(--red);
     display: flex;
     position: absolute;
     align-items: center;
@@ -1038,7 +1051,7 @@ p.settingToggle{
 
 .cutout{
     height: 80%;
-    background-color: #ff6f59;
+    background-color: var(--red);
     top: 10%;
 }
 
@@ -1053,7 +1066,7 @@ p.settingToggle{
 .playbackButton{
     width: 25%;
     height: 100%;
-    background-color:  #ffa294;
+    background-color:  var(--lightred);
     display: flex;
 }
 
@@ -1070,7 +1083,7 @@ p.settingToggle{
 }
 
 .playbackButton:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
 }
 
 .range{
@@ -1087,12 +1100,12 @@ p.settingToggle{
     font-size: 100%;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
-    background-color: #ffa294;
+    background-color: var(--lightred);
     cursor: pointer;
 }
 
 #norm:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
 }
 
 #timeRange{
@@ -1104,7 +1117,7 @@ p.settingToggle{
 .rangeButton{
     width: 33.4%;
     height: 100%;
-    background-color: #ffa294;;
+    background-color: var(--lightred);;
     position: relative;
 }
 
@@ -1143,12 +1156,12 @@ p.settingToggle{
 }
 
 .rangeButton:hover{
-    background-color: #ff6f59;
+    background-color: var(--red);
 }
 
 .range.propdrop{
     font-size: 90%;
-    background-color: #ffa294;
+    background-color: var(--lightred);
 }
 
 .range option{

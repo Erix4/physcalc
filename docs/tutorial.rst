@@ -154,12 +154,102 @@ The timeline is simpler than the display, but there are still several things you
 
 Navigating the timeline
 -----------------------
-Words here
+To zoom in and out on the timeline, simply scroll up or down while hovering over it.
+To scroll left or right, shift click anywhere on the timeline and drag left or right.
+You can manually edit the current visible range of the timeline using the field on the upper right side of the timeline.
+Additionally, you can change the unit the fields are in using the drop down next to it.
+To the left of these fields is a button called rescale, which will automatically set the visible range of the timeline based on the important points in the objects path.
+
+To set the current time, click anywhere on the timeline.
+This will also move the time cursor to that position.
+You can control click on the timeline to snap to specific intervals (for instance every 5 seconds) or to important points for any of the objects.
+
+Objects on the timeline
+-----------------------
+
+When an object is present, a line corresponding with the color of the object will appear on the timeline.
+This line will have small dots on it, representing the important (or critical) points in the object's motion.
+For instance, when an object has zero velocity, or crosses the x axis, would both be considered critical points.
+
+Clicking on a critical point will move the cursor and the object to that point in time.
+You can then look at the properties menu for detailed information on the object's current position and motion.
+You can click and drag the critical points on the timeline to move the function in time.
+For instance, dragging a point to the left on the timeline would make that point happen sooner in time.
+Holding control while dragging a point will snap it to time intervals or other objects' critical points.
 
 The Properties Menu
 ===================
 
-About the use of the properties menu
+The properties menu is where you can manually control everything about each object.
+As you hover over items in the properties menu, pop-ups will appear to explain their functionality.
+
+The very top of the menu lists the number of the current object selected, in the color that the object appears in on the grid.
+When no object is selected, this will read "no object".
+
+
+Piecewise bar
+-------------
+
+Below the object header, there is a small section with a tab, labeled "1", and plus button next to it.
+This section allows you to add additional equations to any object to describe it at different points in time.
+For instance, you could have the object completely still until t=0, and then accelarate forward at t>0.
+Essentially, they are piecewise equations.
+If your piecewise equations do not describe an object's motion at a given point in time, the object will simply not move during that time.
+
+To add a new piecewise equation, simply click the plus button.
+With multiple piecewise equations, you can click on the corresponding tab to move to each equation.
+The current time will automatically update to move the object to a point within that equation's time range.
+Editing values while that tab is selected will update the equations of the tab selected.
+
+Piecewise equations can have one of three relationships with its neighboring equation:
+1. Continuous - the equation always ends at the starting position and time of the next equation
+2. Discontinuous - the equation ends at the same time, but not necessarily the same position as the next equation
+3. Disconnected -the equation does not necessarily end at the same time or position as the equation
+
+When a new piecewise equation is created, it by default is continuous with its neighboring equation.
+You can change the relationship, with either the left (earlier) or right (later) neighboring equation by clicking the icon to the left or right of the _<T<_ text.
+If there is no equation on that side of the current equation, the icon can only be infinity- 
+as in the equation continues to infinity, or disconnected- where the equation ends at a specific point in time.
+If there is an equation on that side of the current equation, the icon can be only relationship except infinity.
+
+When an icon does not read infinity, the text field next to the icon will light up, indicating you can specify the time when an equation starts or ends.
+If that side of the relationship is not disconnected, updating the time will also update the time for neighboring equations.
+When a neighboring equation is continuous, altering the current equation will alter the starting position- and there position values- of the neighboring equation.
+
+.. note::
+    When you click the plus button to create a new piecewise equation, it will always add an equation starting at your current point in time, and going to infinity, or the next equation.
+
+Values section
+--------------
+
+The collaspable values section lists all the current values of the selected object.
+Because all objects are described with parametric equations, every values has a set of x and y number associated with it.
+The numbers also have units, which can be changed using the drop down next the the numbers.
+
+As you move forward and backward in time, the values will automatically update according to the object's motion.
+You can click on these values and edit them, which will in turn edit the motion of the object.
+You can also click the circular arrow to the right of every set of values to set both to zero.
+Click the diagonal arrow next to that will show the corresponding vector arrows in the visual display.
+
+By default, three values are shown: position, velocity, and accelaration.
+You can click on and expand the "More" drop down to also show jerk, snap, crackle, and pop, which are further derivatives.
+These values will usually be zero, unless your object's motion is described by higher order polynomial functions.
+
+When a new object is created, it's velocity with be +5 on the x and y axis, its position will be wherever you clicked and place the object, 
+and its accelartion will be -9.81 on the y, unless you've changed the default gravity value in the settings.
+
+The values will round to three decimals places by default, but if you add additional significant figures all value fields 
+will increase to that number of significant figures.
+
+Equations section
+-----------------
+
+The equations section shows the equations for the movement of the selected object.
+The main equation is for the position, listed as two functions of its parametric motion: x(t) and y(t).
+
+The velocity and acceleration are also listed as derivates of the main function: x'(t) and y'(t).
+
+You can change the units the equations are in using the drop down at the top of the section.
 
 .. _settings:
 

@@ -2057,7 +2057,6 @@ function findRealRoots(func){//find real roots of a function
     return roots;
 }
 //
-//Insert Collins-Akritas, Bisection root finding here
 function CollinsAkritas(given, n, m){
     /*
     For Collins-Akritas, given compressed polynomial p1, use the following steps:

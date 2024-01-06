@@ -3,61 +3,43 @@ A physics calculator website
 
 Go [here](https://physcalc-docs.readthedocs.io/en/latest/index.html) for the official documentation.
 
-# Get Started
+# About the Project
 
-Let's learn how to use the website step by step! For more depth on specific features, refer to the [User Refernce](#user-reference) section below.
-Note that this tutorial is intended for computer use only. Several features of the website or different or missing on the phone.
+This is a personal project of Eric Patton, intended to help solve kinematics problems using a visual interface.
 
-## 1. The Display
+The logic is written entirely in vanilla Javascript, using D3 and BigDecimal.
+The components of the website (i.e. the timeline, grid and objects) each have their own classes and .js files.
+The underlying math for object motion is in the func.js file, which describes arbitrarily high-order, parametric piecewise equations.
+For the purposes of this website, the interface limits the user to sixth order polynomials (aka the "pop" value of the object).
 
-When you open the website, you'll notice an object has been created for you.
-It will look like a red circle in the middle of the grid.
-If there is no object, you can press the add button or the a key on your keyboard to create one.
-After adding an object, click somewhere on the grid to comfirm its initial location.
-You can create as many objects as you like, but keep in mind that with too many objects (more than 10) performance will be affected.
+In the func.js file, equations are broken down into layers of abstraction, in the following order:
 
-There are a number of ways that you can change an object with the display alone.
-Most simply, you can click and drag an object to change its current position. 
-Moving an object at any point in time will also change its path of motion.
-You can see an object's path of motion by the red curve behind the object.
-The graph of an object's path will always match the color of the object.
-You'll also notice, as you drag the object around, that some values in the properties menu to the left are updated automatically.
-We'll go over this in more detail in the [Properties Menu](#the-properties-menu) section below.
+1. Profile: piecewise set of parametric equations which describes the entire movement
 
-On the object, there is an arrow protruding to the top right.
-When an object is created, it is given a default velocity of 5 m/s on the x, and 5 m/s on the y.
-An object is also affected by gravity (with a value of -9.81 m/s^2) by default.
-The arrow attached to the object represents the object's current velocity.
-You can change it's current velocity by clicking the white handle at the end of the arrow and dragging it to a new location.
-Note that the displayed length of the arrow will always be four times shorter than its actual value.
-As you change the velocity of the object, you can see the graph of its motion change to match.
-The purpose of vector arrows is to help display an object's instanteneous motion and help you edit that more intuitively.
+2. Piece: a single parametric equation within the profile, with a set of corresponding derivate parametric equations, derived until further derivates are zero
 
-You can view the vector arrows for any one value, all the values simultaenously, or none of the values at all.
-In the top left corner of the grid display, you'll see a drop down menu which is labelled "Arrows."
-The menu should be set to "Velocity" by default.
-You can click on this menu to change which arrows are shown on all objects.
-If you choose to display all arrows, note that each arrow is colored differently.
-The arrows are more lightly colored for higher order derivatives.
-For instance, the arrow for Acceleration is more lightly colored than the arrow for Velocity.
+3. Para: a single parametric equation, at some level of derivation within the piece
 
-Above the menu for arrows is an textbox which shows the current time.
-You can click on this box to edit the current time in the calculator, and click on the menu to the right of it to change the units that time is measured in.
-To run the calculator in real time, simply press the space bar, and the object will start moving according to kinematics in Newtonian physics.
-Press the space bar again to stop the motion.
-Time scrubbing and playback will be covered in more depth in the [Timeline](#the-timeline) section below.
+4. Func: one of two functions (x or y) within the parametric equation
 
-Finally, in the bottom left corner of the grid display, you'll see three buttons, labeled "f(t)", "x(t)", and "y(t)".
-Every object's motion is dictated by two separate functions for the x and y component of its motion.
-By default, both functions are shown together as a parametric function over a y vs. x grid space.
-However, you can also view either function individually with relation to t, or time.
-The "x(t)" button will show you the isolated x motion over time, while the "y(t)" button will show you the y motion over time.
-The vector arrows will still be shown, but they will no longer indicate the magnitude of their value by length, and instead point in angle only.
+5. Term: a single coefficient in the function and its power - lowest level
 
-## 2. The Timeline
+Note: in a future update the Term object will be removed, and its functionality replaced with the index of the coefficient in a list
 
-## 3. The Properties Menu
+## Root Approximation
 
-## 4. The Settings Menu
+An interesting component of the project, which comes at a consequence of dealing with higher-order polynomials, is root approximation.
+When drawing the screen, functions/curves are drawn by breaking them into a number (at the time of writing 500) small segments and drawing these as straight lines.
+In order to determine what parts of the function to draw, the program must first detect where it intersects with the edge of the screen.
+Because the equations are parametric, they may enter and exit the screen any number of times.
+In order to detect all these crossing points, we can- for each edge of the screen- shift the parametric equation until the edge of the screen is at zero.
+Then, approximating the zeroes gives every instance where the line enters or exits the screen on that edge.
+You can determine whether the equation is entering or exiting the screen using the sign of the first coefficient of the equation.
 
-# User Reference
+Because the equations are higher order, there is no single equation to find their roots.
+As such, the roots must be approximated.
+Initially, the Newton-Rhapson method was utilized for this, but it proved too inefficient.
+Currently, I have implemented the Collins-Akritas algorithm, which is based on Descarte's Rule of Signs.
+The implementation can be found on line 2060 of the func.js file
+It effectively works by splitting the function into intervals where a single root must be.
+Then the intervals are reduced continuously using Bisection until the root can approximated highly accurately.
