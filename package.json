@@ -1,13 +1,13 @@
 {
   "name": "physcalc",
-  "version": "0.6.1",
+  "version": "0.6.4",
   "description": "physics calculator",
   "type": "module",
   "scripts": {
     "start": "parcel index.html --open",
     "starthttps": "parcel index.html --https",
     "build": "parcel build index.html",
-    "deploy": "npm version patch --no-git-tag-version && parcel build index.html && aws s3 sync . s3://physcalc.com --exclude dist/* --exclude .git/* --exclude .parcel-cache/* --exclude node_modules/* --exclude docs/* --delete"
+    "deploy": "npm version patch --no-git-tag-version && parcel build index.html && aws s3 sync . s3://physcalc.com --exclude 'dist/*' --exclude '.git/*' --exclude '.parcel-cache/*' --exclude 'node_modules/*' --exclude 'docs/*' --delete"
   },
   "dependencies": {
     "bigdecimal": "^0.6.1",
